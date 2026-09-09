@@ -1625,6 +1625,20 @@
               </select>
             </div>
             <div class="form-group">
+              <label for="bom-client-input">Client / Purchasing Company</label>
+              <input type="text" id="bom-client-input" value="Zamil Steel Saudi Arabia Ltd" placeholder="e.g. Saudi Aramco / SABIC">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="bom-project-input">Project Work Order Ref #</label>
+                <input type="text" id="bom-project-input" value="PROJ-SA-2026-881" placeholder="e.g. PROJ-2026-990">
+              </div>
+              <div class="form-group">
+                <label for="bom-plant-input">Manufacturing Facility</label>
+                <input type="text" id="bom-plant-input" value="Dammam Plant 1 (Warehouse A)">
+              </div>
+            </div>
+            <div class="form-group">
               <label for="bom-quantity">Production Batch Quantity (Units)</label>
               <input type="number" id="bom-quantity" value="10" min="1">
             </div>
@@ -2479,6 +2493,27 @@
       </section>
 
     </main>
+
+    <!-- PROCUREMENT ITEM INSPECTOR MODAL -->
+    <div id="procurement-detail-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(5,8,16,0.85); backdrop-filter:blur(10px); z-index:9999; justify-content:center; align-items:center;">
+      <div class="glass-card" style="width: 600px; max-width:92vw; border: 1px solid var(--primary-glow); box-shadow: 0 0 40px rgba(0, 212, 138, 0.25); border-radius: 16px; padding: 24px;">
+        <div class="card-title-section" style="border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 16px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="display:flex; align-items:center; gap:8px; margin:0; font-size:1.1rem; color:var(--text-main);">
+            <i data-lucide="file-text" style="color:var(--primary);"></i>
+            <span id="modal-doc-title">Document Inspection</span>
+          </h3>
+          <button class="btn-secondary" onclick="closeProcurementModal()" style="padding: 4px 12px; font-size: 0.8rem;">✕ Close</button>
+        </div>
+        
+        <div id="modal-doc-content">
+          <!-- Dynamic detail content -->
+        </div>
+        
+        <div id="modal-doc-actions" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 14px; display:flex; justify-content:flex-end; gap:10px;">
+          <!-- Dynamic action buttons -->
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -3398,41 +3433,179 @@
     function renderProcurementData() {
       // PR Ledger
       const prBody = document.getElementById('pr-ledger-body');
-      prBody.innerHTML = mockData.prs.map(pr => `
-        <tr>
-          <td><strong>${pr.number}</strong></td>
-          <td>${pr.material_code}</td>
-          <td>${pr.qty}</td>
-          <td>⭐ ${pr.rating.toFixed(1)}</td>
-          <td><span class="badge ${pr.priority === 'HIGH' ? 'badge-danger' : pr.priority === 'MEDIUM' ? 'badge-warning' : 'badge-success'}">${pr.priority}</span></td>
-          <td><span class="badge ${pr.status === 'SUBMITTED' ? 'badge-warning' : pr.status === 'APPROVED' ? 'badge-success' : 'badge-info'}">${pr.status}</span></td>
-          <td>
-            ${pr.status === 'SUBMITTED' ? `
-              <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approvePR(${pr.id})">Approve</button>
-            ` : pr.status === 'APPROVED' ? `
-              <button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: var(--success);" onclick="autoPO(${pr.id})">Raise PO</button>
-            ` : `<span style="color:var(--text-muted);font-size:0.8rem;">Ordered</span>`}
-          </td>
-        </tr>
-      `).join('');
+      if (prBody) {
+        prBody.innerHTML = mockData.prs.map(pr => `
+          <tr style="cursor:pointer;" onclick="openPRDetails(${pr.id})">
+            <td><strong style="color:var(--primary);">${pr.number}</strong></td>
+            <td>${pr.material_code}</td>
+            <td>${pr.qty.toLocaleString()}</td>
+            <td>⭐ ${pr.rating.toFixed(1)}</td>
+            <td><span class="badge ${pr.priority === 'HIGH' ? 'badge-danger' : pr.priority === 'MEDIUM' ? 'badge-warning' : 'badge-success'}">${pr.priority}</span></td>
+            <td><span class="badge ${pr.status === 'SUBMITTED' ? 'badge-warning' : pr.status === 'APPROVED' ? 'badge-success' : 'badge-info'}">${pr.status}</span></td>
+            <td onclick="event.stopPropagation();">
+              <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; margin-right:4px;" onclick="openPRDetails(${pr.id})">Inspect</button>
+              ${pr.status === 'SUBMITTED' ? `
+                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approvePR(${pr.id})">Approve</button>
+              ` : pr.status === 'APPROVED' ? `
+                <button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: var(--success);" onclick="autoPO(${pr.id})">Raise PO</button>
+              ` : `<span style="color:var(--text-muted);font-size:0.8rem;">Ordered</span>`}
+            </td>
+          </tr>
+        `).join('');
+      }
 
       // PO Ledger
       const poBody = document.getElementById('po-ledger-body');
-      poBody.innerHTML = mockData.pos.map(po => `
-        <tr>
-          <td><strong>${po.number}</strong></td>
-          <td>${po.supplier}</td>
-          <td>₹${po.value.toLocaleString()}</td>
-          <td>${po.date}</td>
-          <td>${po.delivery}</td>
-          <td><span class="badge ${po.tracking === 'RECEIVED' ? 'badge-success' : po.tracking === 'IN_TRANSIT' ? 'badge-info' : 'badge-warning'}">${po.tracking}</span></td>
-          <td>
-            ${po.tracking !== 'RECEIVED' ? `
-              <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="migoReceipt('${po.number}', '${po.id}')">101 Receipt</button>
-            ` : `✅ Stocked`}
-          </td>
-        </tr>
-      `).join('');
+      if (poBody) {
+        poBody.innerHTML = mockData.pos.map(po => `
+          <tr style="cursor:pointer;" onclick="openPODetails(${po.id})">
+            <td><strong style="color:var(--primary);">${po.number}</strong></td>
+            <td>${po.supplier}</td>
+            <td>₹${po.value.toLocaleString()}</td>
+            <td>${po.date}</td>
+            <td>${po.delivery}</td>
+            <td><span class="badge ${po.tracking === 'RECEIVED' ? 'badge-success' : po.tracking === 'IN_TRANSIT' ? 'badge-info' : 'badge-warning'}">${po.tracking}</span></td>
+            <td onclick="event.stopPropagation();">
+              <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; margin-right:4px;" onclick="openPODetails(${po.id})">Inspect</button>
+              ${po.tracking !== 'RECEIVED' ? `
+                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="migoReceipt('${po.number}', '${po.id}')">101 Receipt</button>
+              ` : `✅ Stocked`}
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // --- Procurement Document Inspection Modals ---
+    function openPRDetails(prId) {
+      const pr = mockData.prs.find(p => p.id === prId);
+      if (!pr) return;
+
+      const mat = mockData.materials.find(m => m.code === pr.material_code) || { name: pr.material_code, standard_cost: 85.50 };
+      const totalVal = pr.qty * (mat.standard_cost || 85.50);
+
+      const modal = document.getElementById('procurement-detail-modal');
+      const title = document.getElementById('modal-doc-title');
+      const content = document.getElementById('modal-doc-content');
+      const actions = document.getElementById('modal-doc-actions');
+
+      title.innerText = `Purchase Requisition Inspector — ${pr.number}`;
+
+      content.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.85rem;">
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">REQUISITION NUMBER</div>
+            <strong style="font-size:1.1rem; color:var(--primary);">${pr.number}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">CURRENT STATUS</div>
+            <span class="badge ${pr.status === 'SUBMITTED' ? 'badge-warning' : pr.status === 'APPROVED' ? 'badge-success' : 'badge-info'}" style="font-size:0.9rem;">${pr.status}</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">CLIENT / PURCHASER</div>
+            <strong>${pr.client_name || 'Zamil Steel Industrial Systems'}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">PROJECT WORK ORDER</div>
+            <strong>${pr.project_ref || 'PROJ-SA-2026-881'}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border); grid-column:span 2;">
+            <div style="color:var(--text-sub); font-size:0.75rem;">MATERIAL SKU & DESCRIPTION</div>
+            <strong>${pr.material_code}</strong> — ${mat.name || 'Raw Material'}
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">REQUESTED QUANTITY</div>
+            <strong style="font-size:1.05rem;">${pr.qty.toLocaleString()} KG</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">ESTIMATED BATCH VALUATION</div>
+            <strong style="color:var(--success); font-size:1.05rem;">₹${totalVal.toLocaleString()}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">SUPPLIER RATING SCORE</div>
+            <strong style="color:#f59e0b;">⭐ ${pr.rating.toFixed(1)} / 5.0</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">PRIORITY LEVEL</div>
+            <span class="badge ${pr.priority === 'HIGH' ? 'badge-danger' : 'badge-warning'}">${pr.priority}</span>
+          </div>
+        </div>
+      `;
+
+      actions.innerHTML = `
+        <button class="btn-secondary" onclick="closeProcurementModal()">Close</button>
+        ${pr.status === 'SUBMITTED' ? `
+          <button class="btn-secondary" style="border-color:var(--danger); color:var(--danger);" onclick="rejectPR(${pr.id}); closeProcurementModal();">Reject PR</button>
+          <button class="btn-primary" style="background:var(--success);" onclick="approvePR(${pr.id}); closeProcurementModal();">Approve PR</button>
+        ` : pr.status === 'APPROVED' ? `
+          <button class="btn-primary" onclick="autoPO(${pr.id}); closeProcurementModal();">Raise Purchase Order</button>
+        ` : `<span style="color:var(--text-muted); font-size:0.85rem; align-self:center;">PO Created</span>`}
+      `;
+
+      modal.style.display = 'flex';
+      lucide.createIcons();
+    }
+
+    function openPODetails(poId) {
+      const po = mockData.pos.find(p => p.id == poId);
+      if (!po) return;
+
+      const modal = document.getElementById('procurement-detail-modal');
+      const title = document.getElementById('modal-doc-title');
+      const content = document.getElementById('modal-doc-content');
+      const actions = document.getElementById('modal-doc-actions');
+
+      title.innerText = `Purchase Order Inspector — ${po.number}`;
+
+      content.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.85rem;">
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">PURCHASE ORDER NUMBER</div>
+            <strong style="font-size:1.1rem; color:var(--primary);">${po.number}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">TRACKING STATUS</div>
+            <span class="badge ${po.tracking === 'RECEIVED' ? 'badge-success' : po.tracking === 'IN_TRANSIT' ? 'badge-info' : 'badge-warning'}" style="font-size:0.9rem;">${po.tracking}</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border); grid-column:span 2;">
+            <div style="color:var(--text-sub); font-size:0.75rem;">QUALIFIED VENDOR / SUPPLIER</div>
+            <strong style="font-size:1rem;">${po.supplier}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">TOTAL ORDER VALUE</div>
+            <strong style="color:var(--success); font-size:1.05rem;">₹${po.value.toLocaleString()}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">ORDER ISSUED DATE</div>
+            <strong>${po.date}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
+            <div style="color:var(--text-sub); font-size:0.75rem;">EXPECTED DELIVERY DATE</div>
+            <strong style="color:#3b82f6;">${po.delivery}</strong>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border); grid-column:span 2;">
+            <div style="color:var(--text-sub); font-size:0.75rem;">DESTINATION PLANT & WORKSHOP</div>
+            <strong>Dammam Plant 1 (Warehouse A — Raw Receiving Dock)</strong>
+          </div>
+        </div>
+      `;
+
+      actions.innerHTML = `
+        <button class="btn-secondary" onclick="closeProcurementModal()">Close</button>
+        ${po.tracking !== 'RECEIVED' ? `
+          <button class="btn-primary" style="background:var(--success);" onclick="migoReceipt('${po.number}', '${po.id}'); closeProcurementModal();">
+            <i data-lucide="package-check"></i> Post MIGO 101 Goods Receipt
+          </button>
+        ` : `<span style="color:var(--success); font-size:0.85rem; align-self:center;">✅ Stocked in Warehouse Bin</span>`}
+      `;
+
+      modal.style.display = 'flex';
+      lucide.createIcons();
+    }
+
+    function closeProcurementModal() {
+      const modal = document.getElementById('procurement-detail-modal');
+      if (modal) modal.style.display = 'none';
     }
 
     function renderInventoryData() {
@@ -3483,6 +3656,9 @@
     function executeBOMBreakdown() {
       const prodId = document.getElementById('bom-product-select').value;
       const qty = parseInt(document.getElementById('bom-quantity').value);
+      const client = document.getElementById('bom-client-input')?.value || 'Zamil Steel Saudi Arabia Ltd';
+      const projectRef = document.getElementById('bom-project-input')?.value || 'PROJ-SA-2026-881';
+      const plant = document.getElementById('bom-plant-input')?.value || 'Dammam Plant 1 (Warehouse A)';
 
       const progContainer = document.getElementById('bom-progress-container');
       const progFill = document.getElementById('bom-progress-fill');
@@ -3518,6 +3694,11 @@
         // Build html tree representation
         let totalVal = 0;
         let treeHtml = `
+          <div style="padding:10px 16px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:10px; margin-bottom:14px; font-size:0.82rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <div><span style="color:var(--text-sub);">Client / Company:</span> <strong style="color:var(--primary);">${client}</strong></div>
+            <div><span style="color:var(--text-sub);">Project Ref #:</span> <strong style="color:var(--text-main);">${projectRef}</strong></div>
+            <div><span style="color:var(--text-sub);">Facility:</span> <strong style="color:var(--text-main);">${plant}</strong></div>
+          </div>
           <div class="bom-node root">
             <div class="node-content root-product">
               <i data-lucide="box"></i>
@@ -3572,9 +3753,9 @@
           <div style="margin-top: 18px; padding: 14px 18px; background: rgba(91, 156, 246, 0.08); border: 1px dashed var(--primary); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
             <div>
               <strong style="color: var(--primary); font-size: 0.92rem;"><i data-lucide="layers" style="vertical-align:middle;"></i> Transfer to MRP Planner?</strong>
-              <div style="font-size: 0.78rem; color: var(--text-sub); margin-top: 2px;">Save this calculated BOM batch as an active production plan and compute net material deficits.</div>
+              <div style="font-size: 0.78rem; color: var(--text-sub); margin-top: 2px;">Save this calculated BOM batch for ${client} (${projectRef}) as an active plan and compute net deficits.</div>
             </div>
-            <button class="btn-primary" onclick="sendBOMToMRP(${prodId}, ${qty})">
+            <button class="btn-primary" onclick="sendBOMToMRP(${prodId}, ${qty}, '${client.replace(/'/g, "\\'")}', '${projectRef.replace(/'/g, "\\'")}', '${plant.replace(/'/g, "\\'")}')">
               <i data-lucide="arrow-right-circle"></i> Send to MRP Planner & Run Analysis
             </button>
           </div>
@@ -3587,7 +3768,7 @@
       }, 1200);
     }
 
-    function sendBOMToMRP(prodId, qty) {
+    function sendBOMToMRP(prodId, qty, client, projectRef, plant) {
       const prod = mockData.products.find(p => p.id == prodId);
       const planNum = `PLAN-2026-00${mockData.plans.length + 1}`;
       const planName = `${planNum}: ${prod ? prod.code + ' ' + prod.name : 'Custom BOM Run'} (${qty} Units)`;
@@ -3597,6 +3778,9 @@
         name: planName,
         prod_id: parseInt(prodId),
         qty: qty,
+        client_name: client || 'Zamil Steel Saudi Arabia Ltd',
+        project_ref: projectRef || 'PROJ-SA-2026-881',
+        plant: plant || 'Dammam Plant 1 (Warehouse A)',
         status: 'ACTIVE'
       };
 
@@ -3608,7 +3792,7 @@
       populateSelects();
       document.getElementById('mrp-plan-select').value = newPlan.id;
 
-      alert(`✅ Created Production Plan ${planNum}. Transferring to MRP Engine...`);
+      alert(`✅ Created Production Plan ${planNum} for ${newPlan.client_name} (${newPlan.project_ref}). Transferring to MRP Engine...`);
       switchTab('mrp');
       runMRP();
     }
@@ -3732,6 +3916,10 @@
           { material_code: 'MAT-5002', deficit_qty: 500 }
         ];
 
+        const planSelect = document.getElementById('mrp-plan-select');
+        const activePlanId = planSelect ? parseInt(planSelect.value) : 101;
+        const currentPlan = (mockData.plans || []).find(p => p.id === activePlanId);
+
         shortages.forEach(s => {
           const newPrNum = `PR-2026-000${mockData.prs.length + 1}`;
           mockData.prs.unshift({
@@ -3739,6 +3927,8 @@
             number: newPrNum,
             material_code: s.material_code,
             qty: s.deficit_qty,
+            client_name: currentPlan ? currentPlan.client_name : 'Zamil Steel Saudi Arabia Ltd',
+            project_ref: currentPlan ? currentPlan.project_ref : 'PROJ-SA-2026-881',
             rating: 4.8,
             priority: 'HIGH',
             status: 'SUBMITTED'
@@ -3794,14 +3984,11 @@
     async function autoPO(prId) {
       if(liveMode) {
         try {
-          // Recommend supplier
           const pr = mockData.prs.find(p => p.id === prId);
-          // Let's use a dummy material ID or real check
           const recRes = await fetch(`${baseRestUrl}/procurement/recommend_supplier?material_id=5001`);
           const recData = await recRes.json();
           const supplierId = recData.items[0]?.supplier_id || 101;
 
-          // Generate PO
           const poRes = await fetch(`${baseRestUrl}/procurement/generate_po`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3815,21 +4002,32 @@
         }
       } else {
         const pr = mockData.prs.find(p => p.id === prId);
+        if (!pr) return;
+
         pr.status = 'ORDERED';
-        mockData.dashboard.open_prs--;
+        mockData.dashboard.open_prs = Math.max(0, mockData.dashboard.open_prs - 1);
         mockData.dashboard.open_pos++;
         
         const newPoNum = `PO-2026-000${mockData.pos.length + 1}`;
-        mockData.pos.push({
+        const mat = mockData.materials.find(m => m.code === pr.material_code);
+        const unitCost = mat ? mat.standard_cost : 85.50;
+
+        mockData.pos.unshift({
           id: 900 + mockData.pos.length + 1,
           number: newPoNum,
+          pr_id: pr.id,
+          pr_number: pr.number,
+          material_code: pr.material_code,
+          client_name: pr.client_name || 'Zamil Steel Saudi Arabia Ltd',
+          project_ref: pr.project_ref || 'PROJ-SA-2026-881',
           supplier: pr.rating > 4.5 ? 'Tata Steel India Ltd' : 'Hindalco Industries',
-          value: pr.qty * (pr.material_code === 'MAT-5001' ? 85.50 : 92.00),
-          date: '12-Aug-2026',
+          value: pr.qty * unitCost,
+          date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
           delivery: '19-Aug-2026',
-          tracking: 'PENDING'
+          tracking: 'IN_TRANSIT'
         });
-        alert(`PO Raised successfully: ${newPoNum} for ${pr.qty} units.`);
+
+        alert(`PO Raised successfully: ${newPoNum} for ${pr.qty.toLocaleString()} units (${pr.client_name || 'Zamil'}).`);
         initUI();
       }
     }
@@ -3839,7 +4037,22 @@
       switchTab('inventory');
       document.getElementById('migo-mvt-select').value = '101';
       onMvtChange();
-      document.getElementById('migo-po-select').value = poId;
+      
+      const migoPoSelect = document.getElementById('migo-po-select');
+      if (migoPoSelect) migoPoSelect.value = poId;
+
+      // Find PO details to pre-fill SKU and quantity
+      const po = mockData.pos.find(p => p.id == poId || p.number === poNum);
+      if (po) {
+        if (po.material_code) {
+          const mat = mockData.materials.find(m => m.code === po.material_code);
+          if (mat) document.getElementById('migo-mat-select').value = mat.id;
+        }
+        const pr = mockData.prs.find(p => p.id === po.pr_id || p.number === po.pr_number);
+        if (pr && pr.qty) {
+          document.getElementById('migo-quantity').value = pr.qty;
+        }
+      }
     }
 
     async function submitMIGO() {
@@ -3912,10 +4125,15 @@
           if (mvt === '101') {
             bal.qty_on_hand += qty;
             const po = mockData.pos.find(p => p.id == poId);
-            if(po) po.tracking = 'RECEIVED';
+            if (po) {
+              po.tracking = 'RECEIVED';
+              const linkedPr = mockData.prs.find(pr => pr.id === po.pr_id || pr.number === po.pr_number || pr.material_code === po.material_code);
+              if (linkedPr) linkedPr.status = 'COMPLETED / STORED';
+              mockData.dashboard.open_pos = Math.max(0, mockData.dashboard.open_pos - 1);
+            }
           } else if (mvt === '261') {
-            if(bal.qty_on_hand < qty) {
-              alert(`Insufficient stock! Bin ${bal.bin_code} only has ${bal.qty_on_hand} KG on hand, cannot issue ${qty} KG.`);
+            if (bal.qty_on_hand < qty) {
+              alert(`Insufficient stock! Storage Bin ${bal.bin_code} only has ${bal.qty_on_hand} KG on hand, cannot issue ${qty} KG.`);
               return;
             }
             bal.qty_on_hand -= qty;
