@@ -11,7 +11,7 @@ MPPMS is an enterprise supply chain management system built to match industrial 
 ```
 [Target Production Plan] 
        ↓
-[Bill of Materials (BOM) Explosion] 
+[Bill of Materials (BOM) Breakdown] 
        ↓
 [MRP Engine Net Deficiency Check] 
        ↓
@@ -55,8 +55,8 @@ Used by production engineers to see what raw materials are needed to manufacture
 1. Click **Bill of Materials** in the sidebar.
 2. Select a target product (e.g. `PRD-2001 - Industrial Centrifugal Pump`).
 3. Enter the batch quantity (e.g. `10 Units`).
-4. Click **Explode BOM Tree**.
-5. **Result**: The system explodes the multi-level product tree, displays required component quantities (Steel H-Beams, Bolts, Motors), calculates standard cost roll-ups, and compares requirements against current warehouse stock on-hand.
+4. Click **Calculate BOM Breakdown**.
+5. **Result**: The system breaks down the multi-level product tree, displays required component quantities (Steel H-Beams, Bolts, Motors), calculates standard cost roll-ups, and compares requirements against current warehouse stock on-hand.
 
 ---
 
@@ -64,7 +64,7 @@ Used by production engineers to see what raw materials are needed to manufacture
 Calculates exact material deficits across active production plans.
 1. Click **MRP Planner** in the sidebar.
 2. Select a Master Production Plan (e.g. `PLAN-2026-Q3`).
-3. Click **Run MRP Explosion**.
+3. Click **Run MRP Calculation**.
 4. **Result**: The engine calculates:
    $$\text{Net Deficit} = \text{Gross Requirement} + \text{Safety Stock} - \text{Stock On-Hand} - \text{Stock On-Order}$$
 5. If net shortages are found, click **Generate Purchase Requisitions**. The system automatically creates PRs for the missing materials.
