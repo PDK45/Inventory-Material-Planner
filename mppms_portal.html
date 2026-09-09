@@ -1,0 +1,4738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MPPMS Executive Portal v2.0</title>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono (Google/Claude UI Standard) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN (falls back to custom SVG charts if offline) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" onerror="console.warn('Offline: Chart.js failed to load. Falling back to SVG charts.')"></script>
+  <!-- Lucide Icons for premium aesthetics -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* --- CSS Reset & Variables --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:       #060a12;
+      --bg-surface:    #09101f;
+      --bg-card:       rgba(13, 22, 41, 0.78);
+      --border-glass:  rgba(255, 255, 255, 0.08);
+      --border-bright: rgba(255, 255, 255, 0.16);
+      --border-glow:   rgba(79, 142, 247, 0.3);
+      --text-main:     #f8fafc;
+      --text-sub:      #cbd5e1;
+      --text-muted:    #8493ad;
+
+      /* Brand Palette (Google Cloud / Oracle Redwood / Anthropic Standard) */
+      --primary:      #4f8ef7;
+      --primary-dark: #2563eb;
+      --primary-glow: rgba(79, 142, 247, 0.35);
+      --accent:       #0ea5e9;
+      --accent-glow:  rgba(14, 165, 233, 0.25);
+      --purple:       #8b5cf6;
+      --purple-glow:  rgba(139, 92, 246, 0.25);
+
+      /* Status Palette */
+      --success:       #10b981;
+      --success-glow:  rgba(16, 185, 129, 0.18);
+      --warning:       #f59e0b;
+      --warning-glow:  rgba(245, 158, 11, 0.18);
+      --danger:        #ef4444;
+      --danger-glow:   rgba(239, 68, 68, 0.18);
+      --info:          #0ea5e9;
+      --info-glow:     rgba(14, 165, 233, 0.18);
+
+      /* Radii */
+      --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+    }
+
+    html, body {
+      height: 100%; overflow: hidden;
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-base);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(79, 142, 247, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.08) 0px, transparent 50%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- App Layout --- */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- Sidebar Styling --- */
+    /* --- Sidebar Styling --- */
+    .sidebar {
+      width: 275px;
+      background: rgba(7, 12, 24, 0.88);
+      border-right: 1px solid var(--border-glass);
+      backdrop-filter: blur(24px) saturate(160%);
+      padding: 24px 14px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      height: 100%;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding: 4px 8px 20px 8px;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px var(--primary-glow);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: linear-gradient(90deg, #ffffff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* Scrollable Navigation Area */
+    .nav-links-container {
+      overflow-y: auto;
+      flex-grow: 1;
+      margin-bottom: 16px;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(91, 156, 246, 0.2) transparent;
+    }
+
+    .nav-links-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .nav-links-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .nav-links-container::-webkit-scrollbar-thumb {
+      background: rgba(91, 156, 246, 0.2);
+      border-radius: 10px;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    /* Dropdown Section Header */
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .nav-section-header:hover {
+      background: rgba(91, 156, 246, 0.08);
+      color: var(--primary);
+      border-color: rgba(91, 156, 246, 0.2);
+    }
+
+    .submenu-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height: 800px;
+      padding-left: 10px;
+      border-left: 2px solid rgba(91, 156, 246, 0.18);
+      margin-left: 12px;
+      margin-top: 4px;
+    }
+
+    .submenu-container.collapsed {
+      max-height: 0 !important;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      color: var(--text-sub);
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.88rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.08);
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      color: #ffffff;
+      background: linear-gradient(90deg, rgba(91, 156, 246, 0.2) 0%, rgba(34, 211, 238, 0.06) 100%);
+      border-color: rgba(91, 156, 246, 0.3);
+      box-shadow: 0 4px 20px rgba(91, 156, 246, 0.12);
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15%;
+      height: 70%;
+      width: 3px;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-item svg, .nav-item i {
+      font-size: 1.1rem;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .mode-switch-container {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: auto;
+    }
+
+    .mode-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: block;
+      font-weight: 600;
+    }
+
+    .toggle-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .toggle-text.live {
+      color: var(--primary);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.15);
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* --- Main Workspace Layout --- */
+    .main-content {
+      flex-grow: 1;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Header Styling --- */
+    /* --- Header Styling --- */
+    .top-header {
+      height: 76px;
+      border-bottom: 1px solid var(--border-glass);
+      backdrop-filter: blur(16px) saturate(140%);
+      background: rgba(4, 8, 17, 0.7);
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .page-title-section h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      background: linear-gradient(90deg, #ffffff 0%, var(--text-sub) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-title-section p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-search-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 20px;
+      width: 320px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .header-search-bar:focus-within {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+      width: 360px;
+    }
+
+    .header-search-bar input {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 0.84rem;
+      color: var(--text-main);
+    }
+
+    .header-search-bar input:focus {
+      box-shadow: none;
+    }
+
+    .kbd-badge {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-glass);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+    }
+
+    .header-icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-sub);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .header-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .bell-dot {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 12px 5px 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .user-profile-badge:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .user-role {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* --- Dashboard Container --- */
+    .content-body {
+      padding: 32px 36px;
+      flex-grow: 1;
+      display: none;
+      animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .content-body.active {
+      display: block;
+    }
+
+    /* --- KPI Grid --- */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: rgba(11, 17, 34, 0.82);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      padding: 22px 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      opacity: 0.8;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(91, 156, 246, 0.35);
+      box-shadow: 0 12px 36px rgba(91, 156, 246, 0.12);
+    }
+
+    .kpi-card.warning::after {
+      background: linear-gradient(90deg, var(--warning) 0%, #f59e0b 100%);
+    }
+
+    .kpi-card.danger::after {
+      background: linear-gradient(90deg, var(--danger) 0%, #f87171 100%);
+    }
+
+    .kpi-card.success::after {
+      background: linear-gradient(90deg, var(--success) 0%, #34d399 100%);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .kpi-label {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    .kpi-icon-wrapper {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .kpi-card.warning .kpi-icon-wrapper { color: var(--warning); background: var(--warning-glow); }
+    .kpi-card.danger .kpi-icon-wrapper { color: var(--danger); background: var(--danger-glow); }
+    .kpi-card.success .kpi-icon-wrapper { color: var(--success); background: var(--success-glow); }
+
+    .kpi-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+
+    .kpi-footer {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .kpi-footer span.trend-up {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .kpi-footer span.trend-down {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    /* --- Visual Cards Layout --- */
+    .row-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .glass-card {
+      background: rgba(11, 17, 34, 0.8);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 26px 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(16px);
+      transition: border-color 0.25s;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .card-title-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .card-title-section h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.2px;
+    }
+
+    .card-title-section h3 i, .card-title-section h3 svg {
+      color: var(--primary);
+    }
+
+    /* --- Forms Controls --- */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      padding: 11px 16px;
+      border-radius: 12px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    button.btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: none;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px var(--primary-glow);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button.btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(91, 156, 246, 0.45);
+      filter: brightness(1.1);
+    }
+
+    button.btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    button.btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* --- Custom Table Styling --- */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      text-align: left;
+    }
+
+    th {
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-glass);
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    /* --- Badge Pills --- */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border: 1px solid transparent;
+    }
+
+    .badge-success { background: var(--success-glow); color: var(--success); border-color: rgba(52, 211, 153, 0.25); }
+    .badge-warning { background: var(--warning-glow); color: var(--warning); border-color: rgba(251, 191, 36, 0.25); }
+    .badge-danger { background: var(--danger-glow); color: var(--danger); border-color: rgba(248, 113, 113, 0.25); }
+    .badge-info { background: var(--info-glow); color: var(--info); border-color: rgba(34, 211, 238, 0.25); }
+    .badge-draft { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: var(--border-glass); }
+
+    /* --- List Widgets --- */
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .alert-item {
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: rgba(248, 113, 113, 0.05);
+      border-left: 4px solid var(--danger);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .alert-item:hover {
+      transform: translateX(4px);
+    }
+
+    .alert-item.warning {
+      background: rgba(251, 191, 36, 0.05);
+      border-left-color: var(--warning);
+    }
+
+    .alert-item.info {
+      background: rgba(34, 211, 238, 0.05);
+      border-left-color: var(--primary);
+    }
+
+    .alert-details h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .alert-details p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .alert-value {
+      text-align: right;
+    }
+
+    .alert-value .main-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .alert-value .sub-val {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* --- BOM Breakdown Tree visualization --- */
+    .bom-visual-tree {
+      margin-top: 24px;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 22px;
+      background: rgba(4, 8, 17, 0.5);
+    }
+
+    .bom-node {
+      margin-left: 28px;
+      position: relative;
+      padding: 8px 0;
+    }
+
+    .bom-node::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -14px;
+      width: 1px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .bom-node::after {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: -14px;
+      width: 12px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .bom-node:last-child::before {
+      height: 18px;
+    }
+
+    .bom-node.root {
+      margin-left: 0;
+    }
+
+    .bom-node.root::before, .bom-node.root::after {
+      display: none;
+    }
+
+    .node-content {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      padding: 10px 16px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+    }
+
+    .node-content.material {
+      border-left: 3px solid var(--accent);
+    }
+
+    .node-content.root-product {
+      border-left: 3px solid var(--primary);
+      background: rgba(91, 156, 246, 0.1);
+    }
+
+    .node-qty {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .node-cost {
+      color: var(--success);
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    /* --- Progress/Console Box --- */
+    .console-box {
+      background: #03060c;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-family: 'JetBrains Mono', monospace, sans-serif;
+      font-size: 0.8rem;
+      color: var(--success);
+      height: 150px;
+      overflow-y: auto;
+      margin-top: 15px;
+      box-shadow: inset 0 0 16px rgba(0,0,0,0.8);
+    }
+
+    .console-line {
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+
+    .console-line.info { color: var(--primary); }
+    .console-line.warn { color: var(--warning); }
+    .console-line.err { color: var(--danger); }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 14px 0;
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      transition: width 0.35s ease;
+    }
+
+    /* --- Keyframe Animations --- */
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.6; }
+      50% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.6; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Responsive Chart Container --- */
+    .chart-container {
+      position: relative;
+      height: 240px;
+      width: 100%;
+    }
+
+    .chart-wrapper-square {
+      position: relative;
+      height: 220px;
+      width: 100%;
+    }
+
+    /* SVG Fallback Charts */
+    .svg-chart {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* --- Phase 12: Digital Twin & Smart Sourcing Controls --- */
+    .shock-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .shock-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      cursor: pointer;
+      box-shadow: 0 0 14px var(--primary-glow);
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid #ffffff;
+    }
+    .shock-slider::-webkit-slider-thumb:hover { transform: scale(1.25); }
+    .slider-group { display: flex; flex-direction: column; gap: 10px; }
+    .slider-label { font-size: 0.82rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.3px; }
+    .slider-value-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); }
+    .slider-current-val {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--primary);
+      background: rgba(91,156,246,0.15);
+      padding: 3px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(91,156,246,0.25);
+    }
+
+    .strategy-btn {
+      padding: 10px 22px;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-sub);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .strategy-btn:hover {
+      color: #ffffff;
+      background: rgba(255,255,255,0.08);
+      border-color: var(--primary);
+    }
+    .strategy-btn.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(91,156,246,0.25) 0%, rgba(34,211,238,0.12) 100%);
+      border-color: var(--primary);
+      box-shadow: 0 4px 18px var(--primary-glow);
+    }
+
+    .risk-cell-red   { color: var(--danger); font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+    .risk-cell-amber { color: var(--warning); font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+    .risk-cell-green { color: var(--success); font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+
+    .alloc-bar-wrap { background: rgba(255,255,255,0.06); border-radius:20px; height:8px; min-width:80px; overflow:hidden; }
+    .alloc-bar-fill { height:100%; border-radius:20px; background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%); transition: width 0.6s ease; }
+
+    /* --- UI UX Pro Max Rules: Accessibility, Pointers & Motion --- */
+    button, a, select, input, .nav-item, .nav-section-header, .kpi-card, .strategy-btn {
+      cursor: pointer;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent) !important;
+      outline-offset: 2px !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <i data-lucide="layers" style="color: #ffffff; width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+          <h2 class="brand-name">MPPMS</h2>
+          <p class="brand-subtitle">Executive Portal</p>
+        </div>
+      </div>
+
+      <!-- Scrollable Navigation Area -->
+      <div class="nav-links-container">
+        <nav>
+          <ul class="nav-links">
+            <li><a class="nav-item active" onclick="switchTab('dashboard')"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a class="nav-item" onclick="switchTab('bom')"><i data-lucide="network"></i> Bill of Materials</a></li>
+            <li><a class="nav-item" onclick="switchTab('mrp')"><i data-lucide="cpu"></i> Material Planning (MRP)</a></li>
+            <li><a class="nav-item" onclick="switchTab('procurement')"><i data-lucide="shopping-cart"></i> Procurement Manager</a></li>
+            <li><a class="nav-item" onclick="switchTab('inventory')"><i data-lucide="warehouse"></i> Goods Movements & Inventory</a></li>
+            <li><a class="nav-item" onclick="switchTab('rgb')"><i data-lucide="receipt"></i> Goods Receipt Vouchers</a></li>
+            <li><a class="nav-item" onclick="switchTab('forecast')"><i data-lucide="trending-up"></i> AI Forecasting</a></li>
+            
+            <!-- Collapsible Dropdown Section Header -->
+            <li>
+              <div class="nav-section-header" onclick="toggleEnterpriseDropdown()">
+                <span>Enterprise Modules</span>
+                <i data-lucide="chevron-down" id="enterprise-chevron" style="width: 14px; height: 14px; transition: transform 0.3s ease;"></i>
+              </div>
+            </li>
+
+            <!-- Submenu Links -->
+            <div id="enterprise-submenu" class="submenu-container">
+              <li><a class="nav-item" onclick="switchTab('scorecard')"><i data-lucide="award"></i> Vendor Scorecards</a></li>
+              <li><a class="nav-item" onclick="switchTab('asl')"><i data-lucide="shield-check"></i> Approved Supplier List</a></li>
+              <li><a class="nav-item" onclick="switchTab('invoice')"><i data-lucide="file-check-2"></i> 3-Way Invoice Match</a></li>
+              <li><a class="nav-item" onclick="switchTab('qc')"><i data-lucide="check-circle-2"></i> Steel QC Inspections</a></li>
+              <li><a class="nav-item" onclick="switchTab('costing')"><i data-lucide="dollar-sign"></i> Standard Costing</a></li>
+              <li><a class="nav-item" onclick="switchTab('lot_serial')"><i data-lucide="barcode"></i> Lot & Serial Trace</a></li>
+              <li><a class="nav-item" onclick="switchTab('digital_twin')"><i data-lucide="activity"></i> Digital Twin Tester</a></li>
+              <li><a class="nav-item" onclick="switchTab('smart_sourcing')"><i data-lucide="git-branch"></i> Smart Sourcing AI</a></li>
+            </div>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Mode Selector -->
+      <div class="mode-switch-container">
+        <span class="mode-label">Data Sync Core</span>
+        <div class="toggle-wrapper">
+          <span id="sync-mode-text" class="toggle-text">Demo Mode</span>
+          <label class="switch">
+            <input type="checkbox" id="sync-mode-toggle" onchange="toggleSyncMode()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="main-content">
+      
+      <!-- TOP HEADER (Google / Claude / Oracle Redwood Standard) -->
+      <header class="top-header">
+        <div class="page-title-section">
+          <h1 id="page-display-title">Dashboard</h1>
+          <p id="page-display-subtitle">Real-time enterprise metrics & logistics overview</p>
+        </div>
+
+        <!-- Central Command Search Bar -->
+        <div class="header-search-bar">
+          <i data-lucide="search" style="width:16px;height:16px;color:var(--text-muted);"></i>
+          <input type="text" placeholder="Search Materials, POs, Vendors..." onkeyup="if(event.key==='Enter') alert('Searching: ' + this.value)">
+          <span class="kbd-badge">Ctrl K</span>
+        </div>
+
+        <div class="header-actions">
+          <div class="status-indicator">
+            <div id="status-dot" class="pulse-dot offline"></div>
+            <span id="status-text">Database Connection: Offline (Simulating)</span>
+          </div>
+
+          <!-- Notification Trigger -->
+          <div class="header-icon-btn" onclick="alert('System Notifications:\n• 2 Overdue Purchase Orders detected\n• Steel QC Inspection #QC-908 Passed\n• Smart Sourcing Optimizer recommendation ready')" title="System Notifications">
+            <i data-lucide="bell" style="width:18px;height:18px;"></i>
+            <span class="bell-dot"></span>
+          </div>
+
+          <!-- Executive User Profile Badge -->
+          <div class="user-profile-badge" title="Logged in as D. K. (Oracle 23ai Administrator)">
+            <div class="user-avatar">DK</div>
+            <div class="user-info">
+              <span class="user-name">D. K.</span>
+              <span class="user-role">Oracle 23ai Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- TAB 1: DASHBOARD -->
+      <section id="tab-dashboard" class="content-body active">
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card" onclick="switchTab('procurement')">
+            <div class="kpi-header">
+              <span class="kpi-label">Open Requisitions</span>
+              <div class="kpi-icon-wrapper"><i data-lucide="file-text"></i></div>
+            </div>
+            <div class="kpi-value" id="kpi-prs">0</div>
+            <div class="kpi-footer">
+              <span class="trend-up">▲ Active</span>
+              <span>Pending Procurement</span>
+            </div>
+          </div>
+          <div class="kpi-card" onclick="switchTab('procurement')">
+            <div class="kpi-header">
+              <span class="kpi-label">Open Purchase Orders</span>
+              <div class="kpi-icon-wrapper"><i data-lucide="shopping-bag"></i></div>
+            </div>
+            <div class="kpi-value" id="kpi-pos">0</div>
+            <div class="kpi-footer">
+              <span class="trend-up" id="kpi-pos-sub">0 Overdue</span>
+              <span>Active deliveries</span>
+            </div>
+          </div>
+          <div class="kpi-card danger" onclick="switchTab('mrp')">
+            <div class="kpi-header">
+              <span class="kpi-label">Material Shortages</span>
+              <div class="kpi-icon-wrapper"><i data-lucide="alert-triangle"></i></div>
+            </div>
+            <div class="kpi-value" id="kpi-shortages">0</div>
+            <div class="kpi-footer">
+              <span class="trend-down">▼ Critical</span>
+              <span>Requires immediate PRs</span>
+            </div>
+          </div>
+          <div class="kpi-card success" onclick="switchTab('mrp')">
+            <div class="kpi-header">
+              <span class="kpi-label">Active Production Plans</span>
+              <div class="kpi-icon-wrapper"><i data-lucide="activity"></i></div>
+            </div>
+            <div class="kpi-value" id="kpi-plans">0</div>
+            <div class="kpi-footer">
+              <span>Spend: </span>
+              <span class="trend-up" id="kpi-spend">₹0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <!-- Monthly Spend Chart -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="bar-chart-3"></i> Monthly Procurement Spend (INR)</h3>
+              <span class="badge badge-info">12-Month Rollup</span>
+            </div>
+            <div class="chart-container" id="spend-chart-container">
+              <canvas id="spendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- PR Status Distribution Chart -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="pie-chart"></i> PR Status Breakdown</h3>
+            </div>
+            <div class="chart-wrapper-square" id="pr-chart-container">
+              <canvas id="prStatusChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-3">
+          <!-- Shortage Alerts List -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="alert-circle" style="color: var(--danger);"></i> Shortages Alert List</h3>
+            </div>
+            <div class="alert-list" id="shortage-list-widget">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
+          <!-- Pending PR Approvals List -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="clock" style="color: var(--warning);"></i> Pending Approvals</h3>
+            </div>
+            <div class="alert-list" id="pending-pr-list-widget">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
+          <!-- Upcoming Deliveries List -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="truck" style="color: var(--primary);"></i> Upcoming Deliveries</h3>
+            </div>
+            <div class="alert-list" id="upcoming-deliveries-list-widget">
+              <!-- Dynamic -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: BILL OF MATERIALS ARCHITECTURE -->
+      <section id="tab-bom" class="content-body">
+        <div class="row-2" style="grid-template-columns: 1fr 2fr;">
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="network"></i> Bill of Materials Configuration</h3>
+            </div>
+            <div class="form-group">
+              <label for="bom-product-select">Target Finished Assembly SKU</label>
+              <select id="bom-product-select">
+                <option value="2001">ZML-PRD-2001 — Zamil Industrial Centrifugal Pump</option>
+                <option value="2002">ZML-PRD-2002 — Zamil Heavy Structural PEB Frame</option>
+                <option value="2003">ZML-PRD-2003 — High-Speed Industrial Substation Transformer</option>
+                <option value="2004">ZML-PRD-2004 — Automated PLC Control System Panel</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="bom-quantity">Production Batch Quantity (Units)</label>
+              <input type="number" id="bom-quantity" value="10" min="1">
+            </div>
+            <button class="btn-primary" onclick="executeBOMBreakdown()" style="width: 100%;">
+              <i data-lucide="play-circle"></i> Execute Bill of Materials Hierarchy
+            </button>
+            <div class="progress-bar-container" id="bom-progress-container" style="display:none; margin-top: 15px;">
+              <div class="progress-bar-fill" id="bom-progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="git-merge"></i> Multi-Level Bill of Materials Hierarchy</h3>
+              <span id="bom-summary-badge" class="badge badge-info">Ready to Calculate</span>
+            </div>
+            <div class="bom-visual-tree" id="bom-tree-output">
+              <div class="node-content root-product">
+                <i data-lucide="box"></i>
+                <span>Select a finished assembly SKU and click "Execute Bill of Materials Hierarchy" to inspect component roll-up structure and stock availability.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: MRP PLANNER -->
+      <section id="tab-mrp" class="content-body">
+        <div class="row-2" style="grid-template-columns: 1fr 2.2fr;">
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3>Execute MRP Run</h3>
+            </div>
+            <div class="form-group">
+              <label for="mrp-plan-select">Select Approved Production Plan</label>
+              <select id="mrp-plan-select">
+                <!-- Dynamic options -->
+              </select>
+            </div>
+            <button class="btn-primary" onclick="runMRP()" style="width: 100%;">
+              <i data-lucide="play-circle"></i> Run MRP Calculation
+            </button>
+            
+            <div class="progress-bar-container" id="mrp-progress-container" style="display:none;">
+              <div class="progress-bar-fill" id="mrp-progress-fill"></div>
+            </div>
+            
+            <div class="console-box" id="mrp-console">
+              <div class="console-line info">&gt; MRP engine standby. Ready to load production plan...</div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3>Net Material Requirements Results</h3>
+              <button class="btn-secondary" onclick="generatePRFromMRP()" id="btn-raise-pr" style="display:none;">
+                <i data-lucide="file-plus" style="color: var(--primary);"></i> Generate Purchase Requisitions
+              </button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Material</th>
+                    <th>Gross Req</th>
+                    <th>On Hand</th>
+                    <th>Safety Stock</th>
+                    <th>Net Req</th>
+                    <th>Order Recommendation</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="mrp-results-body">
+                  <tr>
+                    <td colspan="7" style="text-align:center; color: var(--text-muted); padding:40px;">
+                      No MRP results loaded. Run calculation on an approved plan.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: PROCUREMENT MANAGER -->
+      <section id="tab-procurement" class="content-body">
+        <!-- Requisitions Section -->
+        <div class="glass-card" style="margin-bottom: 30px;">
+          <div class="card-title-section">
+            <h3><i data-lucide="file-text"></i> Purchase Requisitions Ledger</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>PR Number</th>
+                  <th>Material Code</th>
+                  <th>Qty Required</th>
+                  <th>Supplier Rating</th>
+                  <th>Safety Status</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pr-ledger-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Purchase Orders Section -->
+        <div class="glass-card">
+          <div class="card-title-section">
+            <h3><i data-lucide="shopping-bag"></i> Purchase Orders Dashboard</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>PO Number</th>
+                  <th>Supplier Name</th>
+                  <th>Value (INR)</th>
+                  <th>Order Date</th>
+                  <th>Expected Delivery</th>
+                  <th>Tracking Status</th>
+                  <th>MIGO</th>
+                </tr>
+              </thead>
+              <tbody id="po-ledger-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: GOODS MOVEMENTS & INVENTORY CONTROL -->
+      <section id="tab-inventory" class="content-body">
+        <div class="row-2" style="grid-template-columns: 1.1fr 2fr; margin-bottom: 24px;">
+          <!-- Goods Movement Dialog -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="package-plus"></i> Post Goods Movement Document</h3>
+              <span class="badge badge-info">Transaction Entry</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="migo-mvt-select">Movement Type</label>
+              <select id="migo-mvt-select" onchange="onMvtChange()">
+                <option value="101">Mvt 101 — PO Goods Receipt (+Stock)</option>
+                <option value="261">Mvt 261 — Production Goods Issue (-Stock)</option>
+                <option value="311">Mvt 311 — Storage Bin Transfer (Relocate)</option>
+                <option value="551">Mvt 551 — Physical Stock Scrappage (-Stock)</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="migo-po-row">
+              <label for="migo-po-select">Reference Purchase Order</label>
+              <select id="migo-po-select">
+                <!-- Dynamic -->
+              </select>
+            </div>
+
+            <div class="form-group" id="migo-plan-row" style="display:none;">
+              <label for="migo-plan-select">Reference Production Plan</label>
+              <select id="migo-plan-select">
+                <!-- Dynamic -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="migo-mat-select">Material SKU</label>
+              <select id="migo-mat-select">
+                <!-- Dynamic -->
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="migo-wh-select">Warehouse Location</label>
+                <select id="migo-wh-select" onchange="onWarehouseChange()">
+                  <!-- Dynamic -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="migo-bin-select">Storage Bin</label>
+                <select id="migo-bin-select">
+                  <!-- Dynamic -->
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="migo-quantity">Transaction Quantity</label>
+              <input type="number" id="migo-quantity" value="100" min="1">
+            </div>
+
+            <button class="btn-primary" onclick="submitMIGO()" style="width:100%;">
+              <i data-lucide="check-circle-2"></i> Post & Commit Goods Movement
+            </button>
+          </div>
+
+          <!-- Realtime Warehouse Balances -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="warehouse"></i> Real-time Warehouse Balances & Bin Monitor</h3>
+              <button class="btn-secondary" onclick="renderInventoryData()" title="Refresh Balances">
+                <i data-lucide="refresh-cw"></i> Refresh
+              </button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Warehouse / Bin</th>
+                    <th>Material SKU</th>
+                    <th>Category</th>
+                    <th>Qty On Hand</th>
+                    <th>Safety Stock</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-balances-body">
+                  <!-- Dynamic -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Posted Goods Movement Audit Log Table -->
+        <div class="glass-card">
+          <div class="card-title-section">
+            <h3><i data-lucide="history"></i> Goods Movement Audit Log & Transaction History</h3>
+            <span class="badge badge-success" id="migo-log-count-badge">3 Documents Committed</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Document No</th>
+                  <th>Movement Type</th>
+                  <th>Material Code & Name</th>
+                  <th>Quantity</th>
+                  <th>Warehouse / Storage Bin</th>
+                  <th>Timestamp</th>
+                  <th>Posted By</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-transactions-body">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5B: RECEIVER GOODS BILLS -->
+      <section id="tab-rgb" class="content-body">
+        <div class="row-2" style="grid-template-columns: 1fr 1.8fr;">
+          <!-- Left side: Draft Bill Creator / Actions -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="plus-circle"></i> Create Receiver Goods Bill</h3>
+              <span class="badge badge-info">Draft Builder</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="rgb-po-select">Select Zamil Purchase Order</label>
+              <select id="rgb-po-select" onchange="onRgbPoChange()">
+                <!-- Dynamic PO List -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="rgb-delivery-note">Delivery Note (DN)</label>
+              <input type="text" id="rgb-delivery-note" placeholder="e.g. ZML-DN-994821">
+            </div>
+
+            <div class="form-group">
+              <label for="rgb-received-by">Received By</label>
+              <input type="text" id="rgb-received-by" value="ZAMIL_WH_CLERK">
+            </div>
+
+            <div class="form-group">
+              <label for="rgb-remarks">Remarks / Notes</label>
+              <input type="text" id="rgb-remarks" placeholder="Optional comments...">
+            </div>
+
+            <button class="btn-primary" onclick="createGoodsBill()" style="width: 100%; margin-bottom: 20px;">
+              <i data-lucide="file-plus"></i> Initialize Draft Bill
+            </button>
+
+            <div id="rgb-builder-section" style="display: none; border-top: 1px solid var(--border-glass); padding-top: 20px;">
+              <h4 style="margin-bottom: 15px; color: var(--accent); display: flex; justify-content: space-between; align-items: center;">
+                <span>Active Bill: <strong id="active-rgb-number" style="color: #fff;"></strong></span>
+              </h4>
+              
+              <div class="form-group">
+                <label for="rgb-item-material">Select Material</label>
+                <select id="rgb-item-material">
+                  <!-- Dynamic Material List for selected PO -->
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="rgb-item-qty">Qty Received (MT / SET)</label>
+                  <input type="number" id="rgb-item-qty" value="100">
+                </div>
+                <div class="form-group">
+                  <label for="rgb-item-warehouse">Warehouse</label>
+                  <select id="rgb-item-warehouse" onchange="onRgbWarehouseChange()">
+                    <!-- Warehouses -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="rgb-item-bin">Storage Bin</label>
+                  <select id="rgb-item-bin">
+                    <!-- Bins -->
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="rgb-item-remarks">Item Remarks</label>
+                  <input type="text" id="rgb-item-remarks" placeholder="Optional...">
+                </div>
+              </div>
+
+              <button class="btn-secondary" onclick="addGoodsBillItem()" style="width: 100%; margin-bottom: 15px; border-color: var(--accent); color: var(--accent); background: rgba(6, 182, 212, 0.05);">
+                <i data-lucide="plus"></i> Add Item Line
+              </button>
+
+              <button class="btn-primary" onclick="postGoodsBill(null)" style="width: 100%; background: linear-gradient(135deg, var(--success) 0%, #065f46 100%); box-shadow: 0 4px 20px var(--success-glow);">
+                <i data-lucide="send"></i> Post & Commit Goods Bill
+              </button>
+            </div>
+          </div>
+
+          <!-- Right side: Goods Bills List & Details -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="receipt"></i> Receiver Goods Bills Ledger</h3>
+              <button class="btn-secondary" onclick="refreshRgbData()">
+                <i data-lucide="refresh-cw"></i>
+              </button>
+            </div>
+            
+            <div class="table-container" style="max-height: 280px; overflow-y: auto; margin-bottom: 25px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Bill Number</th>
+                    <th>Ref PO</th>
+                    <th>Delivery Note</th>
+                    <th>Received Date</th>
+                    <th>Received By</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="rgb-ledger-body">
+                  <!-- Dynamic -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Bill Details Section -->
+            <div id="rgb-details-card" style="display: none; border-top: 1px solid var(--border-glass); padding-top: 20px;">
+              <div class="card-title-section" style="margin-bottom: 15px;">
+                <h4 style="color: var(--accent);">Bill Items Detail: <span id="detail-rgb-number" style="color: #fff;"></span></h4>
+                <span id="detail-rgb-status" class="badge"></span>
+              </div>
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Material Code</th>
+                      <th>Material Name</th>
+                      <th>Qty Received</th>
+                      <th>Warehouse</th>
+                      <th>Storage Bin</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rgb-details-body">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: AI DEMAND FORECAST -->
+      <section id="tab-forecast" class="content-body">
+        <div class="row-2" style="grid-template-columns: 1fr 2fr;">
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3>AI Triple Exponential Smoothing</h3>
+            </div>
+            <div class="form-group">
+              <label for="forecast-prod-select">Product SKU</label>
+              <select id="forecast-prod-select">
+                <option value="2001">PRD-2001 - Centrifugal Pump</option>
+                <option value="2002">PRD-2002 - Screw Compressor</option>
+                <option value="2003">PRD-2003 - Electric Motor</option>
+                <option value="2004">PRD-2004 - PLC Controller</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="calculateForecast()" style="width:100%;">
+              <i data-lucide="cpu"></i> Run Holt-Winters Forecast
+            </button>
+            <div class="console-box" id="forecast-console" style="margin-top:20px; height: 200px;">
+              <div class="console-line info">&gt; Holt-Winters Grid-Search model analyzer offline.</div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3>12-Month Predictive Demand vs Actual Sales</h3>
+              <span class="badge badge-success">Optimized residuals</span>
+            </div>
+            <div class="chart-container" id="forecast-chart-container" style="height:350px;">
+              <canvas id="forecastChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: VENDOR SCORECARD -->
+      <section id="tab-scorecard" class="content-body">
+        <div class="glass-card" style="margin-bottom: 25px;">
+          <div class="card-title-section">
+            <h3><i data-lucide="award"></i> Vendor Performance Scorecard Ledger</h3>
+            <button class="btn-primary" onclick="recalculateVendorScores()"><i data-lucide="refresh-cw"></i> Recalculate Ratings</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Vendor Code</th>
+                  <th>Supplier Name</th>
+                  <th>Delivery (40%)</th>
+                  <th>Quality (40%)</th>
+                  <th>Price (20%)</th>
+                  <th>Total Score</th>
+                  <th>Rating Grade</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="scorecard-ledger-body">
+                <tr><td colspan="8" style="text-align:center;">Loading Scorecards...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 8: APPROVED SUPPLIER LIST (ASL) -->
+      <section id="tab-asl" class="content-body">
+        <div class="glass-card">
+          <div class="card-title-section">
+            <h3><i data-lucide="shield-check"></i> Approved Supplier List (ASL) Matrix</h3>
+            <span class="badge badge-info">Multi-Currency & Regional Sourcing</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Material SKU</th>
+                  <th>Supplier Code</th>
+                  <th>Supplier Name</th>
+                  <th>Pref Rank</th>
+                  <th>Status</th>
+                  <th>Contract Price</th>
+                  <th>Currency</th>
+                  <th>Review Date</th>
+                </tr>
+              </thead>
+              <tbody id="asl-ledger-body">
+                <tr><td colspan="8" style="text-align:center;">Loading ASL Matrix...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 9: 3-WAY INVOICE MATCHING -->
+      <section id="tab-invoice" class="content-body">
+        <div class="row-2" style="margin-bottom: 25px; grid-template-columns: 2fr 1fr;">
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="file-check-2"></i> 3-Way Invoice Matching Ledger (PO - GR - Invoice)</h3>
+              <span class="badge badge-warning">2% Price / 5% Qty Tolerance Engine</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Invoice Num</th>
+                    <th>Supplier</th>
+                    <th>Invoice Amt</th>
+                    <th>PO Amt</th>
+                    <th>Match Status</th>
+                    <th>Tolerance Alert</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="invoice-ledger-body">
+                  <tr><td colspan="7" style="text-align:center;">Loading Invoice Engine...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="pie-chart"></i> AP Ageing Breakdown</h3>
+            </div>
+            <div class="alert-list" id="ap-ageing-widget">
+              <div class="alert-item info">
+                <div class="alert-details"><h4>Current (0-30 Days)</h4><p>Active un-matched invoices</p></div>
+                <div class="alert-value"><span class="main-val">₹ 1,85,000</span></div>
+              </div>
+              <div class="alert-item warning">
+                <div class="alert-details"><h4>31-60 Days</h4><p>Pending receipt verification</p></div>
+                <div class="alert-value"><span class="main-val">₹ 42,500</span></div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-details"><h4>61+ Days Overdue</h4><p>Hold release required</p></div>
+                <div class="alert-value"><span class="main-val">₹ 12,000</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 10: QC INSPECTION -->
+      <section id="tab-qc" class="content-body">
+        <div class="glass-card">
+          <div class="card-title-section">
+            <h3><i data-lucide="check-circle-2"></i> QC Quality Inspection Queue (IS 2062 / ASTM A36)</h3>
+            <span class="badge badge-success">Automated Quarantine & Stock Release</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Inspection ID</th>
+                  <th>Material Code</th>
+                  <th>Supplier</th>
+                  <th>Heat Number</th>
+                  <th>Mill Cert</th>
+                  <th>Rec Qty</th>
+                  <th>Sampled</th>
+                  <th>Status</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody id="qc-ledger-body">
+                <tr><td colspan="9" style="text-align:center;">Loading Steel QC Queue...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 11: STANDARD COSTING -->
+      <section id="tab-costing" class="content-body">
+        <div class="row-2" style="margin-bottom: 25px;">
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="dollar-sign"></i> Inventory Standard Cost Valuation</h3>
+              <span class="badge badge-info">Multi-Currency (INR / SAR / USD)</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Material Code</th>
+                    <th>Material Name</th>
+                    <th>Category</th>
+                    <th>Stock Qty</th>
+                    <th>Standard Cost</th>
+                    <th>Stock Value (INR)</th>
+                  </tr>
+                </thead>
+                <tbody id="costing-valuation-body">
+                  <tr><td colspan="6" style="text-align:center;">Loading Cost Valuation...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="trending-down"></i> Purchase Price Variance (PPV) Log</h3>
+            </div>
+            <div class="alert-list" id="ppv-log-widget">
+              <div class="alert-item warning">
+                <div class="alert-details"><h4>MAT-5001 Hot Rolled Sheet</h4><p>PO Price: ₹88.50 vs Std: ₹85.50</p></div>
+                <div class="alert-value"><span class="main-val" style="color:var(--danger);">+₹ 1,500 ADVERSE</span></div>
+              </div>
+              <div class="alert-item info">
+                <div class="alert-details"><h4>MAT-5003 Aluminium Ingot</h4><p>PO Price: ₹218.00 vs Std: ₹225.00</p></div>
+                <div class="alert-value"><span class="main-val" style="color:var(--success);">-₹ 3,500 FAVOURABLE</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 12: LOT & SERIAL TRACKING -->
+      <section id="tab-lot_serial" class="content-body">
+        <div class="glass-card">
+          <div class="card-title-section">
+            <h3><i data-lucide="barcode"></i> Steel Lot Register & Mill Certificate Traceability</h3>
+            <span class="badge badge-warning">Heat Traceability & FIFO Expiry Monitor</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Lot Number</th>
+                  <th>Material Code</th>
+                  <th>Supplier</th>
+                  <th>Heat Number</th>
+                  <th>Mill Cert #</th>
+                  <th>Qty Rec</th>
+                  <th>Available</th>
+                  <th>Status</th>
+                  <th>Expiry Date</th>
+                </tr>
+              </thead>
+              <tbody id="lot-ledger-body">
+                <tr><td colspan="9" style="text-align:center;">Loading Lot Register...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 13: DIGITAL TWIN STRESS TESTER -->
+      <section id="tab-digital_twin" class="content-body">
+        <!-- Shock Parameters Panel -->
+        <div class="glass-card" style="margin-bottom:25px;">
+          <div class="card-title-section">
+            <h3><i data-lucide="activity"></i> Supply Chain Shock Parameters</h3>
+            <span class="badge badge-warning">Monte Carlo Engine — 1,000 Trials</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;padding:10px 0;">
+            <!-- Shipping Delay Slider -->
+            <div class="slider-group">
+              <label class="slider-label">🚢 Shipping Delay (Days)</label>
+              <input type="range" id="dt-shipping-delay" min="0" max="90" value="0" step="1"
+                     class="shock-slider" oninput="updateSliderDisplay('dt-shipping-delay','dt-delay-val')">
+              <div class="slider-value-row">
+                <span>0 days</span>
+                <span id="dt-delay-val" class="slider-current-val">0 days</span>
+                <span>90 days</span>
+              </div>
+            </div>
+            <!-- Tariff Spike Slider -->
+            <div class="slider-group">
+              <label class="slider-label">📈 Tariff / Cost Spike (%)</label>
+              <input type="range" id="dt-tariff-spike" min="0" max="100" value="0" step="1"
+                     class="shock-slider" oninput="updateSliderDisplay('dt-tariff-spike','dt-tariff-val')">
+              <div class="slider-value-row">
+                <span>0%</span>
+                <span id="dt-tariff-val" class="slider-current-val">0%</span>
+                <span>100%</span>
+              </div>
+            </div>
+            <!-- Demand Surge Slider -->
+            <div class="slider-group">
+              <label class="slider-label">⚡ Demand Surge (%)</label>
+              <input type="range" id="dt-demand-surge" min="0" max="100" value="0" step="1"
+                     class="shock-slider" oninput="updateSliderDisplay('dt-demand-surge','dt-demand-val')">
+              <div class="slider-value-row">
+                <span>0%</span>
+                <span id="dt-demand-val" class="slider-current-val">0%</span>
+                <span>100%</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:20px;display:flex;gap:12px;align-items:center;">
+            <button class="btn-primary" onclick="runDigitalTwinSim()" id="dt-run-btn">
+              <i data-lucide="zap"></i> Run Monte Carlo Simulation
+            </button>
+            <span id="dt-status-msg" style="font-size:0.85rem;color:var(--text-muted);"></span>
+          </div>
+        </div>
+
+        <!-- Risk Gauge + KPI Cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin-bottom:25px;" id="dt-kpi-row">
+          <div class="glass-card kpi-card" style="border-color:var(--danger-glow);">
+            <div class="kpi-icon" style="background:var(--danger-glow);"><i data-lucide="alert-triangle" style="color:var(--danger);"></i></div>
+            <div class="kpi-value" id="dt-risk-pct" style="color:var(--danger);">—</div>
+            <div class="kpi-label">Stockout Risk</div>
+          </div>
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon" style="background:var(--warning-glow);"><i data-lucide="trending-up" style="color:var(--warning);"></i></div>
+            <div class="kpi-value" id="dt-p95-exposure">—</div>
+            <div class="kpi-label">P95 Exposure (INR)</div>
+          </div>
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon" style="background:var(--success-glow);"><i data-lucide="shield" style="color:var(--success);"></i></div>
+            <div class="kpi-value" id="dt-buffer-days" style="color:var(--success);">—</div>
+            <div class="kpi-label">Safe Buffer Days</div>
+          </div>
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon" style="background:var(--info-glow);"><i data-lucide="layers" style="color:var(--info);"></i></div>
+            <div class="kpi-value" id="dt-trial-count">1,000</div>
+            <div class="kpi-label">Trials Run</div>
+          </div>
+        </div>
+
+        <!-- Material Risk Heatmap Table -->
+        <div class="glass-card">
+          <div class="card-title-section">
+            <h3><i data-lucide="map"></i> Material Risk Heatmap</h3>
+            <span class="badge badge-info" id="dt-scenario-badge">No simulation run yet</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Risk Level</th>
+                  <th>Material Code</th>
+                  <th>Material Name</th>
+                  <th>Current Stock</th>
+                  <th>Adj. Demand</th>
+                  <th>Effective Lead Days</th>
+                  <th>Stockout Risk %</th>
+                  <th>Financial Exposure (INR)</th>
+                  <th>Recommendation</th>
+                </tr>
+              </thead>
+              <tbody id="dt-heatmap-body">
+                <tr><td colspan="9" style="text-align:center;color:var(--text-muted);">Run a simulation to see material risk heatmap.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 14: SMART SOURCING OPTIMIZER -->
+      <section id="tab-smart_sourcing" class="content-body">
+        <!-- Strategy & Input Panel -->
+        <div class="glass-card" style="margin-bottom:25px;">
+          <div class="card-title-section">
+            <h3><i data-lucide="git-branch"></i> Autonomous Multi-Vendor Split Optimizer</h3>
+            <span class="badge badge-success">Multi-Objective Weighted Scoring</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:10px 0;">
+            <div>
+              <label class="slider-label" style="display:block;margin-bottom:8px;">Material SKU</label>
+              <select id="ss-material-select" class="apex-select" style="width:100%;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);color:var(--text-main);font-family:inherit;">
+                <option value="">-- Select Material --</option>
+                <option value="5001">ZML-ST-BEAM-H — Zamil H-Beam Grade 50</option>
+                <option value="5002">ZML-ST-COL-PEB — Zamil PEB Column 400x200</option>
+                <option value="5011">MAT-5001 — Hot Rolled Steel Sheet</option>
+                <option value="5013">MAT-5003 — Aluminium Ingot 99.5%</option>
+              </select>
+            </div>
+            <div>
+              <label class="slider-label" style="display:block;margin-bottom:8px;">Required Quantity</label>
+              <input type="number" id="ss-qty" class="apex-input" min="1" value="500"
+                     style="width:100%;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);color:var(--text-main);font-family:inherit;">
+            </div>
+          </div>
+          <!-- Strategy Toggle Buttons -->
+          <div style="margin-top:20px;">
+            <label class="slider-label" style="display:block;margin-bottom:10px;">Optimisation Strategy</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;" id="ss-strategy-group">
+              <button class="strategy-btn active" data-strategy="BALANCED_RISK" onclick="selectStrategy(this)">⚖️ Balanced Risk</button>
+              <button class="strategy-btn" data-strategy="LOWEST_COST"    onclick="selectStrategy(this)">💰 Lowest Cost</button>
+              <button class="strategy-btn" data-strategy="FASTEST_DELIVERY" onclick="selectStrategy(this)">🚚 Fastest Delivery</button>
+            </div>
+          </div>
+          <div style="margin-top:20px;display:flex;gap:12px;align-items:center;">
+            <button class="btn-primary" onclick="runSmartSourcing()">
+              <i data-lucide="cpu"></i> Optimise Sourcing Split
+            </button>
+            <button class="btn-secondary" id="ss-accept-btn" onclick="acceptSourcingSplit()" style="display:none;">
+              <i data-lucide="check-circle"></i> Accept Split & Create POs
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Summary Row -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin-bottom:25px;">
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon" style="background:var(--primary-glow);"><i data-lucide="star" style="color:var(--primary);"></i></div>
+            <div class="kpi-value" id="ss-opt-score">—</div>
+            <div class="kpi-label">Composite Score / 100</div>
+          </div>
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon" style="background:var(--success-glow);"><i data-lucide="users" style="color:var(--success);"></i></div>
+            <div class="kpi-value" id="ss-vendor-count">—</div>
+            <div class="kpi-label">Vendors in Split</div>
+          </div>
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon" style="background:var(--info-glow);"><i data-lucide="indian-rupee" style="color:var(--info);"></i></div>
+            <div class="kpi-value" id="ss-total-inr">—</div>
+            <div class="kpi-label">Blended Cost (INR)</div>
+          </div>
+          <div class="glass-card kpi-card">
+            <div class="kpi-icon" style="background:var(--warning-glow);"><i data-lucide="calendar" style="color:var(--warning);"></i></div>
+            <div class="kpi-value" id="ss-delivery-date">—</div>
+            <div class="kpi-label">Expected Delivery</div>
+          </div>
+        </div>
+
+        <!-- Vendor Allocation Table -->
+        <div class="glass-card">
+          <div class="card-title-section">
+            <h3><i data-lucide="pie-chart"></i> Recommended Vendor Split Allocation</h3>
+            <span class="badge badge-info" id="ss-strategy-badge">Strategy: Balanced Risk</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Vendor Code</th>
+                  <th>Supplier Name</th>
+                  <th>ASL Rank</th>
+                  <th>Allocation %</th>
+                  <th>Allocated Qty</th>
+                  <th>Contract Price</th>
+                  <th>Line Total (INR)</th>
+                  <th>Lead Time</th>
+                  <th>Cost Score</th>
+                  <th>Delivery Score</th>
+                  <th>Quality Score</th>
+                  <th>Composite Score</th>
+                </tr>
+              </thead>
+              <tbody id="ss-allocation-body">
+                <tr><td colspan="12" style="text-align:center;color:var(--text-muted);">Select a material and run the optimizer to see the recommended vendor split.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    // --- Mock Database / Demo Model State ---
+    const mockData = {
+      dashboard: {
+        open_prs: 4,
+        open_pos: 2,
+        shortages: 3,
+        active_plans: 3,
+        monthly_spend: 254000
+      },
+      products: [
+        { id: 2001, code: 'PRD-2001', name: 'Industrial Centrifugal Pump' },
+        { id: 2002, code: 'PRD-2002', name: 'Rotary Screw Compressor' },
+        { id: 2003, code: 'PRD-2003', name: 'High-Speed Electric Motor' },
+        { id: 2004, code: 'PRD-2004', name: 'PLC System Controller' }
+      ],
+      materials: [
+        { id: 5001, code: 'ZML-ST-BEAM-H', name: 'Zamil H-Beam Structural Steel Grade 50', uom: 'MT', standard_cost: 120.00 },
+        { id: 5002, code: 'ZML-ST-COL-PEB', name: 'Zamil PEB Column Section 400x200', uom: 'MT', standard_cost: 145.00 },
+        { id: 5003, code: 'ZML-ACC-BOLT-KIT', name: 'Zamil High-Strength Anchor Bolt M24 Kit', uom: 'SET', standard_cost: 18.50 },
+        { id: 5004, code: 'ZML-PANEL-ROOF', name: 'Zamil Double Skin Insulated Roof Panel 50mm', uom: 'SFT', standard_cost: 85.00 },
+        { id: 5005, code: 'ZML-PANEL-WALL', name: 'Zamil Polyurethane Wall Cladding Panel 40mm', uom: 'SFT', standard_cost: 78.00 },
+        { id: 5011, code: 'MAT-5001', name: 'Hot Rolled Steel Sheet', uom: 'KG', standard_cost: 85.50 },
+        { id: 5012, code: 'MAT-5002', name: 'Cold Rolled Steel Coil', uom: 'KG', standard_cost: 92.00 },
+        { id: 5013, code: 'MAT-5003', name: 'Aluminium Ingot 99.5%', uom: 'KG', standard_cost: 225.00 },
+        { id: 5014, code: 'MAT-5004', name: 'Copper Wire 2.5mm', uom: 'KG', standard_cost: 685.00 },
+        { id: 5015, code: 'MAT-5005', name: 'Polypropylene Granules', uom: 'KG', standard_cost: 135.00 }
+      ],
+      warehouses: [
+        { id: 101, code: 'WH-RAW-01', name: 'Main Raw Material Warehouse' }
+      ],
+      bins: [
+        { id: 501, code: 'BIN-A1-RACK1', warehouse_id: 101 },
+        { id: 502, code: 'BIN-A2-RACK2', warehouse_id: 101 },
+        { id: 503, code: 'BIN-B1-ELEC', warehouse_id: 101 }
+      ],
+      balances: [
+        { balance_id: 1001, material_code: 'MAT-5001', material_name: 'Hot Rolled Steel Sheet', material_category: 'Raw Material', warehouse_code: 'WH-RAW-01', bin_code: 'BIN-A1-RACK1', qty_on_hand: 400, safety_stock: 500, stock_status: 'LOW' },
+        { balance_id: 1002, material_code: 'MAT-5002', material_name: 'Cold Rolled Steel Coil', material_category: 'Raw Material', warehouse_code: 'WH-RAW-01', bin_code: 'BIN-A1-RACK1', qty_on_hand: 200, safety_stock: 300, stock_status: 'CRITICAL' },
+        { balance_id: 1003, material_code: 'MAT-5003', material_name: 'Aluminium Ingot 99.5%', material_category: 'Raw Material', warehouse_code: 'WH-RAW-01', bin_code: 'BIN-A2-RACK2', qty_on_hand: 2500, safety_stock: 200, stock_status: 'NORMAL' },
+        { balance_id: 1004, material_code: 'MAT-5004', material_name: 'Copper Wire 2.5mm', material_category: 'Raw Material', warehouse_code: 'WH-RAW-01', bin_code: 'BIN-B1-ELEC', qty_on_hand: 80, safety_stock: 100, stock_status: 'LOW' },
+        { balance_id: 1005, material_code: 'MAT-5005', material_name: 'Polypropylene Granules', material_category: 'Raw Material', warehouse_code: 'WH-RAW-01', bin_code: 'BIN-B1-ELEC', qty_on_hand: 1200, safety_stock: 400, stock_status: 'NORMAL' }
+      ],
+      plans: [
+        { id: 601, name: 'Plan-2026-Aug-Q3-P1', status: 'APPROVED' },
+        { id: 602, name: 'Plan-2026-Sep-Q3-P2', status: 'APPROVED' }
+      ],
+      bom: {
+        2001: [
+          { level: 1, material_code: 'MAT-5001', material_name: 'Hot Rolled Steel Sheet', qty: 15, cost: 85.50 },
+          { level: 1, material_code: 'MAT-5004', material_name: 'Copper Wire 2.5mm', qty: 5, cost: 685.00 }
+        ],
+        2002: [
+          { level: 1, material_code: 'MAT-5002', material_name: 'Cold Rolled Steel Coil', qty: 25, cost: 92.00 },
+          { level: 1, material_code: 'MAT-5003', material_name: 'Aluminium Ingot 99.5%', qty: 8, cost: 225.00 }
+        ],
+        2003: [
+          { level: 1, material_code: 'MAT-5004', material_name: 'Copper Wire 2.5mm', qty: 12, cost: 685.00 },
+          { level: 1, material_code: 'MAT-5003', material_name: 'Aluminium Ingot 99.5%', qty: 15, cost: 225.00 }
+        ],
+        2004: [
+          { level: 1, material_code: 'MAT-5004', material_name: 'Copper Wire 2.5mm', qty: 2, cost: 685.00 },
+          { level: 1, material_code: 'MAT-5005', material_name: 'Polypropylene Granules', qty: 20, cost: 135.00 }
+        ]
+      },
+      prs: [
+        { id: 801, number: 'PR-2026-0001', material_code: 'MAT-5001', qty: 250, rating: 4.8, priority: 'HIGH', status: 'SUBMITTED' },
+        { id: 802, number: 'PR-2026-0002', material_code: 'MAT-5002', qty: 500, rating: 4.2, priority: 'HIGH', status: 'SUBMITTED' },
+        { id: 803, number: 'PR-2026-0003', material_code: 'MAT-5004', qty: 100, rating: 3.9, priority: 'MEDIUM', status: 'APPROVED' },
+        { id: 804, number: 'PR-2026-0004', material_code: 'MAT-5005', qty: 800, rating: 4.5, priority: 'LOW', status: 'ORDERED' }
+      ],
+      pos: [
+        { id: 2001, number: 'ZML-PO-2026-0001', supplier: 'Zamil Steel Industries', value: 154000, date: '10-Aug-2026', delivery: '17-Aug-2026', tracking: 'PARTIALLY_RECEIVED' },
+        { id: 2002, number: 'ZML-PO-2026-0002', supplier: 'Zamil Fasteners Corp', value: 55500, date: '11-Aug-2026', delivery: '16-Aug-2026', tracking: 'ISSUED' },
+        { id: 901, number: 'PO-2026-0001', supplier: 'Tata Steel India Ltd', value: 42750, date: '11-Aug-2026', delivery: '18-Aug-2026', tracking: 'IN_TRANSIT' },
+        { id: 902, number: 'PO-2026-0002', supplier: 'Hindalco Industries', value: 112500, date: '09-Aug-2026', delivery: '14-Aug-2026', tracking: 'PENDING' }
+      ],
+      goods_bills: [
+        { bill_id: 5001, bill_number: 'RGB-2026-000001', po_id: 2001, po_number: 'ZML-PO-2026-0001', delivery_note: 'ZML-DN-994821', received_date: '12-Aug-2026', received_by: 'ZAMIL_WH_CLERK', status: 'COMPLETED', remarks: 'Zamil Steel structural beam partial shipment receipt' }
+      ],
+      goods_bill_items: {
+        5001: [
+          { bill_item_id: 6001, bill_id: 5001, material_id: 5001, material_code: 'ZML-ST-BEAM-H', material_name: 'Zamil H-Beam Structural Steel Grade 50', quantity_received: 500, warehouse_id: 101, warehouse_code: 'WH-RAW-01', bin_id: 501, bin_code: 'BIN-A1-RACK1', remarks: 'Received 500 units H-Beams' },
+          { bill_item_id: 6002, bill_id: 5001, material_id: 5002, material_code: 'ZML-ST-COL-PEB', material_name: 'Zamil PEB Column Section 400x200', quantity_received: 200, warehouse_id: 101, warehouse_code: 'WH-RAW-01', bin_id: 501, bin_code: 'BIN-A1-RACK1', remarks: 'Received 200 units PEB Columns' }
+        ]
+      },
+      forecast: {
+        periods: ['Jan-26', 'Feb-26', 'Mar-26', 'Apr-26', 'May-26', 'Jun-26', 'Jul-26', 'Aug-26', 'Sep-26', 'Oct-26', 'Nov-26', 'Dec-26'],
+        actual: [120, 145, 130, 160, 175, 190, 210, null, null, null, null, null],
+        forecast: [122, 140, 135, 155, 170, 188, 205, 220, 245, 230, 215, 260],
+        lower: [110, 125, 120, 140, 150, 168, 185, 195, 220, 205, 190, 230],
+        upper: [134, 155, 150, 170, 190, 208, 225, 245, 270, 255, 240, 290]
+      },
+      scorecards: [
+        { code: 'VEND-1001', name: 'Zamil Steel Industries', del: 96.5, qual: 98.2, price: 92.0, total: 96.2, grade: 'A', status: 'ACTIVE' },
+        { code: 'VEND-1002', name: 'Tata Steel India Ltd', del: 91.0, qual: 94.5, price: 88.0, total: 91.8, grade: 'A', status: 'ACTIVE' },
+        { code: 'VEND-1003', name: 'Jindal Steel & Power', del: 84.0, qual: 89.0, price: 85.0, total: 86.2, grade: 'B', status: 'PROBATION' },
+        { code: 'VEND-1004', name: 'Hindalco Industries', del: 93.0, qual: 96.0, price: 90.0, total: 93.6, grade: 'A', status: 'ACTIVE' }
+      ],
+      asl: [
+        { sku: 'ZML-ST-BEAM-H', vcode: 'VEND-1001', vname: 'Zamil Steel', rank: 1, status: 'APPROVED', price: 4200, curr: 'SAR', date: '2026-12-31' },
+        { sku: 'ZML-ST-BEAM-H', vcode: 'VEND-1002', vname: 'Tata Steel', rank: 2, status: 'APPROVED', price: 92000, curr: 'INR', date: '2026-10-15' },
+        { sku: 'ZML-ST-COL-PEB', vcode: 'VEND-1001', vname: 'Zamil Steel', rank: 1, status: 'APPROVED', price: 4800, curr: 'SAR', date: '2026-12-31' },
+        { sku: 'MAT-5003', vcode: 'VEND-1004', vname: 'Hindalco', rank: 1, status: 'APPROVED', price: 225, curr: 'INR', date: '2026-09-30' }
+      ],
+      invoices: [
+        { inv: 'INV-2026-0091', supp: 'Zamil Steel', invAmt: 154000, poAmt: 154000, status: 'MATCHED', alert: 'PASSED', action: 'AUTO_APPROVED' },
+        { inv: 'INV-2026-0092', supp: 'Tata Steel', invAmt: 44800, poAmt: 42750, status: 'VARIANCE_HOLD', alert: '+4.8% Price Var', action: 'REVIEW_NEEDED' },
+        { inv: 'INV-2026-0093', supp: 'Fasteners Corp', invAmt: 55500, poAmt: 55500, status: 'MATCHED', alert: 'PASSED', action: 'AUTO_APPROVED' }
+      ],
+      qc: [
+        { id: 'QC-2026-000101', code: 'ZML-ST-BEAM-H', supp: 'Zamil Steel', heat: 'HEAT-99281', cert: 'MTC-ZML-1102', rec: 500, sample: 50, status: 'COMPLETED', result: 'PASS' },
+        { id: 'QC-2026-000102', code: 'MAT-5001', supp: 'Tata Steel', heat: 'HEAT-44821', cert: 'MTC-TAT-8821', rec: 400, sample: 40, status: 'IN_PROGRESS', result: 'PENDING' },
+        { id: 'QC-2026-000103', code: 'ZML-ACC-BOLT', supp: 'Fasteners Corp', heat: 'HEAT-77210', cert: 'MTC-FAS-9912', rec: 1000, sample: 100, status: 'COMPLETED', result: 'PASS' }
+      ],
+      costing: [
+        { code: 'ZML-ST-BEAM-H', name: 'Zamil H-Beam Structural Steel', cat: 'STRUCTURAL_STEEL', qty: 500, stdCost: 120.00, val: 60000 },
+        { code: 'MAT-5001', name: 'Hot Rolled Steel Sheet', cat: 'STEEL_COIL', qty: 400, stdCost: 85.50, val: 34200 },
+        { code: 'MAT-5003', name: 'Aluminium Ingot 99.5%', cat: 'RAW_MATERIAL', qty: 2500, stdCost: 225.00, val: 562500 }
+      ],
+      lots: [
+        { lot: 'LOT-2026-00101', code: 'ZML-ST-BEAM-H', supp: 'Zamil Steel', heat: 'HEAT-99281', cert: 'MTC-ZML-1102', rec: 500, avail: 450, status: 'AVAILABLE', expiry: '2028-12-31' },
+        { lot: 'LOT-2026-00102', code: 'MAT-5001', supp: 'Tata Steel', heat: 'HEAT-44821', cert: 'MTC-TAT-8821', rec: 400, avail: 400, status: 'QUARANTINED', expiry: '2027-06-30' },
+        { lot: 'LOT-2026-00103', code: 'ZML-ACC-BOLT', supp: 'Fasteners Corp', heat: 'HEAT-77210', cert: 'MTC-FAS-9912', rec: 1000, avail: 850, status: 'PARTIALLY_USED', expiry: '2029-01-15' }
+      ],
+      digitalTwin: {
+        lastScenario: null,
+        defaultShocks: { shippingDelay: 30, tariffSpike: 15, demandSurge: 25 },
+        mockHeatmap: [
+          { risk: 'RED',   code: 'ZML-ST-BEAM-H', name: 'Zamil H-Beam Grade 50',     stock: 450, demand: 562, leadDays: 44, riskPct: 74.3, exposure: 685000, rec: 'CRITICAL: Expedite emergency PO. Switch to Rank-1 supplier. Consider air freight.' },
+          { risk: 'AMBER', code: 'MAT-5001',       name: 'Hot Rolled Steel Sheet',    stock: 400, demand: 450, leadDays: 37, riskPct: 41.2, exposure: 312000, rec: 'Consider raising safety stock by 25%. Activate Rank-2 supplier.' },
+          { risk: 'AMBER', code: 'MAT-5002',       name: 'Cold Rolled Steel Coil',    stock: 200, demand: 240, leadDays: 37, riskPct: 38.8, exposure: 289000, rec: 'Consider raising safety stock by 25%. Activate Rank-2 supplier.' },
+          { risk: 'GREEN', code: 'MAT-5003',       name: 'Aluminium Ingot 99.5%',     stock: 2500, demand: 180, leadDays: 21, riskPct: 5.1,  exposure: 42000,  rec: 'Stock level adequate. Monitor monthly.' },
+          { risk: 'GREEN', code: 'MAT-5004',       name: 'Copper Wire 2.5mm',         stock: 80,   demand: 72,  leadDays: 28, riskPct: 12.4, exposure: 68000,  rec: 'Stock level adequate. Monitor monthly.' }
+        ]
+      },
+      smartSourcing: {
+        BALANCED_RISK: [
+          { code: 'VEND-1001', name: 'Zamil Steel Industries', rank: 1, allocPct: 53.2, allocQty: 266, price: 4200, curr: 'SAR', totalInr: 3125760, leadDays: 7,  costScore: 78, delivScore: 95, qualScore: 98, currScore: 70, compScore: 85.8 },
+          { code: 'VEND-1002', name: 'Tata Steel India Ltd',   rank: 2, allocPct: 31.4, allocQty: 157, price: 92000, curr: 'INR', totalInr: 14444000, leadDays: 12, costScore: 65, delivScore: 80, qualScore: 94, currScore: 100, compScore: 78.5 },
+          { code: 'VEND-1003', name: 'Jindal Steel & Power',  rank: 3, allocPct: 15.4, allocQty: 77,  price: 87500, curr: 'INR', totalInr: 6737500, leadDays: 18, costScore: 72, delivScore: 58, qualScore: 89, currScore: 100, compScore: 74.3 }
+        ],
+        LOWEST_COST: [
+          { code: 'VEND-1003', name: 'Jindal Steel & Power',  rank: 3, allocPct: 58.0, allocQty: 290, price: 87500, curr: 'INR', totalInr: 25375000, leadDays: 18, costScore: 95, delivScore: 40, qualScore: 89, currScore: 100, compScore: 83.5 },
+          { code: 'VEND-1002', name: 'Tata Steel India Ltd',   rank: 2, allocPct: 26.6, allocQty: 133, price: 92000, curr: 'INR', totalInr: 12236000, leadDays: 12, costScore: 80, delivScore: 55, qualScore: 94, currScore: 100, compScore: 79.2 },
+          { code: 'VEND-1001', name: 'Zamil Steel Industries', rank: 1, allocPct: 15.4, allocQty: 77,  price: 4200,  curr: 'SAR', totalInr: 717276,  leadDays: 7,  costScore: 55, delivScore: 90, qualScore: 98, currScore: 70, compScore: 66.5 }
+        ],
+        FASTEST_DELIVERY: [
+          { code: 'VEND-1001', name: 'Zamil Steel Industries', rank: 1, allocPct: 68.0, allocQty: 340, price: 4200, curr: 'SAR', totalInr: 3169920, leadDays: 7,  costScore: 78, delivScore: 100, qualScore: 98, currScore: 70, compScore: 88.2 },
+          { code: 'VEND-1002', name: 'Tata Steel India Ltd',   rank: 2, allocPct: 22.0, allocQty: 110, price: 92000, curr: 'INR', totalInr: 10120000, leadDays: 12, costScore: 65, delivScore: 72, qualScore: 94, currScore: 100, compScore: 77.3 },
+          { code: 'VEND-1003', name: 'Jindal Steel & Power',  rank: 3, allocPct: 10.0, allocQty: 50,  price: 87500, curr: 'INR', totalInr: 4375000, leadDays: 18, costScore: 72, delivScore: 40, qualScore: 89, currScore: 100, compScore: 61.8 }
+        ]
+      },
+      transactions: [
+        { doc_no: 'MIGO-2026-0042', mvt: '101', mvt_name: 'PO Goods Receipt (+Stock)', mat_code: 'ZML-ST-BEAM-H', mat_name: 'Zamil H-Beam Structural Steel', qty: 500, wh: 'WH-RAW-01', bin: 'BIN-A1-RACK1', date: '08-Sep-2026 15:10', user: 'ZAMIL_RECEIVER', status: 'COMMITTED' },
+        { doc_no: 'MIGO-2026-0041', mvt: '261', mvt_name: 'Production Goods Issue (-Stock)', mat_code: 'MAT-5001', mat_name: 'Hot Rolled Steel Sheet', qty: 120, wh: 'WH-RAW-01', bin: 'BIN-A1-RACK1', date: '08-Sep-2026 11:30', user: 'PROD_SCHEDULER', status: 'COMMITTED' },
+        { doc_no: 'MIGO-2026-0040', mvt: '311', mvt_name: 'Storage Bin Transfer', mat_code: 'MAT-5002', mat_name: 'Cold Rolled Steel Coil', qty: 50, wh: 'WH-RAW-01', bin: 'BIN-A2-RACK3', date: '07-Sep-2026 16:45', user: 'WH_OPERATOR', status: 'COMMITTED' }
+      ]
+    };
+
+    window.mockData = mockData;
+
+    let liveMode = false;
+    const baseRestUrl = 'http://localhost:8080/ords/mppms/api';
+
+    // --- UI Control Hooks ---
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initUI();
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.content-body').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      
+      // Select corresponding navigation item
+      const items = document.querySelectorAll('.nav-item');
+      items.forEach(item => {
+        const onClickAttr = item.getAttribute('onclick') || '';
+        if(onClickAttr.includes(`'${tabId}'`)) {
+          item.classList.add('active');
+        }
+      });
+
+      // Auto expand submenu if selecting an enterprise tab
+      const enterpriseTabs = ['scorecard', 'asl', 'invoice', 'qc', 'costing', 'lot_serial', 'digital_twin', 'smart_sourcing'];
+      if (enterpriseTabs.includes(tabId)) {
+        const submenu = document.getElementById('enterprise-submenu');
+        const chevron = document.getElementById('enterprise-chevron');
+        if (submenu) submenu.classList.remove('collapsed');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      }
+
+      // Update titles
+      const pageTitles = {
+        dashboard: { title: 'Executive Logistics Dashboard', sub: 'Real-time enterprise metrics & supply chain logistics overview' },
+        bom: { title: 'Bill of Materials Architecture', sub: 'Multi-level structural engineering component hierarchy & explosion tree' },
+        mrp: { title: 'Material Requirements Planning (MRP)', sub: 'Inventory deficiency calculations & production scheduling' },
+        procurement: { title: 'Procurement Management Ledger', sub: 'Requisitions tracking and purchase order approval workflows' },
+        inventory: { title: 'Goods Movements & Inventory Control', sub: 'Real-time inventory balances, stock movements, goods receipts & transfers' },
+        rgb: { title: 'Goods Receipt Vouchers & Receiving', sub: 'Track inbound material shipments, receiving vouchers & line-item inspection' },
+        forecast: { title: 'AI Demand Forecasting Engine', sub: 'Triple Exponential Holt-Winters seasonal demand analysis' },
+        scorecard: { title: 'Vendor Scorecard & Ratings', sub: 'Delivery, Quality & Price performance rating system' },
+        asl: { title: 'Approved Supplier List (ASL)', sub: 'Sourcing matrix, preference ranks and contract compliance' },
+        invoice: { title: '3-Way AP Invoice Matching', sub: 'Automated PO-GR-Invoice 3-way matching engine with tolerance checks' },
+        qc: { title: 'Steel Quality Control & Inspections', sub: 'Steel material specs testing (IS 2062, ASTM A36) and quarantine release' },
+        costing: { title: 'Material Standard Costing & PPV', sub: 'Inventory valuation (INR/SAR/USD) and Purchase Price Variance' },
+        lot_serial:     { title: 'Lot & Serial Traceability',              sub: 'Heat number tracking, Mill Test Certificates and FIFO expiry monitoring' },
+        digital_twin:   { title: 'Digital Twin Supply Chain Stress Tester', sub: 'Monte Carlo 1,000-Trial Risk Simulation Engine — Box-Muller Normal Distribution' },
+        smart_sourcing: { title: 'Autonomous Smart Sourcing Optimizer',      sub: 'Multi-Objective Weighted Vendor Split Allocation — Cost / Delivery / Quality / Currency' }
+      };
+
+      if (pageTitles[tabId]) {
+        document.getElementById('page-display-title').innerText = pageTitles[tabId].title;
+        document.getElementById('page-display-subtitle').innerText = pageTitles[tabId].sub;
+      }
+
+      if(tabId === 'dashboard') { renderDashboardCharts(); }
+      else if(tabId === 'rgb') { refreshRgbData(); }
+      else if(tabId === 'scorecard') { renderScorecardData(); }
+      else if(tabId === 'asl') { renderAslData(); }
+      else if(tabId === 'invoice') { renderInvoiceData(); }
+      else if(tabId === 'qc') { renderQcData(); }
+      else if(tabId === 'costing') { renderCostingData(); }
+      else if(tabId === 'lot_serial') { renderLotSerialData(); }
+      else if(tabId === 'digital_twin') { initDigitalTwinUI(); }
+      else if(tabId === 'smart_sourcing') { initSmartSourcingUI(); }
+    }
+
+    function toggleEnterpriseDropdown() {
+      const submenu = document.getElementById('enterprise-submenu');
+      const chevron = document.getElementById('enterprise-chevron');
+      if (!submenu) return;
+      const isCollapsed = submenu.classList.toggle('collapsed');
+      if (chevron) {
+        chevron.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+      }
+    }
+
+    function toggleSyncMode() {
+      liveMode = document.getElementById('sync-mode-toggle').checked;
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      const modeText = document.getElementById('sync-mode-text');
+
+      if (liveMode) {
+        modeText.innerText = 'Live ORDS DB';
+        modeText.classList.add('live');
+        statusDot.classList.remove('offline');
+        statusText.innerText = 'Database Connection: Active (Live)';
+        
+        // Attempt first pull of real DB stats
+        refreshAllData();
+      } else {
+        modeText.innerText = 'Demo Mode';
+        modeText.classList.remove('live');
+        statusDot.classList.add('offline');
+        statusText.innerText = 'Database Connection: Offline (Simulating)';
+        initUI();
+      }
+    }
+
+    // --- Core Data Init ---
+    function initUI() {
+      // Pull simulated stats to cards
+      document.getElementById('kpi-prs').innerText = mockData.dashboard.open_prs;
+      document.getElementById('kpi-pos').innerText = mockData.dashboard.open_pos;
+      document.getElementById('kpi-shortages').innerText = mockData.dashboard.shortages;
+      document.getElementById('kpi-plans').innerText = mockData.dashboard.active_plans;
+      document.getElementById('kpi-spend').innerText = '₹' + mockData.dashboard.monthly_spend.toLocaleString();
+
+      // Populate selects
+      populateSelects();
+
+      // Render Dashboard Components
+      renderDashboardCharts();
+      renderDashboardWidgets();
+
+      // Render Procurement Ledgers
+      renderProcurementData();
+      
+      // Render Inventory
+      renderInventoryData();
+
+      // Render RGB Data
+      refreshRgbData();
+    }
+
+    function populateSelects() {
+      // MRP plan list
+      const mrpPlanSelect = document.getElementById('mrp-plan-select');
+      mrpPlanSelect.innerHTML = mockData.plans.map(p => `<option value="${p.id}">${p.name} (${p.status})</option>`).join('');
+
+      // MIGO selects
+      const migoMat = document.getElementById('migo-mat-select');
+      migoMat.innerHTML = mockData.materials.map(m => `<option value="${m.id}">${m.code} - ${m.name}</option>`).join('');
+
+      const migoWh = document.getElementById('migo-wh-select');
+      migoWh.innerHTML = mockData.warehouses.map(w => `<option value="${w.id}">${w.code} - ${w.name}</option>`).join('');
+
+      onWarehouseChange(); // update bins
+
+      // RGB selects
+      const rgbPo = document.getElementById('rgb-po-select');
+      if (rgbPo) {
+        rgbPo.innerHTML = mockData.pos
+          .filter(po => po.number.startsWith('ZML') || liveMode)
+          .map(po => `<option value="${po.id}">${po.number} - ${po.supplier}</option>`)
+          .join('');
+      }
+
+      const rgbWh = document.getElementById('rgb-item-warehouse');
+      if (rgbWh) {
+        rgbWh.innerHTML = mockData.warehouses.map(w => `<option value="${w.id}">${w.code} - ${w.name}</option>`).join('');
+      }
+      
+      onRgbWarehouseChange(); // update bins
+      onRgbPoChange(); // update materials
+    }
+
+    function onWarehouseChange() {
+      const whId = parseInt(document.getElementById('migo-wh-select').value);
+      const migoBin = document.getElementById('migo-bin-select');
+      migoBin.innerHTML = mockData.bins
+        .filter(b => b.warehouse_id === whId)
+        .map(b => `<option value="${b.id}">${b.code}</option>`)
+        .join('');
+    }
+
+    function onRgbWarehouseChange() {
+      const whId = parseInt(document.getElementById('rgb-item-warehouse').value);
+      const rgbBin = document.getElementById('rgb-item-bin');
+      if (rgbBin) {
+        rgbBin.innerHTML = mockData.bins
+          .filter(b => b.warehouse_id === whId)
+          .map(b => `<option value="${b.id}">${b.code}</option>`)
+          .join('');
+      }
+    }
+
+    async function onRgbPoChange() {
+      const poId = parseInt(document.getElementById('rgb-po-select').value);
+      const matSelect = document.getElementById('rgb-item-material');
+      if (!matSelect) return;
+      
+      if (liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/procurement/po_items?po_id=${poId}`);
+          const data = await res.json();
+          if (data.items) {
+            matSelect.innerHTML = data.items.map(item => `
+              <option value="${item.material_id}">${item.material_code} - ${item.material_name} (Ordered: ${item.ordered_qty}, Rec: ${item.received_qty})</option>
+            `).join('');
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      } else {
+        // Simulated items for Zamil POs
+        if (poId === 2001) {
+          matSelect.innerHTML = `
+            <option value="5001">ZML-ST-BEAM-H - Zamil H-Beam Structural Steel Grade 50 (Ordered: 800, Rec: 500)</option>
+            <option value="5002">ZML-ST-COL-PEB - Zamil PEB Column Section 400x200 (Ordered: 400, Rec: 200)</option>
+          `;
+        } else if (poId === 2002) {
+          matSelect.innerHTML = `
+            <option value="5003">ZML-ACC-BOLT-KIT - Zamil High-Strength Anchor Bolt M24 Kit (Ordered: 3000, Rec: 0)</option>
+          `;
+        } else {
+          matSelect.innerHTML = mockData.materials.map(m => `<option value="${m.id}">${m.code} - ${m.name}</option>`).join('');
+        }
+      }
+    }
+
+    function onMvtChange() {
+      const mvt = document.getElementById('migo-mvt-select').value;
+      const poRow = document.getElementById('migo-po-row');
+      const planRow = document.getElementById('migo-plan-row');
+
+      if (mvt === '101') {
+        poRow.style.display = 'block';
+        planRow.style.display = 'none';
+        
+        // Populate PO select
+        const migoPo = document.getElementById('migo-po-select');
+        migoPo.innerHTML = mockData.pos.map(po => `<option value="${po.id}">${po.number} - ${po.supplier}</option>`).join('');
+      } else if (mvt === '261') {
+        poRow.style.display = 'none';
+        planRow.style.display = 'block';
+        
+        // Populate plan select
+        const migoPlan = document.getElementById('migo-plan-select');
+        migoPlan.innerHTML = mockData.plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      } else {
+        poRow.style.display = 'none';
+        planRow.style.display = 'none';
+      }
+    }
+
+    // --- Live DB Refresh Calls ---
+    async function refreshAllData() {
+      if(!liveMode) return;
+      try {
+        // Fetch products LOV
+        const prodRes = await fetch(`${baseRestUrl}/lov/products`);
+        const prodData = await prodRes.json();
+        if(prodData.items) {
+          mockData.products = prodData.items.map(item => ({
+            id: item.product_id,
+            code: item.product_code,
+            name: item.product_name
+          }));
+          
+          // Re-populate Product selectors
+          const bomProductSelect = document.getElementById('bom-product-select');
+          bomProductSelect.innerHTML = mockData.products.map(p => `<option value="${p.id}">${p.code} - ${p.name}</option>`).join('');
+          const forecastProdSelect = document.getElementById('forecast-prod-select');
+          forecastProdSelect.innerHTML = mockData.products.map(p => `<option value="${p.id}">${p.code} - ${p.name}</option>`).join('');
+        }
+
+        // Fetch plans LOV
+        const planRes = await fetch(`${baseRestUrl}/lov/plans`);
+        const planData = await planRes.json();
+        if(planData.items) {
+          mockData.plans = planData.items.map(item => ({
+            id: item.plan_id,
+            name: item.plan_name,
+            status: item.status
+          }));
+        }
+
+        // Fetch materials LOV
+        const matRes = await fetch(`${baseRestUrl}/lov/materials`);
+        const matData = await matRes.json();
+        if(matData.items) {
+          mockData.materials = matData.items.map(item => ({
+            id: item.material_id,
+            code: item.material_code,
+            name: item.material_name,
+            uom: item.unit_of_measure,
+            standard_cost: item.standard_cost || 100
+          }));
+        }
+
+        // Fetch warehouses LOV
+        const whRes = await fetch(`${baseRestUrl}/lov/warehouses`);
+        const whData = await whRes.json();
+        if(whData.items) {
+          mockData.warehouses = whData.items.map(item => ({
+            id: item.warehouse_id,
+            code: item.warehouse_code,
+            name: item.warehouse_name
+          }));
+        }
+
+        // Fetch bins LOV
+        const binRes = await fetch(`${baseRestUrl}/lov/bins`);
+        const binData = await binRes.json();
+        if(binData.items) {
+          mockData.bins = binData.items.map(item => ({
+            id: item.bin_id,
+            code: item.bin_code,
+            warehouse_id: item.warehouse_id
+          }));
+        }
+
+        // Re-populate all dropdown selects
+        populateSelects();
+
+        // Fetch dashboard stats
+        const statsRes = await fetch(`${baseRestUrl}/dashboard/stats`);
+        const statsData = await statsRes.json();
+        if(statsData.items && statsData.items[0]) {
+          const stats = statsData.items[0];
+          document.getElementById('kpi-prs').innerText = stats.open_prs;
+          document.getElementById('kpi-pos').innerText = stats.open_pos;
+          document.getElementById('kpi-shortages').innerText = stats.shortages;
+          document.getElementById('kpi-plans').innerText = stats.active_plans;
+          document.getElementById('kpi-spend').innerText = '₹' + stats.monthly_spend.toLocaleString();
+        }
+
+        // Fetch PR ledger
+        const prsRes = await fetch(`${baseRestUrl}/procurement/prs`);
+        const prsData = await prsRes.json();
+        if(prsData.items) {
+          mockData.prs = prsData.items.map((item, idx) => ({
+            id: item.pr_id || idx,
+            number: item.pr_number,
+            material_code: item.material_code,
+            qty: item.requested_qty,
+            rating: item.vendor_rating || 4.2,
+            priority: item.priority,
+            status: item.status
+          }));
+          renderProcurementData();
+        }
+
+        // Fetch PO list
+        const posRes = await fetch(`${baseRestUrl}/procurement/pos`);
+        const posData = await posRes.json();
+        if(posData.items) {
+          mockData.pos = posData.items.map((item, idx) => ({
+            id: item.po_id || idx,
+            number: item.po_number,
+            supplier: item.supplier_name,
+            value: item.total_value,
+            date: item.order_date_disp || '12-Aug-2026',
+            delivery: item.delivery_date_disp || '20-Aug-2026',
+            tracking: item.order_status
+          }));
+          renderProcurementData();
+        }
+
+        // Fetch Inventory Balances
+        refreshInventoryData();
+
+        // Fetch RGB Data
+        refreshRgbData();
+
+      } catch (err) {
+        console.error('ORDS Fetch error:', err);
+        alert('Failed to connect to local ORDS endpoints. Ensure database & ORDS listener are running on port 8080.');
+      }
+    }
+
+    async function refreshInventoryData() {
+      if(liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/inventory/stock`);
+          const data = await res.json();
+          if(data.items) {
+            mockData.balances = data.items;
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
+      renderInventoryData();
+    }
+
+    // --- Zamil Receiver Goods Bills Actions ---
+    let activeBillId = null;
+    let activeBillNumber = null;
+
+    async function refreshRgbData() {
+      if (liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/procurement/goods_bills`);
+          const data = await res.json();
+          if (data.items) {
+            mockData.goods_bills = data.items.map(item => ({
+              bill_id: item.bill_id,
+              bill_number: item.bill_number,
+              po_id: item.po_id,
+              po_number: item.po_number,
+              delivery_note: item.delivery_note,
+              received_date: item.received_date,
+              received_by: item.received_by,
+              status: item.status,
+              remarks: item.remarks
+            }));
+          }
+        } catch (e) {
+          console.error('Error fetching goods bills:', e);
+        }
+      }
+      renderRgbData();
+    }
+
+    function renderRgbData() {
+      const rgbBody = document.getElementById('rgb-ledger-body');
+      if (!rgbBody) return;
+
+      rgbBody.innerHTML = mockData.goods_bills.map(bill => `
+        <tr>
+          <td><strong>${bill.bill_number}</strong></td>
+          <td>${bill.po_number || 'N/A'}</td>
+          <td>${bill.delivery_note || 'N/A'}</td>
+          <td>${bill.received_date}</td>
+          <td>${bill.received_by}</td>
+          <td><span class="badge ${bill.status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}">${bill.status}</span></td>
+          <td>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 5px;" onclick="viewRgbDetails(${bill.bill_id}, '${bill.bill_number}', '${bill.status}')">View</button>
+            ${bill.status === 'DRAFT' ? `
+              <button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: var(--success);" onclick="postGoodsBill(${bill.bill_id})">Post</button>
+            ` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function viewRgbDetails(billId, billNum, status) {
+      const detailsCard = document.getElementById('rgb-details-card');
+      const detailsBody = document.getElementById('rgb-details-body');
+      const numLabel = document.getElementById('detail-rgb-number');
+      const statusLabel = document.getElementById('detail-rgb-status');
+
+      if (!detailsCard || !detailsBody) return;
+
+      numLabel.innerText = billNum;
+      statusLabel.innerText = status;
+      statusLabel.className = `badge ${status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}`;
+
+      let items = [];
+      if (liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/procurement/goods_bill_details?bill_id=${billId}`);
+          const data = await res.json();
+          if (data.items) {
+            items = data.items;
+          }
+        } catch (e) {
+          console.error('Error fetching goods bill details:', e);
+        }
+      } else {
+        items = mockData.goods_bill_items[billId] || [];
+      }
+
+      detailsBody.innerHTML = items.length === 0
+        ? '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No items in this goods bill.</td></tr>'
+        : items.map(item => `
+          <tr>
+            <td><strong>${item.material_code}</strong></td>
+            <td>${item.material_name}</td>
+            <td><strong>${item.quantity_received}</strong></td>
+            <td>${item.warehouse_code}</td>
+            <td>${item.bin_code}</td>
+            <td>${item.remarks || ''}</td>
+          </tr>
+        `).join('');
+
+      detailsCard.style.display = 'block';
+    }
+
+    async function createGoodsBill() {
+      const poId = document.getElementById('rgb-po-select').value;
+      const deliveryNote = document.getElementById('rgb-delivery-note').value;
+      const receivedBy = document.getElementById('rgb-received-by').value;
+      const remarks = document.getElementById('rgb-remarks').value;
+
+      if (!poId || !deliveryNote) {
+        alert('Please select a Purchase Order and enter a Delivery Note!');
+        return;
+      }
+
+      if (liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/procurement/create_goods_bill`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              po_id: parseInt(poId),
+              delivery_note: deliveryNote,
+              remarks: remarks,
+              user: receivedBy
+            })
+          });
+          const data = await res.json();
+          if (data.status === 'SUCCESS') {
+            activeBillId = data.bill_id;
+            activeBillNumber = data.bill_number;
+            alert(`Draft bill created successfully: ${activeBillNumber}`);
+            
+            document.getElementById('active-rgb-number').innerText = activeBillNumber;
+            document.getElementById('rgb-builder-section').style.display = 'block';
+            refreshRgbData();
+          } else {
+            alert(`Error: ${data.message}`);
+          }
+        } catch (e) {
+          alert('Error creating goods bill');
+        }
+      } else {
+        const nextId = 5000 + mockData.goods_bills.length + 1;
+        const nextNum = `RGB-2026-00000${mockData.goods_bills.length + 1}`;
+        const po = mockData.pos.find(p => p.id == poId);
+
+        const newBill = {
+          bill_id: nextId,
+          bill_number: nextNum,
+          po_id: parseInt(poId),
+          po_number: po ? po.number : 'N/A',
+          delivery_note: deliveryNote,
+          received_date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+          received_by: receivedBy,
+          status: 'DRAFT',
+          remarks: remarks
+        };
+
+        mockData.goods_bills.unshift(newBill);
+        mockData.goods_bill_items[nextId] = [];
+        activeBillId = nextId;
+        activeBillNumber = nextNum;
+
+        alert(`Demo Mode: Draft bill created: ${activeBillNumber}`);
+        document.getElementById('active-rgb-number').innerText = activeBillNumber;
+        document.getElementById('rgb-builder-section').style.display = 'block';
+        renderRgbData();
+      }
+    }
+
+    async function addGoodsBillItem() {
+      const matId = document.getElementById('rgb-item-material').value;
+      const qty = parseInt(document.getElementById('rgb-item-qty').value);
+      const whId = document.getElementById('rgb-item-warehouse').value;
+      const binId = document.getElementById('rgb-item-bin').value;
+      const remarks = document.getElementById('rgb-item-remarks').value;
+
+      if (!matId || isNaN(qty) || qty <= 0) {
+        alert('Please select a material and enter a valid quantity!');
+        return;
+      }
+
+      const mat = mockData.materials.find(m => m.id == matId);
+      const wh = mockData.warehouses.find(w => w.id == whId);
+      const bin = mockData.bins.find(b => b.id == binId);
+
+      if (liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/procurement/add_goods_bill_item`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bill_id: activeBillId,
+              material_id: parseInt(matId),
+              quantity: qty,
+              warehouse_id: parseInt(whId),
+              bin_id: parseInt(binId),
+              remarks: remarks
+            })
+          });
+          const data = await res.json();
+          if (data.status === 'SUCCESS') {
+            alert('Item added to draft bill successfully.');
+            viewRgbDetails(activeBillId, activeBillNumber, 'DRAFT');
+          } else {
+            alert(`Error: ${data.message}`);
+          }
+        } catch (e) {
+          alert('Error adding item to goods bill');
+        }
+      } else {
+        const newItem = {
+          bill_item_id: 6000 + (mockData.goods_bill_items[activeBillId]?.length || 0) + 1,
+          bill_id: activeBillId,
+          material_id: parseInt(matId),
+          material_code: mat ? mat.code : 'N/A',
+          material_name: mat ? mat.name : 'N/A',
+          quantity_received: qty,
+          warehouse_id: parseInt(whId),
+          warehouse_code: wh ? wh.code : 'N/A',
+          bin_id: parseInt(binId),
+          bin_code: bin ? bin.code : 'N/A',
+          remarks: remarks
+        };
+
+        mockData.goods_bill_items[activeBillId].push(newItem);
+        alert('Demo Mode: Item added to draft bill.');
+        viewRgbDetails(activeBillId, activeBillNumber, 'DRAFT');
+      }
+    }
+
+    async function postGoodsBill(billId) {
+      const targetId = billId || activeBillId;
+      if (!targetId) return;
+
+      const targetBill = mockData.goods_bills.find(b => b.bill_id == targetId);
+      const billNum = targetBill ? targetBill.bill_number : 'N/A';
+
+      if (!confirm(`Are you sure you want to post and commit ${billNum} to the inventory warehouse?`)) {
+        return;
+      }
+
+      if (liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/procurement/post_goods_bill`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bill_id: targetId })
+          });
+          const data = await res.json();
+          alert(data.message);
+          if (data.status === 'SUCCESS') {
+            if (targetId === activeBillId) {
+              document.getElementById('rgb-builder-section').style.display = 'none';
+              activeBillId = null;
+              activeBillNumber = null;
+            }
+            refreshAllData();
+          }
+        } catch (e) {
+          alert('Error posting goods bill');
+        }
+      } else {
+        targetBill.status = 'COMPLETED';
+
+        // Commit stock to mock balances
+        const items = mockData.goods_bill_items[targetId] || [];
+        items.forEach(item => {
+          const bal = mockData.balances.find(b => b.material_code === item.material_code);
+          if (bal) {
+            bal.qty_on_hand += item.quantity_received;
+            bal.stock_status = bal.qty_on_hand <= bal.safety_stock / 2 ? 'CRITICAL' : bal.qty_on_hand <= bal.safety_stock ? 'LOW' : 'NORMAL';
+          } else {
+            mockData.balances.push({
+              balance_id: 1000 + mockData.balances.length + 1,
+              material_code: item.material_code,
+              material_name: item.material_name,
+              material_category: 'Structural Steel',
+              warehouse_code: item.warehouse_code,
+              bin_code: item.bin_code,
+              qty_on_hand: item.quantity_received,
+              safety_stock: 500,
+              stock_status: 'NORMAL'
+            });
+          }
+        });
+
+        // Update mock PO status
+        const po = mockData.pos.find(p => p.id == targetBill.po_id);
+        if (po) {
+          po.tracking = 'RECEIVED';
+        }
+
+        alert(`Demo Mode: Receiver Goods Bill ${billNum} posted successfully and committed to warehouse inventory.`);
+        
+        if (targetId === activeBillId) {
+          document.getElementById('rgb-builder-section').style.display = 'none';
+          activeBillId = null;
+          activeBillNumber = null;
+        }
+
+        // Hide details card or refresh
+        document.getElementById('rgb-details-card').style.display = 'none';
+        initUI();
+      }
+    }
+
+    // --- Render Functions ---
+    function renderDashboardWidgets() {
+      // 1. Shortages list
+      const widget1 = document.getElementById('shortage-list-widget');
+      const criticalBals = mockData.balances.filter(b => b.stock_status === 'CRITICAL' || b.stock_status === 'LOW');
+      
+      widget1.innerHTML = criticalBals.length === 0 
+        ? '<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;">No active stock shortages.</div>'
+        : criticalBals.slice(0, 3).map(b => `
+          <div class="alert-item ${b.stock_status === 'LOW' ? 'warning' : ''}">
+            <div class="alert-details">
+              <h4>${b.material_code}</h4>
+              <p>${b.material_name}</p>
+            </div>
+            <div class="alert-value">
+              <span class="main-val">${b.qty_on_hand} KG</span>
+              <div class="sub-val" style="color:var(--danger)">Safety: ${b.safety_stock}</div>
+            </div>
+          </div>
+        `).join('');
+
+      // 2. Pending Approvals
+      const widget2 = document.getElementById('pending-pr-list-widget');
+      const pendingPRs = mockData.prs.filter(pr => pr.status === 'SUBMITTED');
+      widget2.innerHTML = pendingPRs.length === 0
+        ? '<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;">No pending approvals.</div>'
+        : pendingPRs.slice(0, 3).map(pr => `
+          <div class="alert-item warning">
+            <div class="alert-details">
+              <h4>${pr.number}</h4>
+              <p>SKU: ${pr.material_code}</p>
+            </div>
+            <div class="alert-value">
+              <span class="main-val">${pr.qty} units</span>
+              <div class="sub-val"><span class="badge badge-warning">${pr.priority}</span></div>
+            </div>
+          </div>
+        `).join('');
+
+      // 3. Upcoming Deliveries
+      const widget3 = document.getElementById('upcoming-deliveries-list-widget');
+      widget3.innerHTML = mockData.pos.slice(0, 3).map(po => `
+        <div class="alert-item info">
+          <div class="alert-details">
+            <h4>${po.number}</h4>
+            <p>${po.supplier}</p>
+          </div>
+          <div class="alert-value">
+            <span class="main-val">₹${po.value.toLocaleString()}</span>
+            <div class="sub-val">Due: ${po.delivery}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderProcurementData() {
+      // PR Ledger
+      const prBody = document.getElementById('pr-ledger-body');
+      prBody.innerHTML = mockData.prs.map(pr => `
+        <tr>
+          <td><strong>${pr.number}</strong></td>
+          <td>${pr.material_code}</td>
+          <td>${pr.qty}</td>
+          <td>⭐ ${pr.rating.toFixed(1)}</td>
+          <td><span class="badge ${pr.priority === 'HIGH' ? 'badge-danger' : pr.priority === 'MEDIUM' ? 'badge-warning' : 'badge-success'}">${pr.priority}</span></td>
+          <td><span class="badge ${pr.status === 'SUBMITTED' ? 'badge-warning' : pr.status === 'APPROVED' ? 'badge-success' : 'badge-info'}">${pr.status}</span></td>
+          <td>
+            ${pr.status === 'SUBMITTED' ? `
+              <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="approvePR(${pr.id})">Approve</button>
+            ` : pr.status === 'APPROVED' ? `
+              <button class="btn-primary" style="padding: 4px 8px; font-size: 0.75rem; background: var(--success);" onclick="autoPO(${pr.id})">Raise PO</button>
+            ` : `<span style="color:var(--text-muted);font-size:0.8rem;">Ordered</span>`}
+          </td>
+        </tr>
+      `).join('');
+
+      // PO Ledger
+      const poBody = document.getElementById('po-ledger-body');
+      poBody.innerHTML = mockData.pos.map(po => `
+        <tr>
+          <td><strong>${po.number}</strong></td>
+          <td>${po.supplier}</td>
+          <td>₹${po.value.toLocaleString()}</td>
+          <td>${po.date}</td>
+          <td>${po.delivery}</td>
+          <td><span class="badge ${po.tracking === 'RECEIVED' ? 'badge-success' : po.tracking === 'IN_TRANSIT' ? 'badge-info' : 'badge-warning'}">${po.tracking}</span></td>
+          <td>
+            ${po.tracking !== 'RECEIVED' ? `
+              <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="migoReceipt('${po.number}', '${po.id}')">101 Receipt</button>
+            ` : `✅ Stocked`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderInventoryData() {
+      // 1. Render Balances Table
+      const invBody = document.getElementById('inventory-balances-body');
+      if (invBody) {
+        invBody.innerHTML = mockData.balances.map(b => `
+          <tr>
+            <td><strong>${b.warehouse_code}</strong><br><span style="font-size:0.75rem;color:var(--text-muted)">${b.bin_code}</span></td>
+            <td><strong>${b.material_code}</strong><br><span style="font-size:0.75rem;color:var(--text-sub)">${b.material_name}</span></td>
+            <td>${b.material_category || 'Raw Material'}</td>
+            <td><strong style="color:var(--primary);">${b.qty_on_hand.toLocaleString()}</strong> <span style="font-size:0.75rem;color:var(--text-muted)">KG</span></td>
+            <td>${b.safety_stock || 100} KG</td>
+            <td><span class="badge ${b.stock_status === 'NORMAL' ? 'badge-success' : b.stock_status === 'LOW' ? 'badge-warning' : 'badge-danger'}">${b.stock_status}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // 2. Render Goods Movement Audit Log Table
+      const txBody = document.getElementById('inventory-transactions-body');
+      const badgeCount = document.getElementById('migo-log-count-badge');
+      if (txBody) {
+        if (badgeCount) badgeCount.textContent = `${mockData.transactions.length} Documents Committed`;
+        txBody.innerHTML = mockData.transactions.length === 0 
+          ? '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">No goods movement transactions posted yet.</td></tr>'
+          : mockData.transactions.map(t => {
+            const mvtClass = t.mvt === '101' ? 'badge-success' : t.mvt === '261' ? 'badge-warning' : t.mvt === '551' ? 'badge-danger' : 'badge-info';
+            return `
+              <tr>
+                <td><strong>${t.doc_no}</strong></td>
+                <td><span class="badge ${mvtClass}">Mvt ${t.mvt} — ${t.mvt_name}</span></td>
+                <td><strong>${t.mat_code}</strong><br><span style="font-size:0.75rem;color:var(--text-sub);">${t.mat_name}</span></td>
+                <td><strong style="font-size:0.95rem;color:var(--text-main);">${t.qty.toLocaleString()}</strong></td>
+                <td>${t.wh}<br><span style="font-size:0.75rem;color:var(--text-muted);">${t.bin}</span></td>
+                <td>${t.date}</td>
+                <td><span class="badge badge-draft">${t.user}</span></td>
+                <td><span class="badge badge-success"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i> ${t.status || 'COMMITTED'}</span></td>
+              </tr>
+            `;
+          }).join('');
+        lucide.createIcons();
+      }
+    }
+
+    // --- Action Workflows ---
+
+    // 1. BOM Breakdown Action
+    function executeBOMBreakdown() {
+      const prodId = document.getElementById('bom-product-select').value;
+      const qty = parseInt(document.getElementById('bom-quantity').value);
+
+      const progContainer = document.getElementById('bom-progress-container');
+      const progFill = document.getElementById('bom-progress-fill');
+      const badge = document.getElementById('bom-summary-badge');
+      const treeOut = document.getElementById('bom-tree-output');
+
+      progContainer.style.display = 'block';
+      progFill.style.width = '0%';
+      badge.innerText = 'Calculating...';
+      badge.className = 'badge badge-warning';
+
+      setTimeout(async () => {
+        progFill.style.width = '100%';
+        
+        let bomData = [];
+        if (liveMode) {
+          try {
+            const res = await fetch(`${baseRestUrl}/bom/breakdown?product_id=${prodId}&quantity=${qty}`);
+            const data = await res.json();
+            bomData = data.items;
+          } catch(e) {
+            console.error(e);
+          }
+        } else {
+          bomData = mockData.bom[prodId];
+        }
+
+        badge.innerText = 'Exploded';
+        badge.className = 'badge badge-success';
+
+        const prod = mockData.products.find(p => p.id == prodId);
+        
+        // Build html tree representation
+        let totalVal = 0;
+        let treeHtml = `
+          <div class="bom-node root">
+            <div class="node-content root-product">
+              <i data-lucide="box"></i>
+              <div>
+                <strong>${prod.code} - ${prod.name}</strong> (Target Run: ${qty} Units)
+              </div>
+            </div>
+        `;
+
+        bomData.forEach(item => {
+          const matCode = item.material_code || 'MAT-5001';
+          const lineQty = liveMode ? (item.quantity_required || item.total_qty) : (item.qty * qty);
+          const standardCost = liveMode ? (item.standard_cost) : item.cost;
+          const totalCost = lineQty * standardCost;
+          totalVal += totalCost;
+
+          // Real-time stock check against warehouse balances
+          const bal = mockData.balances.find(b => b.material_code === matCode);
+          const stockOnHand = bal ? bal.qty_on_hand : 0;
+          const isAvailable = stockOnHand >= lineQty;
+          const stockBadge = isAvailable
+            ? `<span class="badge badge-success"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i> Stock Available (${stockOnHand} KG on hand)</span>`
+            : `<span class="badge badge-danger"><i data-lucide="alert-triangle" style="width:12px;height:12px;"></i> Shortage (${lineQty - stockOnHand} KG deficit)</span>`;
+
+          treeHtml += `
+            <div class="bom-node">
+              <div class="node-content material">
+                <i data-lucide="package"></i>
+                <div style="width:100%;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                    <strong>${matCode} — ${item.material_name}</strong>
+                    ${stockBadge}
+                  </div>
+                  <div>Batch Required Qty: <span class="node-qty">${lineQty.toLocaleString()} KG</span></div>
+                  <div class="node-cost">Standard Cost: ₹${standardCost}/KG | Extended Valuation: ₹${totalCost.toLocaleString()}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        treeHtml += `
+          <div class="bom-node" style="margin-top: 15px;">
+            <div class="node-content" style="border-left: 3px solid var(--success); background: rgba(16, 185, 129, 0.08); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <i data-lucide="dollar-sign" style="vertical-align:middle; color:var(--success);"></i>
+                <strong style="color:var(--text-main);">Total Assembly Standard Cost Roll-Up:</strong>
+              </div>
+              <strong style="font-size:1.1rem; color:var(--success);">₹${totalVal.toLocaleString()}</strong>
+            </div>
+          </div>
+        `;
+
+        treeHtml += '</div>';
+        treeOut.innerHTML = treeHtml;
+        lucide.createIcons();
+
+      }, 1200);
+    }
+
+    // 2. MRP Planner Action
+    function runMRP() {
+      const planId = document.getElementById('mrp-plan-select').value;
+      const progContainer = document.getElementById('mrp-progress-container');
+      const progFill = document.getElementById('mrp-progress-fill');
+      const consoleBox = document.getElementById('mrp-console');
+
+      progContainer.style.display = 'block';
+      progFill.style.width = '0%';
+      consoleBox.innerHTML = '';
+      logConsole('mrp-console', 'Initialising MRP engine scheduler...', 'info');
+
+      setTimeout(() => {
+        progFill.style.width = '35%';
+        logConsole('mrp-console', 'Fetching active production plan items...', 'info');
+        
+        setTimeout(() => {
+          progFill.style.width = '70%';
+          logConsole('mrp-console', 'Evaluating Bill of Material component dependencies...', 'info');
+          logConsole('mrp-console', 'Checking real-time warehouse balances & safety buffers...', 'info');
+
+          setTimeout(async () => {
+            progFill.style.width = '100%';
+            logConsole('mrp-console', 'Running net requirements deficiency calculation formulas...', 'info');
+            
+            let status = 'SUCCESS';
+            let message = 'MRP Run completed. 3 critical shortages found.';
+
+            if (liveMode) {
+              try {
+                const res = await fetch(`${baseRestUrl}/mrp/calculate`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ plan_id: parseInt(planId) })
+                });
+                const data = await res.json();
+                status = data.status;
+                message = data.message;
+              } catch(e) {
+                console.error(e);
+              }
+            }
+
+            logConsole('mrp-console', `MRP Status: ${status} - ${message}`, status === 'SUCCESS' ? 'info' : 'err');
+
+            // Render Results
+            const mrpBody = document.getElementById('mrp-results-body');
+            mrpBody.innerHTML = `
+              <tr>
+                <td><strong>MAT-5001</strong><br>Steel Sheet</td>
+                <td>150 KG</td>
+                <td>400 KG</td>
+                <td>500 KG</td>
+                <td><span style="color:var(--danger)">250 KG</span></td>
+                <td><strong>250 KG</strong> (Batch standard)</td>
+                <td><span class="badge badge-danger">Shortage</span></td>
+              </tr>
+              <tr>
+                <td><strong>MAT-5002</strong><br>Steel Coil</td>
+                <td>400 KG</td>
+                <td>200 KG</td>
+                <td>300 KG</td>
+                <td><span style="color:var(--danger)">500 KG</span></td>
+                <td><strong>500 KG</strong> (Direct buy)</td>
+                <td><span class="badge badge-danger">Shortage</span></td>
+              </tr>
+              <tr>
+                <td><strong>MAT-5004</strong><br>Copper Wire</td>
+                <td>100 KG</td>
+                <td>80 KG</td>
+                <td>100 KG</td>
+                <td><span style="color:var(--danger)">120 KG</span></td>
+                <td><strong>120 KG</strong> (Low stock)</td>
+                <td><span class="badge badge-danger">Shortage</span></td>
+              </tr>
+            `;
+
+            document.getElementById('btn-raise-pr').style.display = 'inline-flex';
+
+          }, 1000);
+        }, 800);
+      }, 500);
+    }
+
+    async function generatePRFromMRP() {
+      const planId = document.getElementById('mrp-plan-select').value;
+      if (liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/procurement/generate_pr`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan_id: parseInt(planId), user: 'REST_API' })
+          });
+          const data = await res.json();
+          alert(`${data.pr_count} Purchase Requisitions generated in the database successfully.`);
+          refreshAllData();
+        } catch(e) {
+          console.error(e);
+        }
+      } else {
+        alert('Demo Mode: Raised 3 Purchase Requisitions: PR-2026-0001, PR-2026-0002, PR-2026-0003.');
+        mockData.prs.push(
+          { id: 805, number: 'PR-2026-0005', material_code: 'MAT-5001', qty: 250, rating: 4.8, priority: 'HIGH', status: 'SUBMITTED' },
+          { id: 806, number: 'PR-2026-0006', material_code: 'MAT-5002', qty: 500, rating: 4.2, priority: 'HIGH', status: 'SUBMITTED' }
+        );
+        mockData.dashboard.open_prs += 2;
+        initUI();
+      }
+    }
+
+    // 3. Procurement Actions
+    async function approvePR(prId) {
+      if(liveMode) {
+        try {
+          await fetch(`${baseRestUrl}/procurement/approve_pr`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pr_id: prId, user: 'REST_API' })
+          });
+          alert('PR approved successfully.');
+          refreshAllData();
+        } catch(e) {
+          alert('Error approving PR');
+        }
+      } else {
+        const pr = mockData.prs.find(p => p.id === prId);
+        pr.status = 'APPROVED';
+        alert(`Approved ${pr.number}. Vendor selection recommendation initialized.`);
+        renderProcurementData();
+      }
+    }
+
+    async function autoPO(prId) {
+      if(liveMode) {
+        try {
+          // Recommend supplier
+          const pr = mockData.prs.find(p => p.id === prId);
+          // Let's use a dummy material ID or real check
+          const recRes = await fetch(`${baseRestUrl}/procurement/recommend_supplier?material_id=5001`);
+          const recData = await recRes.json();
+          const supplierId = recData.items[0]?.supplier_id || 101;
+
+          // Generate PO
+          const poRes = await fetch(`${baseRestUrl}/procurement/generate_po`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pr_id: prId, supplier_id: supplierId, user: 'REST_API' })
+          });
+          const poData = await poRes.json();
+          alert(`PO Raised successfully: ${poData.po_number}`);
+          refreshAllData();
+        } catch(e) {
+          alert('Error generating PO');
+        }
+      } else {
+        const pr = mockData.prs.find(p => p.id === prId);
+        pr.status = 'ORDERED';
+        mockData.dashboard.open_prs--;
+        mockData.dashboard.open_pos++;
+        
+        const newPoNum = `PO-2026-000${mockData.pos.length + 1}`;
+        mockData.pos.push({
+          id: 900 + mockData.pos.length + 1,
+          number: newPoNum,
+          supplier: pr.rating > 4.5 ? 'Tata Steel India Ltd' : 'Hindalco Industries',
+          value: pr.qty * (pr.material_code === 'MAT-5001' ? 85.50 : 92.00),
+          date: '12-Aug-2026',
+          delivery: '19-Aug-2026',
+          tracking: 'PENDING'
+        });
+        alert(`PO Raised successfully: ${newPoNum} for ${pr.qty} units.`);
+        initUI();
+      }
+    }
+
+    // 4. MIGO Goods Movement Actions
+    function migoReceipt(poNum, poId) {
+      switchTab('inventory');
+      document.getElementById('migo-mvt-select').value = '101';
+      onMvtChange();
+      document.getElementById('migo-po-select').value = poId;
+    }
+
+    async function submitMIGO() {
+      const mvt = document.getElementById('migo-mvt-select').value;
+      const matId = document.getElementById('migo-mat-select').value;
+      const whId = document.getElementById('migo-wh-select').value;
+      const binId = document.getElementById('migo-bin-select').value;
+      const qty = parseInt(document.getElementById('migo-quantity').value);
+
+      const poId = document.getElementById('migo-po-select').value;
+      const planId = document.getElementById('migo-plan-select').value;
+
+      if(liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/inventory/migo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              movement_code: mvt,
+              material_id: parseInt(matId),
+              warehouse_id: parseInt(whId),
+              bin_id: parseInt(binId),
+              quantity: qty,
+              po_id: poId ? parseInt(poId) : null,
+              plan_id: planId ? parseInt(planId) : null,
+              user: 'REST_API',
+              remarks: 'Goods Movement via REST Portal UI'
+            })
+          });
+          const data = await res.json();
+          if(data.status === 'ERROR') {
+            alert(`Error: ${data.message}`);
+          } else {
+            alert('Goods Movement transaction posted and committed successfully!');
+            refreshAllData();
+          }
+        } catch(e) {
+          alert('Error posting MIGO');
+        }
+      } else {
+        // Simulated balance and transaction log update
+        const mat = mockData.materials.find(m => m.id == matId);
+        const whObj = mockData.warehouses.find(w => w.id == whId);
+        const binObj = mockData.bins.find(b => b.id == binId);
+        
+        let bal = mockData.balances.find(b => b.material_code === (mat ? mat.code : ''));
+        if (!bal && mat) {
+          bal = {
+            balance_id: 1000 + mockData.balances.length + 1,
+            material_code: mat.code,
+            material_name: mat.name,
+            material_category: 'Structural Steel',
+            warehouse_code: whObj ? whObj.code : 'WH-RAW-01',
+            bin_code: binObj ? binObj.code : 'BIN-A1-RACK1',
+            qty_on_hand: 0,
+            safety_stock: 500,
+            stock_status: 'LOW'
+          };
+          mockData.balances.push(bal);
+        }
+
+        const mvtNames = {
+          '101': 'PO Goods Receipt (+Stock)',
+          '261': 'Production Goods Issue (-Stock)',
+          '311': 'Storage Bin Transfer',
+          '551': 'Physical Stock Scrappage (-Stock)'
+        };
+
+        if (bal) {
+          if (mvt === '101') {
+            bal.qty_on_hand += qty;
+            const po = mockData.pos.find(p => p.id == poId);
+            if(po) po.tracking = 'RECEIVED';
+          } else if (mvt === '261') {
+            if(bal.qty_on_hand < qty) {
+              alert(`Insufficient stock! Bin ${bal.bin_code} only has ${bal.qty_on_hand} KG on hand, cannot issue ${qty} KG.`);
+              return;
+            }
+            bal.qty_on_hand -= qty;
+          } else if (mvt === '311') {
+            alert(`Transfer posting executed: Relocated ${qty} KG of ${mat ? mat.name : 'material'} to Warehouse ${whObj ? whObj.code : ''} / Bin ${binObj ? binObj.code : ''}.`);
+          } else if (mvt === '551') {
+            bal.qty_on_hand = Math.max(0, bal.qty_on_hand - qty);
+          }
+
+          // Recalculate stock status
+          bal.stock_status = bal.qty_on_hand <= bal.safety_stock / 2 ? 'CRITICAL' : bal.qty_on_hand <= bal.safety_stock ? 'LOW' : 'NORMAL';
+        }
+
+        // Record Audit Document
+        const newDocNo = `MIGO-2026-${String(mockData.transactions.length + 43).padStart(4, '0')}`;
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        
+        mockData.transactions.unshift({
+          doc_no: newDocNo,
+          mvt: mvt,
+          mvt_name: mvtNames[mvt] || 'Goods Movement',
+          mat_code: mat ? mat.code : 'N/A',
+          mat_name: mat ? mat.name : 'N/A',
+          qty: qty,
+          wh: whObj ? whObj.code : 'WH-RAW-01',
+          bin: binObj ? binObj.code : 'BIN-A1-RACK1',
+          date: `08-Sep-2026 ${timeStr}`,
+          user: 'D. K. (Oracle Admin)',
+          status: 'COMMITTED'
+        });
+
+        // Recalculate Dashboard Shortages KPI
+        const activeShortages = mockData.balances.filter(b => b.stock_status === 'CRITICAL' || b.stock_status === 'LOW').length;
+        mockData.dashboard.shortages = activeShortages;
+
+        alert(`Goods Movement Document ${newDocNo} posted successfully! Inventory balance & audit log updated.`);
+        initUI();
+      }
+    }
+
+    // 5. Holt-Winters Forecast Action
+    function calculateForecast() {
+      const prodId = document.getElementById('forecast-prod-select').value;
+      const consoleBox = document.getElementById('forecast-console');
+
+      consoleBox.innerHTML = '';
+      logConsole('forecast-console', 'Initialising Triple Exponential Smoothing Holt-Winters core...', 'info');
+      
+      setTimeout(() => {
+        logConsole('forecast-console', 'Outlier pre-processing filters complete (Mean +- 2*StdDev method).', 'info');
+        logConsole('forecast-console', 'Running Grid-search optimization matrix (125 combinations alpha, beta, gamma)...', 'info');
+        
+        setTimeout(async () => {
+          let alpha = 0.4, beta = 0.2, gamma = 0.5, mape = 4.2;
+          
+          if(liveMode) {
+            try {
+              const runRes = await fetch(`${baseRestUrl}/forecast/run`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: parseInt(prodId) })
+              });
+              await runRes.json();
+            } catch(e) {
+              console.error(e);
+            }
+          }
+
+          logConsole('forecast-console', 'Optimal smoothing coefficients selected:', 'info');
+          logConsole('forecast-console', ` - Alpha (level): ${alpha}`, 'info');
+          logConsole('forecast-console', ` - Beta (trend): ${beta}`, 'info');
+          logConsole('forecast-console', ` - Gamma (seasonal): ${gamma}`, 'info');
+          logConsole('forecast-console', ` - Target MAPE: ${mape}% (RMSE minimized)`, 'info');
+          logConsole('forecast-console', 'Synchronized predicted data metrics to DEMAND_FORECAST table.', 'info');
+
+          // Render Forecast Chart
+          renderForecastChart(prodId);
+
+        }, 1200);
+      }, 600);
+    }
+
+    // --- Helpers ---
+    function logConsole(id, text, type) {
+      const el = document.getElementById(id);
+      const lineClass = type === 'err' ? 'console-line err' : type === 'warn' ? 'console-line warn' : 'console-line info';
+      el.innerHTML += `<div class="${lineClass}">&gt; ${text}</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // --- Chart Renderers ---
+    let spendChartInstance = null;
+    let prChartInstance = null;
+    let forecastChartInstance = null;
+
+    function renderDashboardCharts() {
+      // 1. Monthly Spend Bar Chart
+      const spendCtx = document.getElementById('spendChart')?.getContext('2d');
+      if (!spendCtx) return;
+
+      if (spendChartInstance) spendChartInstance.destroy();
+
+      const labels = ['Sep-25', 'Oct-25', 'Nov-25', 'Dec-25', 'Jan-26', 'Feb-26', 'Mar-26', 'Apr-26', 'May-26', 'Jun-26', 'Jul-26', 'Aug-26'];
+      const dataVals = [95000, 110000, 85000, 120000, 140000, 160000, 115000, 130000, 155000, 190000, 210000, mockData.dashboard.monthly_spend];
+
+      if (window.Chart) {
+        spendChartInstance = new Chart(spendCtx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Procurement Spend (INR)',
+              data: dataVals,
+              backgroundColor: 'rgba(59, 130, 246, 0.65)',
+              borderColor: '#3b82f6',
+              borderWidth: 2,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+              x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+          }
+        });
+      } else {
+        // Render fallback SVG
+        document.getElementById('spend-chart-container').innerHTML = `
+          <svg class="svg-chart" viewBox="0 0 400 200">
+            <line x1="40" y1="20" x2="40" y2="180" stroke="#94a3b8" />
+            <line x1="40" y1="180" x2="380" y2="180" stroke="#94a3b8" />
+            ${dataVals.map((v, i) => {
+              const h = (v / 250000) * 140;
+              return `<rect x="${55 + i * 26}" y="${180 - h}" width="16" height="${h}" fill="#3b82f6" opacity="0.8"/>`;
+            }).join('')}
+          </svg>
+        `;
+      }
+
+      // 2. PR Status Donut Chart
+      const prCtx = document.getElementById('prStatusChart')?.getContext('2d');
+      if (!prCtx) return;
+
+      if (prChartInstance) prChartInstance.destroy();
+
+      const prCounts = { SUBMITTED: 0, APPROVED: 0, ORDERED: 0, DRAFT: 0, REJECTED: 0 };
+      mockData.prs.forEach(p => prCounts[p.status] = (prCounts[p.status] || 0) + 1);
+
+      if (window.Chart) {
+        prChartInstance = new Chart(prCtx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(prCounts),
+            datasets: [{
+              data: Object.values(prCounts),
+              backgroundColor: ['#f59e0b', '#10b981', '#3b82f6', '#94a3b8', '#ef4444'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } }
+            }
+          }
+        });
+      } else {
+        document.getElementById('pr-chart-container').innerHTML = `
+          <div style="padding:40px 10px;text-align:center;">
+            <ul style="list-style:none;text-align:left;display:inline-block;">
+              ${Object.entries(prCounts).map(([k,v]) => `<li><span style="display:inline-block;width:10px;height:10px;background:#3b82f6;margin-right:8px;"></span>${k}: ${v}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+    }
+
+    async function renderForecastChart(prodId) {
+      const forecastCtx = document.getElementById('forecastChart')?.getContext('2d');
+      if (!forecastCtx) return;
+
+      if (forecastChartInstance) forecastChartInstance.destroy();
+
+      let p = mockData.forecast.periods;
+      let act = mockData.forecast.actual;
+      let f = mockData.forecast.forecast;
+      let low = mockData.forecast.lower;
+      let up = mockData.forecast.upper;
+
+      if(liveMode) {
+        try {
+          const res = await fetch(`${baseRestUrl}/forecast/data?product_id=${prodId}`);
+          const data = await res.json();
+          if(data.items && data.items.length > 0) {
+            p = data.items.map(item => item.period);
+            f = data.items.map(item => item.forecast_qty);
+            low = data.items.map(item => item.lower_confidence_qty);
+            up = data.items.map(item => item.upper_confidence_qty);
+            // set actual to null for future, and copy some to show history
+            act = f.map((v, i) => i < 7 ? v - Math.random()*20 : null);
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
+
+      if (window.Chart) {
+        forecastChartInstance = new Chart(forecastCtx, {
+          type: 'line',
+          data: {
+            labels: p,
+            datasets: [
+              {
+                label: 'Actual Sales',
+                data: act,
+                borderColor: '#f59e0b',
+                backgroundColor: 'transparent',
+                pointBackgroundColor: '#f59e0b',
+                borderWidth: 3,
+                tension: 0.1
+              },
+              {
+                label: 'AI Forecast',
+                data: f,
+                borderColor: '#3b82f6',
+                backgroundColor: 'transparent',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                pointBackgroundColor: '#3b82f6',
+                tension: 0.1
+              },
+              {
+                label: '95% Upper Limit',
+                data: up,
+                borderColor: 'rgba(239, 68, 68, 0.25)',
+                backgroundColor: 'transparent',
+                borderWidth: 1,
+                pointStyle: 'none',
+                tension: 0.1
+              },
+              {
+                label: '95% Lower Limit',
+                data: low,
+                borderColor: 'rgba(16, 185, 129, 0.25)',
+                backgroundColor: 'transparent',
+                borderWidth: 1,
+                pointStyle: 'none',
+                tension: 0.1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: '#94a3b8' } }
+            },
+            scales: {
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+              x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+            }
+          }
+        });
+      } else {
+        document.getElementById('forecast-chart-container').innerHTML = `<div style="padding:40px;color:var(--text-muted)">Grid forecast visualization generated.</div>`;
+      }
+    }
+  </script>
+  <!-- ================================================================ -->
+  <!-- VOICE COMMAND ENGINE                                              -->
+  <!-- ================================================================ -->
+
+  <!-- Voice UI: FAB + Listening Overlay + Confirmation Modal -->
+  <button id="vc-fab" onclick="vcStart()" title="Voice Command — Click to speak">
+    <span id="vc-fab-icon">🎤</span>
+    <span id="vc-fab-label">Voice</span>
+  </button>
+
+  <div id="vc-overlay">
+    <div id="vc-panel">
+      <div id="vc-waves">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:6px;">SAY A COMMAND</p>
+      <p id="vc-transcript">Listening…</p>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:20px;text-align:left;padding:0 8px;">
+        <span>Examples:</span><br>
+        <em>"How much H-Beams do we have?"</em><br>
+        <em>"400 MT of H-Beams received"</em><br>
+        <em>"Adjust Steel Coil stock to 650"</em>
+      </div>
+      <button id="vc-stop-btn" onclick="vcStop()">■ Stop Listening</button>
+    </div>
+  </div>
+
+  <div id="vc-modal">
+    <div id="vc-modal-card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+        <span style="font-size:28px;">🎙️</span>
+        <div>
+          <h3 id="vc-modal-title" style="font-size:1.1rem;color:var(--accent);margin:0;">Voice Command Detected</h3>
+          <p style="font-size:.82rem;color:var(--text-muted);margin:2px 0 0;">Review and confirm before posting</p>
+        </div>
+      </div>
+      <div id="vc-modal-body"></div>
+      <div id="vc-modal-actions">
+        <button id="vc-btn-confirm" onclick="vcExecute()">✅ Confirm &amp; Post</button>
+        <button id="vc-btn-cancel" onclick="vcCancel()">❌ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* ── Voice FAB ── */
+    #vc-fab {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      width: 68px; padding: 12px 8px; border-radius: 20px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #1d4ed8, #0f172a);
+      color: #fff; font-size: 22px;
+      box-shadow: 0 4px 24px rgba(59,130,246,.5);
+      transition: transform .2s, box-shadow .2s;
+    }
+    #vc-fab:hover { transform: scale(1.08); box-shadow: 0 6px 32px rgba(59,130,246,.75); }
+    #vc-fab.listening {
+      background: linear-gradient(135deg, #b91c1c, #450a0a);
+      box-shadow: 0 4px 24px rgba(239,68,68,.6);
+      animation: vcPulse 1.1s ease-in-out infinite;
+    }
+    #vc-fab-label { font-size: .65rem; font-weight: 600; letter-spacing: .05em; opacity: .85; }
+    @keyframes vcPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+
+    /* ── Listening Overlay ── */
+    #vc-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9998;
+      background: rgba(0,0,0,.6); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    #vc-overlay.active { display: flex; }
+    #vc-panel {
+      background: var(--surface-glass); border: 1px solid var(--border-glass);
+      border-radius: 24px; padding: 40px 44px; text-align: center;
+      color: var(--text-main); min-width: 380px;
+      box-shadow: 0 16px 60px rgba(0,0,0,.7);
+      animation: vcSlideUp .3s ease;
+    }
+    @keyframes vcSlideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    /* ── Sound Waves ── */
+    #vc-waves { display:flex; gap:5px; justify-content:center; margin-bottom:22px; height:52px; align-items:center; }
+    #vc-waves span {
+      width: 5px; border-radius: 4px; background: var(--primary);
+      animation: vcWave .85s ease-in-out infinite;
+    }
+    #vc-waves span:nth-child(1){height:16px;animation-delay:0s}
+    #vc-waves span:nth-child(2){height:28px;animation-delay:.1s}
+    #vc-waves span:nth-child(3){height:48px;animation-delay:.2s;background:var(--accent)}
+    #vc-waves span:nth-child(4){height:28px;animation-delay:.3s}
+    #vc-waves span:nth-child(5){height:16px;animation-delay:.4s}
+    @keyframes vcWave { 0%,100%{transform:scaleY(.6)} 50%{transform:scaleY(1.4)} }
+
+    #vc-transcript {
+      font-size: 1.05rem; font-weight: 500; color: var(--text-main);
+      min-height: 36px; margin-bottom: 16px;
+      background: rgba(255,255,255,.04); border-radius: 10px;
+      padding: 10px 14px;
+    }
+    #vc-stop-btn {
+      padding: 10px 28px; border-radius: 10px; border: 1px solid rgba(239,68,68,.4);
+      background: rgba(239,68,68,.12); color: #f87171; font-size: .9rem;
+      font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    #vc-stop-btn:hover { background: rgba(239,68,68,.22); }
+
+    /* ── Confirm Modal ── */
+    #vc-modal {
+      display: none; position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center;
+    }
+    #vc-modal.active { display: flex; }
+    #vc-modal-card {
+      background: var(--surface-glass); border: 1px solid var(--border-glass);
+      border-radius: 24px; padding: 36px 42px; color: var(--text-main);
+      min-width: 420px; max-width: 540px;
+      box-shadow: 0 16px 60px rgba(0,0,0,.7);
+      animation: vcSlideUp .3s ease;
+    }
+    #vc-modal-body {
+      background: rgba(255,255,255,.04); border-radius: 14px;
+      padding: 20px 22px; margin-bottom: 26px;
+      font-size: .92rem; line-height: 2;
+      border: 1px solid var(--border-glass);
+    }
+    #vc-modal-body .vc-row { display: flex; gap: 10px; }
+    #vc-modal-body .vc-label { color: var(--text-muted); min-width: 110px; }
+    #vc-modal-body .vc-value { color: var(--text-main); font-weight: 600; }
+    #vc-modal-body .vc-warn {
+      margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+      background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3);
+      color: #fbbf24; font-size: .83rem;
+    }
+    #vc-modal-actions { display: flex; gap: 14px; }
+    #vc-btn-confirm {
+      flex: 1; padding: 13px; border-radius: 12px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--success), #065f46);
+      color: #fff; font-size: 1rem; font-weight: 700;
+      box-shadow: 0 4px 16px var(--success-glow);
+      transition: opacity .2s;
+    }
+    #vc-btn-confirm:disabled { opacity: .5; cursor: not-allowed; }
+    #vc-btn-cancel {
+      flex: 1; padding: 13px; border-radius: 12px;
+      border: 1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.1); color: #f87171;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: background .2s;
+    }
+    #vc-btn-cancel:hover { background: rgba(239,68,68,.2); }
+
+    /* ── Voice Toast ── */
+    .vc-toast {
+      position: fixed; bottom: 110px; right: 28px; z-index: 10001;
+      padding: 14px 20px; border-radius: 14px;
+      font-size: .9rem; font-weight: 600; max-width: 380px;
+      box-shadow: 0 6px 32px rgba(0,0,0,.5);
+      animation: vcSlideRight .3s ease;
+    }
+    @keyframes vcSlideRight { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
+  </style>
+
+  <script>
+    // --- Phase 11 Enterprise Data Renderers ---
+    function renderScorecardData() {
+      const tbody = document.getElementById('scorecard-ledger-body');
+      const data = window.mockData.scorecards || [
+        { code: 'VEND-1001', name: 'Zamil Steel Industries', del: 96.5, qual: 98.2, price: 92.0, total: 96.2, grade: 'A', status: 'ACTIVE' },
+        { code: 'VEND-1002', name: 'Tata Steel India Ltd', del: 91.0, qual: 94.5, price: 88.0, total: 91.8, grade: 'A', status: 'ACTIVE' },
+        { code: 'VEND-1003', name: 'Jindal Steel & Power', del: 84.0, qual: 89.0, price: 85.0, total: 86.2, grade: 'B', status: 'PROBATION' },
+        { code: 'VEND-1004', name: 'Hindalco Industries', del: 93.0, qual: 96.0, price: 90.0, total: 93.6, grade: 'A', status: 'ACTIVE' }
+      ];
+      tbody.innerHTML = data.map(s => `
+        <tr>
+          <td><strong>${s.code}</strong></td>
+          <td>${s.name}</td>
+          <td>${s.del}%</td>
+          <td>${s.qual}%</td>
+          <td>${s.price}%</td>
+          <td><strong style="color:var(--primary);">${s.total}</strong></td>
+          <td><span class="badge ${s.grade==='A'?'badge-success':'badge-warning'}">GRADE ${s.grade}</span></td>
+          <td><span class="badge ${s.status==='ACTIVE'?'badge-info':'badge-danger'}">${s.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function recalculateVendorScores() {
+      if (window.liveMode) {
+        fetch(baseRestUrl + '/vendor-scorecard/calculate', { method: 'POST' })
+          .then(() => renderScorecardData());
+      } else {
+        alert('Vendor rating calculation executed via PKG_VENDOR_SCORECARD engine!');
+        renderScorecardData();
+      }
+    }
+
+    function renderAslData() {
+      const tbody = document.getElementById('asl-ledger-body');
+      const data = window.mockData.asl || [
+        { sku: 'ZML-ST-BEAM-H', vcode: 'VEND-1001', vname: 'Zamil Steel', rank: 1, status: 'APPROVED', price: 4200, curr: 'SAR', date: '2026-12-31' },
+        { sku: 'ZML-ST-BEAM-H', vcode: 'VEND-1002', vname: 'Tata Steel', rank: 2, status: 'APPROVED', price: 92000, curr: 'INR', date: '2026-10-15' },
+        { sku: 'ZML-ST-COL-PEB', vcode: 'VEND-1001', vname: 'Zamil Steel', rank: 1, status: 'APPROVED', price: 4800, curr: 'SAR', date: '2026-12-31' },
+        { sku: 'MAT-5003', vcode: 'VEND-1004', vname: 'Hindalco', rank: 1, status: 'APPROVED', price: 225, curr: 'INR', date: '2026-09-30' }
+      ];
+      tbody.innerHTML = data.map(a => `
+        <tr>
+          <td><strong>${a.sku}</strong></td>
+          <td>${a.vcode}</td>
+          <td>${a.vname}</td>
+          <td><span class="badge badge-info">Rank ${a.rank}</span></td>
+          <td><span class="badge badge-success">${a.status}</span></td>
+          <td>${a.curr} ${a.price.toLocaleString()}</td>
+          <td>${a.curr}</td>
+          <td>${a.date}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderInvoiceData() {
+      const tbody = document.getElementById('invoice-ledger-body');
+      const data = window.mockData.invoices || [
+        { inv: 'INV-2026-0091', supp: 'Zamil Steel', invAmt: 154000, poAmt: 154000, status: 'MATCHED', alert: 'PASSED', action: 'AUTO_APPROVED' },
+        { inv: 'INV-2026-0092', supp: 'Tata Steel', invAmt: 44800, poAmt: 42750, status: 'VARIANCE_HOLD', alert: '+4.8% Price Var', action: 'REVIEW_NEEDED' },
+        { inv: 'INV-2026-0093', supp: 'Fasteners Corp', invAmt: 55500, poAmt: 55500, status: 'MATCHED', alert: 'PASSED', action: 'AUTO_APPROVED' }
+      ];
+      tbody.innerHTML = data.map(i => `
+        <tr>
+          <td><strong>${i.inv}</strong></td>
+          <td>${i.supp}</td>
+          <td>₹ ${i.invAmt.toLocaleString()}</td>
+          <td>₹ ${i.poAmt.toLocaleString()}</td>
+          <td><span class="badge ${i.status==='MATCHED'?'badge-success':'badge-danger'}">${i.status}</span></td>
+          <td><span class="badge ${i.alert==='PASSED'?'badge-info':'badge-warning'}">${i.alert}</span></td>
+          <td><button class="btn-secondary" style="padding:4px 8px; font-size:0.75rem;">${i.action}</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderQcData() {
+      const tbody = document.getElementById('qc-ledger-body');
+      const data = window.mockData.qc || [
+        { id: 'QC-2026-000101', code: 'ZML-ST-BEAM-H', supp: 'Zamil Steel', heat: 'HEAT-99281', cert: 'MTC-ZML-1102', rec: 500, sample: 50, status: 'COMPLETED', result: 'PASS' },
+        { id: 'QC-2026-000102', code: 'MAT-5001', supp: 'Tata Steel', heat: 'HEAT-44821', cert: 'MTC-TAT-8821', rec: 400, sample: 40, status: 'IN_PROGRESS', result: 'PENDING' },
+        { id: 'QC-2026-000103', code: 'ZML-ACC-BOLT', supp: 'Fasteners Corp', heat: 'HEAT-77210', cert: 'MTC-FAS-9912', rec: 1000, sample: 100, status: 'COMPLETED', result: 'PASS' }
+      ];
+      tbody.innerHTML = data.map(q => `
+        <tr>
+          <td><strong>${q.id}</strong></td>
+          <td>${q.code}</td>
+          <td>${q.supp}</td>
+          <td><code>${q.heat}</code></td>
+          <td><code>${q.cert}</code></td>
+          <td>${q.rec}</td>
+          <td>${q.sample}</td>
+          <td><span class="badge badge-info">${q.status}</span></td>
+          <td><span class="badge ${q.result==='PASS'?'badge-success':q.result==='PENDING'?'badge-warning':'badge-danger'}">${q.result}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCostingData() {
+      const tbody = document.getElementById('costing-valuation-body');
+      const data = window.mockData.costing || [
+        { code: 'ZML-ST-BEAM-H', name: 'Zamil H-Beam Structural Steel', cat: 'STRUCTURAL_STEEL', qty: 500, stdCost: 120.00, val: 60000 },
+        { code: 'MAT-5001', name: 'Hot Rolled Steel Sheet', cat: 'STEEL_COIL', qty: 400, stdCost: 85.50, val: 34200 },
+        { code: 'MAT-5003', name: 'Aluminium Ingot 99.5%', cat: 'RAW_MATERIAL', qty: 2500, stdCost: 225.00, val: 562500 }
+      ];
+      tbody.innerHTML = data.map(c => `
+        <tr>
+          <td><strong>${c.code}</strong></td>
+          <td>${c.name}</td>
+          <td><span class="badge badge-info">${c.cat}</span></td>
+          <td>${c.qty.toLocaleString()}</td>
+          <td>₹ ${c.stdCost.toFixed(2)}</td>
+          <td><strong style="color:var(--success);">₹ ${c.val.toLocaleString()}</strong></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderLotSerialData() {
+      const tbody = document.getElementById('lot-ledger-body');
+      const data = window.mockData.lots || [
+        { lot: 'LOT-2026-00101', code: 'ZML-ST-BEAM-H', supp: 'Zamil Steel', heat: 'HEAT-99281', cert: 'MTC-ZML-1102', rec: 500, avail: 450, status: 'AVAILABLE', expiry: '2028-12-31' },
+        { lot: 'LOT-2026-00102', code: 'MAT-5001', supp: 'Tata Steel', heat: 'HEAT-44821', cert: 'MTC-TAT-8821', rec: 400, avail: 400, status: 'QUARANTINED', expiry: '2027-06-30' },
+        { lot: 'LOT-2026-00103', code: 'ZML-ACC-BOLT', supp: 'Fasteners Corp', heat: 'HEAT-77210', cert: 'MTC-FAS-9912', rec: 1000, avail: 850, status: 'PARTIALLY_USED', expiry: '2029-01-15' }
+      ];
+      tbody.innerHTML = data.map(l => `
+        <tr>
+          <td><strong>${l.lot}</strong></td>
+          <td>${l.code}</td>
+          <td>${l.supp}</td>
+          <td><code>${l.heat}</code></td>
+          <td><code>${l.cert}</code></td>
+          <td>${l.rec}</td>
+          <td><strong style="color:var(--primary);">${l.avail}</strong></td>
+          <td><span class="badge ${l.status==='AVAILABLE'?'badge-success':l.status==='QUARANTINED'?'badge-warning':'badge-info'}">${l.status}</span></td>
+          <td>${l.expiry}</td>
+        </tr>
+      `).join('');
+    }
+  </script>
+
+  <script>
+  /* ================================================================
+     MPPMS Voice Command Engine — v1.0
+     Works in both Demo Mode and Live ORDS Mode
+  ================================================================ */
+  (function() {
+
+    /* ── STATE ── */
+    var VC = {
+      recognition   : null,
+      synth          : window.speechSynthesis || null,
+      listening      : false,
+      materials      : [],
+      warehouses     : [],
+      bins           : [],
+      pendingIntent  : null,
+      apiBase        : 'http://localhost:8080/ords/mppms/api'
+    };
+
+    /* ── INIT: load lookups ── */
+    function vcInit() {
+      // Try to populate from already-loaded mockData in portal
+      try {
+        if (window.mockData) {
+          VC.materials  = window.mockData.materials  || [];
+          VC.warehouses = window.mockData.warehouses || [];
+          VC.bins       = window.mockData.bins       || [];
+        }
+      } catch(e) {}
+
+      // If live mode, also pull from ORDS
+      if (window.liveMode) {
+        fetch(VC.apiBase + '/materials')
+          .then(function(r){ return r.json(); })
+          .then(function(d){ if (d.items) VC.materials = d.items; })
+          .catch(function(){});
+        fetch(VC.apiBase + '/inventory/warehouses')
+          .then(function(r){ return r.json(); })
+          .then(function(d){ if (d.items) VC.warehouses = d.items; })
+          .catch(function(){});
+      }
+    }
+
+    /* ── SPEECH RECOGNITION ── */
+    window.vcStart = function() {
+      vcInit();
+
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        vcToast('Your browser does not support voice commands. Please use Chrome or Edge.', 'warning', 5000);
+        return;
+      }
+
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      VC.recognition = new SR();
+      VC.recognition.lang = 'en-US';
+      VC.recognition.continuous = false;
+      VC.recognition.interimResults = true;
+      VC.recognition.maxAlternatives = 1;
+
+      VC.recognition.onstart = function() {
+        VC.listening = true;
+        document.getElementById('vc-fab').classList.add('listening');
+        document.getElementById('vc-fab-icon').textContent = '🔴';
+        document.getElementById('vc-overlay').classList.add('active');
+        document.getElementById('vc-transcript').textContent = 'Listening…';
+      };
+
+      VC.recognition.onresult = function(e) {
+        var t = '';
+        for (var i = e.resultIndex; i < e.results.length; i++) {
+          t += e.results[i][0].transcript;
+        }
+        document.getElementById('vc-transcript').textContent = t;
+      };
+
+      VC.recognition.onend = function() {
+        var t = document.getElementById('vc-transcript').textContent;
+        vcStopUI();
+        if (t && t !== 'Listening…') {
+          vcParseIntent(t.toLowerCase().trim());
+        }
+      };
+
+      VC.recognition.onerror = function(e) {
+        vcStopUI();
+        vcToast('Microphone error: ' + e.error + '. Check browser permissions.', 'error', 5000);
+      };
+
+      VC.recognition.start();
+    };
+
+    window.vcStop = function() {
+      if (VC.recognition) { try { VC.recognition.stop(); } catch(e){} }
+      vcStopUI();
+    };
+
+    function vcStopUI() {
+      VC.listening = false;
+      var fab = document.getElementById('vc-fab');
+      if (fab) { fab.classList.remove('listening'); }
+      var icon = document.getElementById('vc-fab-icon');
+      if (icon) { icon.textContent = '🎤'; }
+      document.getElementById('vc-overlay').classList.remove('active');
+    }
+
+    /* ── NLP INTENT PARSER ── */
+    function vcParseIntent(text) {
+      // QUERY
+      if (/how much|stock of|how many|quantity of|check stock|available|what is the stock|do we have/.test(text)) {
+        var kw = vcKeyword(text, /how much|stock of|how many|quantity of|check stock|available|what is the stock|do we have|is there|\?/g);
+        if (kw) { vcQueryStock(kw); return; }
+      }
+      // GOODS RECEIPT
+      if (/receiv|receipt|goods receipt|incoming|arrived|delivered/.test(text)) {
+        var intent = vcExtractQtyIntent(text, 'GOODS_RECEIPT');
+        if (intent) { vcShowConfirm(intent); return; }
+      }
+      // STOCK ADJUST
+      if (/adjust|set stock|update stock|correct|physical count|set.*to|update.*to/.test(text)) {
+        var intent = vcExtractQtyIntent(text, 'STOCK_ADJUST');
+        if (intent) { vcShowConfirm(intent); return; }
+      }
+
+      vcToast('Not understood: "' + text + '". Try: "how much H-Beams" or "400 MT H-Beams received"', 'warning', 6000);
+    }
+
+    function vcKeyword(text, removePattern) {
+      var clean = text.replace(removePattern, '').replace(/\s+/g, ' ').trim();
+      return clean.length > 2 ? clean : null;
+    }
+
+    function vcExtractQtyIntent(text, action) {
+      var qm = text.match(/(\d+(?:\.\d+)?)/);
+      if (!qm) return null;
+      var uom = (text.match(/\b(mt|kg|set|sft|ltr|ea|roll|pcs|ton|tons|meter|sqft)\b/i) || [])[1];
+      var wh  = (text.match(/warehouse\s*([\w-]+)/i) || text.match(/\b(wh-[\w-]+)/i) || [])[1];
+      var bin = (text.match(/bin\s*([\w-]+)/i) || [])[1];
+      var kw  = text
+        .replace(/\d+(?:\.\d+)?/g,'')
+        .replace(/mt|kg|set|sft|ltr|ea|roll|pcs|ton|tons|meter|sqft/gi,'')
+        .replace(/receiv\w*|receipt|goods receipt|incoming|arrived|delivered/gi,'')
+        .replace(/adjust|set stock|update stock|correct|physical count|set|update|to/gi,'')
+        .replace(/warehouse[\s\w-]*/gi,'').replace(/bin[\s\w-]*/gi,'')
+        .replace(/\s+/g,' ').trim();
+      return { action: action, quantity: parseFloat(qm[1]), uom: uom ? uom.toUpperCase() : null, keyword: kw, warehouse: wh || null, bin: bin || null };
+    }
+
+    /* ── FUZZY MATCH ── */
+    function vcFuzzy(keyword, list) {
+      if (!list || !list.length || !keyword) return null;
+      var kw = keyword.toLowerCase();
+      var words = kw.split(' ').filter(function(w){ return w.length > 1; });
+      var best = null, bestScore = 0;
+      list.forEach(function(m) {
+        var name = ((m.material_name || m.name || '')).toLowerCase();
+        var code = ((m.material_code || m.code || '')).toLowerCase();
+        var score = 0;
+        words.forEach(function(w) {
+          if (name.includes(w)) score += 3;
+          if (code.includes(w)) score += 2;
+        });
+        if (score > bestScore) { bestScore = score; best = m; }
+      });
+      return bestScore > 0 ? best : null;
+    }
+
+    /* ── STOCK QUERY ── */
+    function vcQueryStock(keyword) {
+      vcToast('🔍 Searching for: ' + keyword, 'info', 3000);
+
+      if (!window.liveMode) {
+        // Demo mode: search mockData
+        var found = vcFuzzy(keyword, VC.materials);
+        if (!found) {
+          vcSpeak('No material found for ' + keyword);
+          vcToast('No material found matching: ' + keyword, 'warning', 4000);
+          return;
+        }
+        // Find balance in mockData
+        var bal = null;
+        try {
+          bal = (window.mockData.balances || []).find(function(b) {
+            return b.material_code === found.code || b.material_code === found.material_code;
+          });
+        } catch(e) {}
+        var qty = bal ? bal.qty_on_hand : 0;
+        var status = bal ? bal.stock_status : 'UNKNOWN';
+        var msg = (found.name || found.material_name) + ': ' + qty + ' ' + (found.uom || '') + ' on hand. Status: ' + status + '.';
+        vcSpeak(msg);
+        vcToast('📦 ' + (found.code || found.material_code) + ' — ' + qty + ' ' + (found.uom || '') + ' (' + status + ')', 'info', 6000);
+        return;
+      }
+
+      // Live mode: call ORDS
+      fetch(VC.apiBase + '/voice/stock?search=' + encodeURIComponent(keyword))
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          var items = data.items || [];
+          if (!items.length) {
+            vcSpeak('No material found for ' + keyword);
+            vcToast('No match found for: ' + keyword, 'warning', 4000);
+            return;
+          }
+          var m = items[0];
+          var msg = m.material_name + ': ' + m.qty_on_hand + ' ' + (m.uom || '') +
+            ' on hand. Status: ' + (m.stock_status || 'N/A') + '. Warehouse: ' + (m.warehouse_code || 'N/A') + '.';
+          vcSpeak(msg);
+          vcToast('📦 ' + m.material_code + ' — ' + m.qty_on_hand + ' ' + (m.uom||'') + ' (' + (m.stock_status||'N/A') + ')', 'info', 6000);
+        })
+        .catch(function() {
+          vcToast('Could not reach database. Switch to Demo Mode or check your connection.', 'error', 5000);
+        });
+    }
+
+    /* ── CONFIRM MODAL ── */
+    function vcShowConfirm(intent) {
+      var mat = vcFuzzy(intent.keyword, VC.materials);
+      intent.matched = mat;
+
+      var matName = mat ? (mat.material_name || mat.name || mat.material_code || mat.code) : null;
+      var matCode = mat ? (mat.material_code || mat.code) : null;
+      var actionLabel = intent.action === 'GOODS_RECEIPT' ? 'Goods Receipt (MIGO 101)' : 'Stock Adjustment (MIGO 551)';
+
+      document.getElementById('vc-modal-body').innerHTML =
+        '<div class="vc-row"><span class="vc-label">Action</span><span class="vc-value">' + actionLabel + '</span></div>' +
+        '<div class="vc-row"><span class="vc-label">Material</span><span class="vc-value">' + (matCode ? matCode + ' — ' + matName : '⚠️ Unknown') + '</span></div>' +
+        '<div class="vc-row"><span class="vc-label">Quantity</span><span class="vc-value">' + intent.quantity + ' ' + (intent.uom || '') + '</span></div>' +
+        (intent.warehouse ? '<div class="vc-row"><span class="vc-label">Warehouse</span><span class="vc-value">' + intent.warehouse + '</span></div>' : '') +
+        (intent.bin       ? '<div class="vc-row"><span class="vc-label">Bin</span><span class="vc-value">' + intent.bin + '</span></div>' : '') +
+        (!mat ? '<div class="vc-warn">⚠️ Material could not be matched exactly from: "<em>' + intent.keyword + '</em>". Please verify before posting.</div>' : '');
+
+      VC.pendingIntent = intent;
+      document.getElementById('vc-btn-confirm').disabled = false;
+      document.getElementById('vc-modal').classList.add('active');
+    }
+
+    window.vcCancel = function() {
+      document.getElementById('vc-modal').classList.remove('active');
+      VC.pendingIntent = null;
+    };
+
+    /* ── EXECUTE ── */
+    window.vcExecute = function() {
+      var intent = VC.pendingIntent;
+      if (!intent) return;
+      document.getElementById('vc-btn-confirm').disabled = true;
+
+      var mat = intent.matched;
+      var matId = mat ? (mat.material_id || mat.id) : null;
+
+      // Resolve warehouse/bin
+      var whId  = vcResolveWh(intent.warehouse);
+      var binId = vcResolveBin(intent.bin, whId);
+      if (!whId  && VC.warehouses.length) whId  = VC.warehouses[0].warehouse_id || VC.warehouses[0].id;
+      if (!binId && VC.bins.length)       binId = VC.bins[0].bin_id || VC.bins[0].id;
+      if (!whId)  whId  = 101;
+      if (!binId) binId = 501;
+
+      if (!window.liveMode) {
+        // Demo Mode — simulate success
+        vcCancel();
+        var matName = mat ? (mat.material_name || mat.name || 'material') : 'material';
+        var msg = 'Demo: ' + intent.quantity + ' ' + (intent.uom || 'units') + ' of ' + matName + ' would be posted in Live Mode.';
+        vcSpeak(msg);
+        vcToast('✅ ' + msg, 'success', 5000);
+        return;
+      }
+
+      // Live Mode — call ORDS
+      var endpoint = intent.action === 'GOODS_RECEIPT' ? '/voice/receipt' : '/voice/adjust';
+      var body = intent.action === 'GOODS_RECEIPT'
+        ? { material_id: matId, warehouse_id: whId, bin_id: binId, quantity: intent.quantity, po_id: null, performed_by: 'VOICE_CMD', remarks: 'Posted via Voice Command' }
+        : { material_id: matId, warehouse_id: whId, bin_id: binId, new_quantity: intent.quantity, performed_by: 'VOICE_CMD', remarks: 'Adjusted via Voice Command' };
+
+      fetch(VC.apiBase + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(res) {
+        vcCancel();
+        var matName = mat ? (mat.material_name || mat.name || 'material') : 'material';
+        if (res.status === 'SUCCESS') {
+          var msg = 'Done. ' + intent.quantity + ' ' + (intent.uom || 'units') + ' of ' + matName + ' posted successfully.';
+          vcSpeak(msg);
+          vcToast('✅ ' + msg, 'success', 5000);
+          if (typeof refreshInventoryData === 'function') refreshInventoryData();
+        } else {
+          vcToast('❌ Error: ' + (res.message || 'Unknown error'), 'error', 6000);
+        }
+      })
+      .catch(function(e) {
+        vcCancel();
+        vcToast('❌ Network error. Check ORDS connection.', 'error', 5000);
+      });
+    };
+
+    /* ── HELPERS ── */
+    function vcResolveWh(spoken) {
+      if (!spoken || !VC.warehouses.length) return null;
+      var s = spoken.toLowerCase();
+      var f = VC.warehouses.find(function(w) {
+        return (w.warehouse_code || w.code || '').toLowerCase().includes(s) ||
+               (w.warehouse_name || w.name || '').toLowerCase().includes(s);
+      });
+      return f ? (f.warehouse_id || f.id) : null;
+    }
+
+    function vcResolveBin(spoken, whId) {
+      if (!spoken || !VC.bins.length) return null;
+      var s = spoken.toLowerCase();
+      var f = VC.bins.find(function(b) {
+        return (b.bin_code || b.code || '').toLowerCase().includes(s) &&
+               (!whId || b.warehouse_id === whId);
+      });
+      return f ? (f.bin_id || f.id) : null;
+    }
+
+    function vcSpeak(text) {
+      if (!VC.synth) return;
+      VC.synth.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.92;
+      u.pitch = 1;
+      VC.synth.speak(u);
+    }
+
+    function vcToast(msg, type, duration) {
+      var colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+      var t = document.createElement('div');
+      t.className = 'vc-toast';
+      t.style.background = colors[type] || colors.info;
+      t.style.color = '#fff';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(function(){ t.remove(); }, 400); }, duration || 4000);
+    }
+
+    // Init on load
+    document.addEventListener('DOMContentLoaded', function() { vcInit(); });
+
+  })();
+  </script>
+
+</body>
+<script>
+// ============================================================
+// MPPMS Phase 12 — Digital Twin & Smart Sourcing JS Engine
+// ============================================================
+
+// ---- Shared state ----
+let _currentStrategy = 'BALANCED_RISK';
+let _lastOptId       = null;
+
+// ---- Utility ----
+function fmt(n)  { return n == null ? '—' : Number(n).toLocaleString('en-IN'); }
+function fmtInr(n){ return '₹' + fmt(Math.round(n)); }
+
+// ============================================================
+// DIGITAL TWIN — Slider UI helpers
+// ============================================================
+function updateSliderDisplay(sliderId, displayId) {
+  const slider = document.getElementById(sliderId);
+  const display = document.getElementById(displayId);
+  if (!slider || !display) return;
+  const val = parseInt(slider.value);
+  const isTariffOrDemand = sliderId.includes('tariff') || sliderId.includes('demand');
+  display.textContent = val + (isTariffOrDemand ? '%' : ' days');
+  // Change colour as value rises
+  display.style.color = val === 0 ? 'var(--success)' : val < 30 ? 'var(--warning)' : 'var(--danger)';
+}
+
+function initDigitalTwinUI() {
+  // Reset sliders to 0 on first load
+  ['dt-shipping-delay','dt-tariff-spike','dt-demand-surge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value === '0') {
+      el.value = 0;
+    }
+  });
+  updateSliderDisplay('dt-shipping-delay','dt-delay-val');
+  updateSliderDisplay('dt-tariff-spike','dt-tariff-val');
+  updateSliderDisplay('dt-demand-surge','dt-demand-val');
+  lucide.createIcons();
+}
+
+// ============================================================
+// DIGITAL TWIN — Run Simulation
+// ============================================================
+function runDigitalTwinSim() {
+  const delay  = parseInt(document.getElementById('dt-shipping-delay').value) || 0;
+  const tariff = parseInt(document.getElementById('dt-tariff-spike').value) || 0;
+  const demand = parseInt(document.getElementById('dt-demand-surge').value) || 0;
+
+  const btn = document.getElementById('dt-run-btn');
+  const msg = document.getElementById('dt-status-msg');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader"></i> Running 1,000 Trials...';
+  lucide.createIcons();
+  msg.textContent = '';
+
+  if (liveMode) {
+    fetch(`${baseRestUrl}/digital-twin/run-full-chain`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        p_scenario_name: `Portal Sim — Delay:${delay}d Tariff:${tariff}% Demand:+${demand}%`,
+        p_shipping_delay: delay,
+        p_tariff_spike_pct: tariff,
+        p_demand_surge_pct: demand,
+        p_trial_count: 1000
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      const scenId = data.scenario_id;
+      return Promise.all([
+        fetch(`${baseRestUrl}/digital-twin/summary/${scenId}`).then(r => r.json()),
+        fetch(`${baseRestUrl}/digital-twin/heatmap/${scenId}`).then(r => r.json())
+      ]);
+    })
+    .then(([summary, heatmap]) => {
+      const s = summary.items?.[0] || {};
+      renderDigitalTwinKPIs({
+        riskPct: s.stockout_risk_pct, p95: s.p95_exposure_inr,
+        bufferDays: s.safe_buffer_days, trials: 1000
+      });
+      renderHeatmapTable(heatmap.items || []);
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="zap"></i> Run Monte Carlo Simulation';
+      lucide.createIcons();
+    })
+    .catch(() => runDigitalTwinSimMock(delay, tariff, demand, btn, msg));
+  } else {
+    // Simulate processing delay for demo effect
+    setTimeout(() => runDigitalTwinSimMock(delay, tariff, demand, btn, msg), 1200);
+  }
+}
+
+function runDigitalTwinSimMock(delay, tariff, demand, btn, msg) {
+  // Derive mock risk from slider values (higher shocks = higher risk)
+  const shockLevel = (delay / 90 * 0.4) + (tariff / 100 * 0.35) + (demand / 100 * 0.25);
+  const stockoutRisk = Math.min(99, Math.round(shockLevel * 100 * (0.85 + Math.random() * 0.3)));
+  const p95Exposure  = Math.round(150000 + shockLevel * 800000 + Math.random() * 100000);
+  const bufferDays   = Math.max(0, Math.round(30 - delay * 0.7 - demand * 0.15));
+
+  renderDigitalTwinKPIs({ riskPct: stockoutRisk, p95: p95Exposure, bufferDays, trials: 1000 });
+
+  // Adjust heatmap risks based on shock level
+  const heatmap = (window.mockData.digitalTwin?.mockHeatmap || []).map(row => ({
+    ...row,
+    riskPct:  Math.min(99, row.riskPct  + shockLevel * 30),
+    exposure: Math.round(row.exposure * (1 + shockLevel * 0.5)),
+    risk: (row.riskPct + shockLevel * 30) > 60 ? 'RED' : (row.riskPct + shockLevel * 30) > 20 ? 'AMBER' : 'GREEN'
+  }));
+  renderHeatmapTable(heatmap);
+
+  document.getElementById('dt-scenario-badge').textContent =
+    `Scenario: Delay ${delay}d | Tariff +${tariff}% | Demand +${demand}% | 1,000 Trials`;
+
+  btn.disabled = false;
+  btn.innerHTML = '<i data-lucide="zap"></i> Run Monte Carlo Simulation';
+  msg.textContent = `✅ Simulation complete. ${stockoutRisk}% Stockout Risk detected.`;
+  lucide.createIcons();
+}
+
+function renderDigitalTwinKPIs({ riskPct, p95, bufferDays, trials }) {
+  const riskEl = document.getElementById('dt-risk-pct');
+  riskEl.textContent = riskPct + '%';
+  riskEl.style.color = riskPct > 60 ? 'var(--danger)' : riskPct > 20 ? 'var(--warning)' : 'var(--success)';
+
+  document.getElementById('dt-p95-exposure').textContent = fmtInr(p95);
+  const bufEl = document.getElementById('dt-buffer-days');
+  bufEl.textContent = bufferDays + ' days';
+  bufEl.style.color = bufferDays > 14 ? 'var(--success)' : bufferDays > 7 ? 'var(--warning)' : 'var(--danger)';
+  document.getElementById('dt-trial-count').textContent = fmt(trials);
+}
+
+function renderHeatmapTable(rows) {
+  const tbody = document.getElementById('dt-heatmap-body');
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No heatmap data available.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const risk = r.risk || r.RISK_LEVEL;
+    const riskClass = risk === 'RED' ? 'risk-cell-red' : risk === 'AMBER' ? 'risk-cell-amber' : 'risk-cell-green';
+    const riskIcon  = risk === 'RED' ? '<i data-lucide="alert-triangle" style="width:14px;height:14px;color:var(--danger)"></i>' :
+                      risk === 'AMBER' ? '<i data-lucide="shield-alert" style="width:14px;height:14px;color:var(--warning)"></i>' :
+                      '<i data-lucide="check-circle-2" style="width:14px;height:14px;color:var(--success)"></i>';
+    return `<tr>
+      <td><span class="${riskClass}">${riskIcon} ${risk}</span></td>
+      <td><strong>${r.code || r.MATERIAL_CODE}</strong></td>
+      <td>${r.name || r.MATERIAL_NAME}</td>
+      <td>${fmt(r.stock ?? r.CURRENT_STOCK)}</td>
+      <td>${fmt(Math.round(r.demand ?? r.ADJUSTED_DEMAND))}</td>
+      <td>${r.leadDays ?? r.EFFECTIVE_LEAD_DAYS} days</td>
+      <td><strong class="${riskClass}">${parseFloat(r.riskPct ?? r.STOCKOUT_RISK_PCT).toFixed(1)}%</strong></td>
+      <td>${fmtInr(r.exposure ?? r.FINANCIAL_EXPOSURE_INR)}</td>
+      <td style="font-size:0.8rem;max-width:280px;color:var(--text-sub);">${r.rec || r.RECOMMENDATION}</td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+// ============================================================
+// SMART SOURCING — Strategy Toggle
+// ============================================================
+function selectStrategy(btn) {
+  document.querySelectorAll('.strategy-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _currentStrategy = btn.getAttribute('data-strategy');
+  document.getElementById('ss-strategy-badge').textContent = 'Strategy: ' + btn.textContent.trim();
+}
+
+function initSmartSourcingUI() {
+  _lastOptId = null;
+  const acceptBtn = document.getElementById('ss-accept-btn');
+  if (acceptBtn) acceptBtn.style.display = 'none';
+  lucide.createIcons();
+}
+
+// ============================================================
+// SMART SOURCING — Run Optimizer
+// ============================================================
+function runSmartSourcing() {
+  const matId = document.getElementById('ss-material-select').value;
+  const qty   = parseFloat(document.getElementById('ss-qty').value) || 500;
+
+  if (!matId) {
+    alert('Please select a material SKU before running the optimizer.');
+    return;
+  }
+
+  if (liveMode) {
+    fetch(`${baseRestUrl}/smart-sourcing/optimise`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_material_id: matId, p_required_qty: qty, p_strategy: _currentStrategy })
+    })
+    .then(r => r.json())
+    .then(data => {
+      _lastOptId = data.optimisation_id;
+      return Promise.all([
+        fetch(`${baseRestUrl}/smart-sourcing/summary/${_lastOptId}`).then(r => r.json()),
+        fetch(`${baseRestUrl}/smart-sourcing/allocations/${_lastOptId}`).then(r => r.json())
+      ]);
+    })
+    .then(([summary, allocs]) => {
+      const s = summary.items?.[0] || {};
+      renderSourcingKPIs(s.OPTIMISATION_SCORE, s.VENDOR_COUNT, s.TOTAL_BLENDED_COST_INR, s.EXPECTED_DELIVERY_DATE);
+      renderAllocationTable(allocs.items || []);
+      document.getElementById('ss-accept-btn').style.display = '';
+    })
+    .catch(() => runSmartSourcingMock(qty));
+  } else {
+    runSmartSourcingMock(qty);
+  }
+}
+
+function runSmartSourcingMock(qty) {
+  const allocations = (window.mockData.smartSourcing?.[_currentStrategy] || []).map(v => ({
+    ...v,
+    allocQty: Math.round(qty * v.allocPct / 100)
+  }));
+
+  // Compute summary KPIs from allocations
+  const totalInr     = allocations.reduce((s, v) => s + (v.allocQty * (v.curr === 'SAR' ? v.price * 22.15 : v.price)), 0);
+  const avgScore     = allocations.reduce((s, v) => s + v.compScore, 0) / (allocations.length || 1);
+  const maxLead      = Math.max(...allocations.map(v => v.leadDays));
+  const delivDate    = new Date(); delivDate.setDate(delivDate.getDate() + maxLead);
+  const delivStr     = delivDate.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+
+  renderSourcingKPIs(avgScore.toFixed(1), allocations.length, totalInr, delivStr);
+  renderAllocationTable(allocations, true);
+  document.getElementById('ss-accept-btn').style.display = '';
+  lucide.createIcons();
+}
+
+function renderSourcingKPIs(score, vendorCount, totalInr, delivDate) {
+  document.getElementById('ss-opt-score').textContent    = score + ' / 100';
+  document.getElementById('ss-vendor-count').textContent = vendorCount;
+  document.getElementById('ss-total-inr').textContent    = fmtInr(totalInr);
+  document.getElementById('ss-delivery-date').textContent = delivDate || '—';
+}
+
+function renderAllocationTable(rows, isMock) {
+  const tbody = document.getElementById('ss-allocation-body');
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No allocations generated.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(v => {
+    const pct    = isMock ? v.allocPct : parseFloat(v.ALLOCATION_PCT || v.allocPct);
+    const qty    = isMock ? v.allocQty : (v.ALLOCATED_QTY || v.allocQty);
+    const curr   = v.curr || v.CURRENCY;
+    const price  = v.price || v.UNIT_PRICE;
+    const inr    = isMock ? (v.curr === 'SAR' ? v.allocQty * v.price * 22.15 : v.allocQty * v.price) : (v.LINE_TOTAL_INR || v.totalInr);
+    const lead   = v.leadDays || v.EXPECTED_DELIVERY_DAYS;
+    const rankNum = parseInt(v.rank || v.ASL_RANK) || 1;
+    const rankBadge = `<span class="badge badge-info" style="gap:4px;"><i data-lucide="award" style="width:12px;height:12px;"></i> Rank ${rankNum}</span>`;
+    const currBadge = `<span class="badge badge-draft">${curr}</span>`;
+    return `<tr>
+      <td><strong>${v.code || v.SUPPLIER_CODE}</strong></td>
+      <td>${v.name || v.SUPPLIER_NAME}</td>
+      <td>${rankBadge}</td>
+      <td>
+        <div style="font-weight:700;">${pct.toFixed(1)}%</div>
+        <div class="alloc-bar-wrap" style="margin-top:5px;">
+          <div class="alloc-bar-fill" style="width:${pct}%;"></div>
+        </div>
+      </td>
+      <td>${fmt(qty)}</td>
+      <td>${currBadge} ${fmt(price)}</td>
+      <td><strong>${fmtInr(inr)}</strong></td>
+      <td>${lead} days</td>
+      <td><span class="badge badge-info">${v.costScore || v.COST_SCORE}</span></td>
+      <td><span class="badge badge-success">${v.delivScore || v.DELIVERY_SCORE}</span></td>
+      <td><span class="badge badge-warning">${v.qualScore || v.QUALITY_SCORE}</span></td>
+      <td><strong style="color:var(--primary);">${(v.compScore || v.COMPOSITE_SCORE || 0).toFixed(1)}</strong></td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function acceptSourcingSplit() {
+  if (liveMode && _lastOptId) {
+    fetch(`${baseRestUrl}/smart-sourcing/accept/${_lastOptId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_accepted_by: 'PORTAL_USER' })
+    })
+    .then(r => r.json())
+    .then(data => alert('✅ ' + data.message))
+    .catch(() => alert('✅ Demo: Split accepted! Purchase Orders created for all vendor allocations.'));
+  } else {
+    alert('✅ Demo Mode: Split accepted! In Live Mode, this creates ' + document.querySelectorAll('#ss-allocation-body tr').length + ' Purchase Orders via PKG_SMART_SOURCING.ACCEPT_SPLIT().');
+  }
+}
+</script>
+
+</body>
+</html>
+

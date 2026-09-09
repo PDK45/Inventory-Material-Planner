@@ -1,0 +1,147 @@
+-- ============================================================
+-- MPPMS :: 22_inventory_views_and_data.sql
+-- Purpose : Inventory views & seed sample data
+-- Run As  : MPPMS user on FREEPDB1
+-- ============================================================
+SET ECHO ON
+SET SERVEROUTPUT ON SIZE UNLIMITED
+SET DEFINE OFF
+
+PROMPT ============================================================
+PROMPT  MPPMS :: Phase 13 - Inventory Views & Seed Data
+PROMPT ============================================================
+
+-- ------------------------------------------------------------
+-- VIEW 1: VW_INVENTORY_STOCK
+-- ------------------------------------------------------------
+CREATE OR REPLACE VIEW VW_INVENTORY_STOCK AS
+SELECT
+    ib.BALANCE_ID,
+    m.MATERIAL_ID,
+    m.MATERIAL_CODE,
+    m.MATERIAL_NAME,
+    m.CATEGORY                           AS MATERIAL_CATEGORY,
+    m.UNIT_OF_MEASURE,
+    m.STANDARD_COST,
+    w.WAREHOUSE_ID,
+    w.WAREHOUSE_CODE,
+    w.WAREHOUSE_NAME,
+    w.PLANT_LOCATION,
+    b.BIN_ID,
+    b.BIN_CODE,
+    b.ZONE_NAME,
+    ib.QTY_ON_HAND,
+    ib.QTY_RESERVED,
+    (ib.QTY_ON_HAND - ib.QTY_RESERVED)   AS QTY_AVAILABLE,
+    ib.QTY_IN_QUALITY,
+    ib.QTY_BLOCKED,
+    (ib.QTY_ON_HAND * m.STANDARD_COST)   AS STOCK_VALUE,
+    m.SAFETY_STOCK                       AS MIN_STOCK_LEVEL,
+    m.REORDER_LEVEL                      AS REORDER_POINT,
+    m.SAFETY_STOCK,
+    CASE 
+        WHEN (ib.QTY_ON_HAND - ib.QTY_RESERVED) <= m.SAFETY_STOCK THEN 'CRITICAL'
+        WHEN (ib.QTY_ON_HAND - ib.QTY_RESERVED) <= m.REORDER_LEVEL THEN 'LOW'
+        ELSE 'NORMAL'
+    END                                  AS STOCK_STATUS,
+    ib.LAST_UPDATED_DATE
+FROM INVENTORY_BALANCE ib
+JOIN MATERIAL_MASTER   m ON m.MATERIAL_ID  = ib.MATERIAL_ID
+JOIN WAREHOUSE_MASTER  w ON w.WAREHOUSE_ID = ib.WAREHOUSE_ID
+JOIN STORAGE_BIN       b ON b.BIN_ID       = ib.BIN_ID;
+
+-- ------------------------------------------------------------
+-- VIEW 2: VW_GOODS_MOVEMENT_LOG
+-- ------------------------------------------------------------
+CREATE OR REPLACE VIEW VW_GOODS_MOVEMENT_LOG AS
+SELECT
+    it.TRANSACTION_ID,
+    it.TRANSACTION_NUM,
+    it.MOVEMENT_CODE,
+    it.TRANSACTION_TYPE,
+    m.MATERIAL_CODE,
+    m.MATERIAL_NAME,
+    m.UNIT_OF_MEASURE,
+    w.WAREHOUSE_CODE,
+    w.WAREHOUSE_NAME,
+    b.BIN_CODE,
+    it.QUANTITY,
+    (it.QUANTITY * m.STANDARD_COST)       AS TRANSACTION_VALUE,
+    it.REFERENCE_TYPE,
+    it.REFERENCE_ID,
+    it.PERFORMED_BY,
+    it.REMARKS,
+    TO_CHAR(it.TRANSACTION_DATE,'DD-Mon-YYYY HH24:MI') AS TRANSACTION_TIME,
+    it.TRANSACTION_DATE
+FROM INVENTORY_TRANSACTION it
+JOIN MATERIAL_MASTER       m ON m.MATERIAL_ID  = it.MATERIAL_ID
+JOIN WAREHOUSE_MASTER      w ON w.WAREHOUSE_ID = it.WAREHOUSE_ID
+JOIN STORAGE_BIN           b ON b.BIN_ID       = it.BIN_ID;
+
+PROMPT [OK] Inventory views created.
+
+-- ------------------------------------------------------------
+-- SEED DATA: Warehouses
+-- ------------------------------------------------------------
+INSERT INTO WAREHOUSE_MASTER (WAREHOUSE_ID, WAREHOUSE_CODE, WAREHOUSE_NAME, PLANT_LOCATION, WAREHOUSE_TYPE, MANAGER_NAME, STATUS)
+VALUES (101, 'WH-RAW-01', 'Main Raw Material Warehouse', 'Plant 1 - East Wing', 'RAW_MATERIAL', 'Vikram Singh', 'ACTIVE');
+
+INSERT INTO WAREHOUSE_MASTER (WAREHOUSE_ID, WAREHOUSE_CODE, WAREHOUSE_NAME, PLANT_LOCATION, WAREHOUSE_TYPE, MANAGER_NAME, STATUS)
+VALUES (102, 'WH-FG-01', 'Finished Goods Distribution Center', 'Plant 1 - South Hub', 'FINISHED_GOODS', 'Ananya Roy', 'ACTIVE');
+
+INSERT INTO WAREHOUSE_MASTER (WAREHOUSE_ID, WAREHOUSE_CODE, WAREHOUSE_NAME, PLANT_LOCATION, WAREHOUSE_TYPE, MANAGER_NAME, STATUS)
+VALUES (103, 'WH-SPARE-01', 'Maintenance & Spares Store', 'Plant 2 - Service Bay', 'SPARE_PARTS', 'Rohan Sharma', 'ACTIVE');
+
+-- ------------------------------------------------------------
+-- SEED DATA: Storage Bins
+-- ------------------------------------------------------------
+INSERT INTO STORAGE_BIN (BIN_ID, WAREHOUSE_ID, BIN_CODE, ZONE_NAME, MAX_CAPACITY, STATUS)
+VALUES (501, 101, 'BIN-A1-RACK1', 'Zone A - Metals', 5000, 'AVAILABLE');
+
+INSERT INTO STORAGE_BIN (BIN_ID, WAREHOUSE_ID, BIN_CODE, ZONE_NAME, MAX_CAPACITY, STATUS)
+VALUES (502, 101, 'BIN-A2-RACK2', 'Zone A - Plastics', 5000, 'AVAILABLE');
+
+INSERT INTO STORAGE_BIN (BIN_ID, WAREHOUSE_ID, BIN_CODE, ZONE_NAME, MAX_CAPACITY, STATUS)
+VALUES (503, 101, 'BIN-B1-ELEC',  'Zone B - Electronics', 2000, 'AVAILABLE');
+
+INSERT INTO STORAGE_BIN (BIN_ID, WAREHOUSE_ID, BIN_CODE, ZONE_NAME, MAX_CAPACITY, STATUS)
+VALUES (504, 102, 'BIN-FG-BAY01', 'Finished Goods Bay 1', 10000, 'AVAILABLE');
+
+-- ------------------------------------------------------------
+-- SEED DATA: Initial Stock Balances
+-- ------------------------------------------------------------
+-- Material 5001 (CR Steel Sheet 2mm) -> WH-RAW-01, BIN-A1-RACK1
+INSERT INTO INVENTORY_BALANCE (BALANCE_ID, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QTY_ON_HAND, QTY_RESERVED, QTY_IN_QUALITY, QTY_BLOCKED)
+VALUES (1001, 5001, 101, 501, 1200, 200, 0, 0);
+
+-- Material 5002 (Aluminum Alloy Ingot) -> WH-RAW-01, BIN-A1-RACK1
+INSERT INTO INVENTORY_BALANCE (BALANCE_ID, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QTY_ON_HAND, QTY_RESERVED, QTY_IN_QUALITY, QTY_BLOCKED)
+VALUES (1002, 5002, 101, 501, 600, 100, 0, 0);
+
+-- Material 5003 (ABS Plastic Granules) -> WH-RAW-01, BIN-A2-RACK2
+INSERT INTO INVENTORY_BALANCE (BALANCE_ID, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QTY_ON_HAND, QTY_RESERVED, QTY_IN_QUALITY, QTY_BLOCKED)
+VALUES (1003, 5003, 101, 502, 2500, 500, 0, 0);
+
+-- Material 5004 (Electric Motor 1.5HP) -> WH-RAW-01, BIN-B1-ELEC
+INSERT INTO INVENTORY_BALANCE (BALANCE_ID, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QTY_ON_HAND, QTY_RESERVED, QTY_IN_QUALITY, QTY_BLOCKED)
+VALUES (1004, 5004, 101, 503, 150, 30, 0, 0);
+
+-- Material 5005 (Microcontroller Board V2) -> WH-RAW-01, BIN-B1-ELEC
+INSERT INTO INVENTORY_BALANCE (BALANCE_ID, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QTY_ON_HAND, QTY_RESERVED, QTY_IN_QUALITY, QTY_BLOCKED)
+VALUES (1005, 5005, 101, 503, 80, 20, 0, 0);
+
+-- ------------------------------------------------------------
+-- SEED DATA: Goods Movement Transactions
+-- ------------------------------------------------------------
+INSERT INTO INVENTORY_TRANSACTION (TRANSACTION_ID, TRANSACTION_NUM, MOVEMENT_CODE, TRANSACTION_TYPE, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QUANTITY, REFERENCE_TYPE, REFERENCE_ID, PERFORMED_BY, REMARKS)
+VALUES (8001, 'TXN-2026-000001', '101', 'GOODS_RECEIPT', 5001, 101, 501, 1200, 'PO', 1, 'STORE_CLERK01', 'Initial PO Receipt (PO-2026-20001)');
+
+INSERT INTO INVENTORY_TRANSACTION (TRANSACTION_ID, TRANSACTION_NUM, MOVEMENT_CODE, TRANSACTION_TYPE, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QUANTITY, REFERENCE_TYPE, REFERENCE_ID, PERFORMED_BY, REMARKS)
+VALUES (8002, 'TXN-2026-000002', '101', 'GOODS_RECEIPT', 5003, 101, 502, 2500, 'PO', 2, 'STORE_CLERK01', 'Initial PO Receipt (PO-2026-20002)');
+
+INSERT INTO INVENTORY_TRANSACTION (TRANSACTION_ID, TRANSACTION_NUM, MOVEMENT_CODE, TRANSACTION_TYPE, MATERIAL_ID, WAREHOUSE_ID, BIN_ID, QUANTITY, REFERENCE_TYPE, REFERENCE_ID, PERFORMED_BY, REMARKS)
+VALUES (8003, 'TXN-2026-000003', '261', 'GOODS_ISSUE',   5001, 101, 501, 300,  'PRODUCTION_PLAN', 1, 'SHOPFLOOR01', 'Material issued to Plan PLAN-2026-00001');
+
+COMMIT;
+
+PROMPT [SUCCESS] Inventory views and seed data created successfully.

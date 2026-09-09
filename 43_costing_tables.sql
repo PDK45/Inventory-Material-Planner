@@ -1,0 +1,136 @@
+-- ============================================================
+-- MPPMS :: 43_costing_tables.sql
+-- Purpose : Material Standard Costing & Price Variance
+-- Run As  : MPPMS user on FREEPDB1
+-- ============================================================
+SET ECHO ON
+SET FEEDBACK ON
+SET DEFINE OFF
+
+PROMPT ============================================================
+PROMPT  MPPMS :: Phase 11e - Standard Costing Tables
+PROMPT ============================================================
+
+CREATE TABLE COST_PERIOD (
+    PERIOD_ID       NUMBER          GENERATED ALWAYS AS IDENTITY,
+    PERIOD_NAME     VARCHAR2(30)    NOT NULL,   -- e.g. 'AUG-2026'
+    FISCAL_YEAR     NUMBER(4)       NOT NULL,
+    PERIOD_NUMBER   NUMBER(2)       NOT NULL,   -- 1-12
+    START_DATE      DATE            NOT NULL,
+    END_DATE        DATE            NOT NULL,
+    STATUS          VARCHAR2(10)    DEFAULT 'OPEN',  -- OPEN / CLOSED / FUTURE
+    CLOSED_BY       VARCHAR2(60),
+    CLOSED_DATE     DATE,
+    CONSTRAINT PK_COST_PERIOD   PRIMARY KEY (PERIOD_ID),
+    CONSTRAINT UQ_PERIOD_NAME   UNIQUE (FISCAL_YEAR, PERIOD_NUMBER),
+    CONSTRAINT CHK_PERIOD_STATUS CHECK (STATUS IN ('OPEN','CLOSED','FUTURE'))
+);
+
+CREATE TABLE MATERIAL_COST (
+    COST_ID             NUMBER          GENERATED ALWAYS AS IDENTITY,
+    MATERIAL_ID         NUMBER          NOT NULL,
+    PERIOD_ID           NUMBER          NOT NULL,
+    STANDARD_COST       NUMBER(18,4)    NOT NULL,
+    CURRENCY_CODE       VARCHAR2(3)     DEFAULT 'INR',
+    COST_TYPE           VARCHAR2(15)    DEFAULT 'STANDARD',
+    EFFECTIVE_FROM      DATE            NOT NULL,
+    EFFECTIVE_TO        DATE,
+    SET_BY              VARCHAR2(60)    DEFAULT USER,
+    SET_DATE            DATE            DEFAULT SYSDATE,
+    NOTES               VARCHAR2(500),
+    CONSTRAINT PK_MATERIAL_COST     PRIMARY KEY (COST_ID),
+    CONSTRAINT FK_MC_MATERIAL       FOREIGN KEY (MATERIAL_ID)  REFERENCES MATERIAL_MASTER(MATERIAL_ID),
+    CONSTRAINT FK_MC_PERIOD         FOREIGN KEY (PERIOD_ID)    REFERENCES COST_PERIOD(PERIOD_ID),
+    CONSTRAINT FK_MC_CURRENCY       FOREIGN KEY (CURRENCY_CODE) REFERENCES CURRENCY_MASTER(CURRENCY_CODE),
+    CONSTRAINT UQ_MAT_COST_PERIOD   UNIQUE (MATERIAL_ID, PERIOD_ID, COST_TYPE),
+    CONSTRAINT CHK_MC_COST_TYPE     CHECK (COST_TYPE IN ('STANDARD','ACTUAL','ESTIMATED'))
+);
+
+CREATE TABLE PRICE_VARIANCE_LOG (
+    VARIANCE_ID             NUMBER          GENERATED ALWAYS AS IDENTITY,
+    PO_ID                   NUMBER          NOT NULL,
+    PO_LINE_ID              NUMBER,
+    MATERIAL_ID             NUMBER          NOT NULL,
+    GR_TRANSACTION_ID       NUMBER,
+    PERIOD_ID               NUMBER,
+    STANDARD_COST           NUMBER(18,4)    NOT NULL,
+    PO_UNIT_PRICE           NUMBER(18,4)    NOT NULL,
+    PO_CURRENCY             VARCHAR2(3),
+    PO_PRICE_IN_INR         NUMBER(18,4),   -- converted to base
+    QTY_RECEIVED            NUMBER(18,3)    NOT NULL,
+    PRICE_VARIANCE_UNIT     NUMBER(18,4),   -- (PO price in INR) - std cost
+    TOTAL_VARIANCE_AMOUNT   NUMBER(18,2),   -- variance × qty
+    VARIANCE_TYPE           VARCHAR2(15),   -- FAVOURABLE / ADVERSE
+    VARIANCE_PCT            NUMBER(8,3),
+    POSTED_DATE             DATE            DEFAULT SYSDATE,
+    CONSTRAINT PK_PPV               PRIMARY KEY (VARIANCE_ID),
+    CONSTRAINT FK_PPV_PO            FOREIGN KEY (PO_ID)         REFERENCES PURCHASE_ORDER(PO_ID),
+    CONSTRAINT FK_PPV_MATERIAL      FOREIGN KEY (MATERIAL_ID)   REFERENCES MATERIAL_MASTER(MATERIAL_ID),
+    CONSTRAINT FK_PPV_PERIOD        FOREIGN KEY (PERIOD_ID)     REFERENCES COST_PERIOD(PERIOD_ID),
+    CONSTRAINT CHK_PPV_TYPE         CHECK (VARIANCE_TYPE IN ('FAVOURABLE','ADVERSE'))
+);
+
+-- Indexes
+CREATE INDEX IDX_MATCOST_MATERIAL   ON MATERIAL_COST(MATERIAL_ID);
+CREATE INDEX IDX_MATCOST_PERIOD     ON MATERIAL_COST(PERIOD_ID);
+CREATE INDEX IDX_PPV_MATERIAL       ON PRICE_VARIANCE_LOG(MATERIAL_ID);
+CREATE INDEX IDX_PPV_PO             ON PRICE_VARIANCE_LOG(PO_ID);
+CREATE INDEX IDX_PPV_DATE           ON PRICE_VARIANCE_LOG(POSTED_DATE);
+
+-- Seed cost periods (last 6 months + next 3)
+DECLARE
+    v_date  DATE := ADD_MONTHS(TRUNC(SYSDATE,'MM'), -5);
+    v_month NUMBER;
+    v_year  NUMBER;
+    v_status VARCHAR2(10);
+BEGIN
+    FOR i IN 1..9 LOOP
+        v_month := TO_NUMBER(TO_CHAR(v_date, 'MM'));
+        v_year  := TO_NUMBER(TO_CHAR(v_date, 'YYYY'));
+        v_status := CASE WHEN v_date < TRUNC(SYSDATE,'MM') THEN 'CLOSED'
+                         WHEN v_date = TRUNC(SYSDATE,'MM') THEN 'OPEN'
+                         ELSE 'FUTURE' END;
+        BEGIN
+            INSERT INTO COST_PERIOD (PERIOD_NAME, FISCAL_YEAR, PERIOD_NUMBER, START_DATE, END_DATE, STATUS)
+            VALUES (TO_CHAR(v_date,'MON-YYYY'), v_year, v_month,
+                    v_date, LAST_DAY(v_date), v_status);
+        EXCEPTION WHEN DUP_VAL_ON_INDEX THEN NULL;
+        END;
+        v_date := ADD_MONTHS(v_date, 1);
+    END LOOP;
+    COMMIT;
+END;
+/
+
+-- Seed standard costs for existing materials (SAR-based for Zamil context)
+DECLARE
+    v_period_id NUMBER;
+BEGIN
+    SELECT PERIOD_ID INTO v_period_id FROM COST_PERIOD
+    WHERE STATUS = 'OPEN' AND ROWNUM = 1;
+
+    FOR m IN (SELECT MATERIAL_ID, MATERIAL_CODE, UNIT_OF_MEASURE FROM MATERIAL_MASTER) LOOP
+        BEGIN
+            INSERT INTO MATERIAL_COST (MATERIAL_ID, PERIOD_ID, STANDARD_COST, CURRENCY_CODE, COST_TYPE, EFFECTIVE_FROM, SET_BY)
+            VALUES (
+                m.MATERIAL_ID, v_period_id,
+                CASE
+                    WHEN m.MATERIAL_CODE LIKE 'ZML-ST-%' THEN ROUND(DBMS_RANDOM.VALUE(2800, 4200), 2)   -- SAR/MT structural steel
+                    WHEN m.MATERIAL_CODE LIKE 'ZML-BLT-%' THEN ROUND(DBMS_RANDOM.VALUE(15, 45), 2)      -- SAR/KG bolts
+                    WHEN m.MATERIAL_CODE LIKE 'ZML-WLD-%' THEN ROUND(DBMS_RANDOM.VALUE(8, 25), 2)       -- SAR/KG welding
+                    WHEN m.MATERIAL_CODE LIKE 'ZML-PNT-%' THEN ROUND(DBMS_RANDOM.VALUE(18, 55), 2)      -- SAR/LTR paint
+                    ELSE ROUND(DBMS_RANDOM.VALUE(50, 500), 2)
+                END,
+                'SAR', 'STANDARD', TRUNC(SYSDATE,'MM'), 'COST_CONTROLLER'
+            );
+        EXCEPTION WHEN DUP_VAL_ON_INDEX THEN NULL;
+        END;
+    END LOOP;
+    COMMIT;
+END;
+/
+
+PROMPT [OK] Costing tables created and seeded.
+SELECT TABLE_NAME FROM USER_TABLES
+WHERE TABLE_NAME IN ('COST_PERIOD','MATERIAL_COST','PRICE_VARIANCE_LOG')
+ORDER BY TABLE_NAME;
