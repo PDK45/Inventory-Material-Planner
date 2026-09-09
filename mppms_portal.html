@@ -3365,7 +3365,7 @@
               </div>
               <div class="approval-btn-group">
                 <button class="btn-approve" onclick="approvePR(${pr.id})">Approve</button>
-                <button class="btn-reject">Reject</button>
+                <button class="btn-reject" onclick="rejectPR(${pr.id})">Reject</button>
               </div>
             </div>
           `).join('');
@@ -3699,9 +3699,26 @@
         }
       } else {
         const pr = mockData.prs.find(p => p.id === prId);
-        pr.status = 'APPROVED';
-        alert(`Approved ${pr.number}. Vendor selection recommendation initialized.`);
-        renderProcurementData();
+        if (pr) {
+          pr.status = 'APPROVED';
+          alert(`Approved ${pr.number}. Ready to convert to Purchase Order.`);
+        }
+        initUI();
+      }
+    }
+
+    async function rejectPR(prId) {
+      if (liveMode) {
+        alert('PR Rejected');
+        refreshAllData();
+      } else {
+        const pr = mockData.prs.find(p => p.id === prId);
+        if (pr) {
+          pr.status = 'REJECTED';
+          mockData.dashboard.open_prs = Math.max(0, mockData.dashboard.open_prs - 1);
+          alert(`PR ${pr.number} has been rejected.`);
+        }
+        initUI();
       }
     }
 
