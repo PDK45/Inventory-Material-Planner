@@ -2569,6 +2569,11 @@
           { bill_item_id: 6002, bill_id: 5001, material_id: 5002, material_code: 'ZML-ST-COL-PEB', material_name: 'Zamil PEB Column Section 400x200', quantity_received: 200, warehouse_id: 101, warehouse_code: 'WH-RAW-01', bin_id: 501, bin_code: 'BIN-A1-RACK1', remarks: 'Received 200 units PEB Columns' }
         ]
       },
+      plans: [
+        { id: 101, name: 'PLAN-2026-001: ZML-PRD-2001 Industrial Centrifugal Pump (10 Units)', prod_id: 2001, qty: 10, status: 'ACTIVE' },
+        { id: 102, name: 'PLAN-2026-002: ZML-PRD-2002 Heavy Structural PEB Frame (5 Units)', prod_id: 2002, qty: 5, status: 'ACTIVE' },
+        { id: 103, name: 'PLAN-2026-003: ZML-PRD-2003 Substation Transformer (2 Units)', prod_id: 2003, qty: 2, status: 'ACTIVE' }
+      ],
       forecast: {
         periods: ['Jan-26', 'Feb-26', 'Mar-26', 'Apr-26', 'May-26', 'Jun-26', 'Jul-26', 'Aug-26', 'Sep-26', 'Oct-26', 'Nov-26', 'Dec-26'],
         actual: [120, 145, 130, 160, 175, 190, 210, null, null, null, null, null],
@@ -3564,6 +3569,15 @@
               <strong style="font-size:1.1rem; color:var(--success);">₹${totalVal.toLocaleString()}</strong>
             </div>
           </div>
+          <div style="margin-top: 18px; padding: 14px 18px; background: rgba(91, 156, 246, 0.08); border: 1px dashed var(--primary); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--primary); font-size: 0.92rem;"><i data-lucide="layers" style="vertical-align:middle;"></i> Transfer to MRP Planner?</strong>
+              <div style="font-size: 0.78rem; color: var(--text-sub); margin-top: 2px;">Save this calculated BOM batch as an active production plan and compute net material deficits.</div>
+            </div>
+            <button class="btn-primary" onclick="sendBOMToMRP(${prodId}, ${qty})">
+              <i data-lucide="arrow-right-circle"></i> Send to MRP Planner & Run Analysis
+            </button>
+          </div>
         `;
 
         treeHtml += '</div>';
@@ -3573,9 +3587,38 @@
       }, 1200);
     }
 
+    function sendBOMToMRP(prodId, qty) {
+      const prod = mockData.products.find(p => p.id == prodId);
+      const planNum = `PLAN-2026-00${mockData.plans.length + 1}`;
+      const planName = `${planNum}: ${prod ? prod.code + ' ' + prod.name : 'Custom BOM Run'} (${qty} Units)`;
+      
+      const newPlan = {
+        id: 100 + mockData.plans.length + 1,
+        name: planName,
+        prod_id: parseInt(prodId),
+        qty: qty,
+        status: 'ACTIVE'
+      };
+
+      if (!mockData.plans) mockData.plans = [];
+      mockData.plans.push(newPlan);
+      mockData.dashboard.active_plans = mockData.plans.length;
+      
+      // Re-populate select and set value
+      populateSelects();
+      document.getElementById('mrp-plan-select').value = newPlan.id;
+
+      alert(`✅ Created Production Plan ${planNum}. Transferring to MRP Engine...`);
+      switchTab('mrp');
+      runMRP();
+    }
+
     // 2. MRP Planner Action
     function runMRP() {
-      const planId = document.getElementById('mrp-plan-select').value;
+      const planIdSelect = document.getElementById('mrp-plan-select');
+      const planId = parseInt(planIdSelect ? planIdSelect.value : 101);
+      const plan = (mockData.plans || []).find(p => p.id === planId) || (mockData.plans ? mockData.plans[0] : { prod_id: 2001, qty: 10 });
+      
       const progContainer = document.getElementById('mrp-progress-container');
       const progFill = document.getElementById('mrp-progress-fill');
       const consoleBox = document.getElementById('mrp-console');
@@ -3583,30 +3626,30 @@
       progContainer.style.display = 'block';
       progFill.style.width = '0%';
       consoleBox.innerHTML = '';
-      logConsole('mrp-console', 'Initialising MRP engine scheduler...', 'info');
+      logConsole('mrp-console', `Initialising MRP engine for plan: ${plan ? plan.name : 'Selected Plan'}...`, 'info');
 
       setTimeout(() => {
         progFill.style.width = '35%';
-        logConsole('mrp-console', 'Fetching active production plan items...', 'info');
+        logConsole('mrp-console', `Loading BOM component hierarchy for Product ID ${plan ? plan.prod_id : 2001}...`, 'info');
         
         setTimeout(() => {
           progFill.style.width = '70%';
-          logConsole('mrp-console', 'Evaluating Bill of Material component dependencies...', 'info');
-          logConsole('mrp-console', 'Checking real-time warehouse balances & safety buffers...', 'info');
+          logConsole('mrp-console', `Target Batch Volume: ${plan ? plan.qty : 10} Units. Calculating gross material requirements...`, 'info');
+          logConsole('mrp-console', 'Evaluating warehouse stock on-hand & safety buffers...', 'info');
 
           setTimeout(async () => {
             progFill.style.width = '100%';
-            logConsole('mrp-console', 'Running net requirements deficiency calculation formulas...', 'info');
+            logConsole('mrp-console', 'Running net requirements deficiency formula: Net = Gross + Safety - OnHand', 'info');
             
             let status = 'SUCCESS';
-            let message = 'MRP Run completed. 3 critical shortages found.';
+            let message = 'MRP Calculation finished.';
 
             if (liveMode) {
               try {
                 const res = await fetch(`${baseRestUrl}/mrp/calculate`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ plan_id: parseInt(planId) })
+                  body: JSON.stringify({ plan_id: planId })
                 });
                 const data = await res.json();
                 status = data.status;
@@ -3616,41 +3659,52 @@
               }
             }
 
-            logConsole('mrp-console', `MRP Status: ${status} - ${message}`, status === 'SUCCESS' ? 'info' : 'err');
+            // Calculate dynamic net requirements from BOM items for this product
+            const targetProdId = plan ? plan.prod_id : 2001;
+            const targetQty = plan ? plan.qty : 10;
+            const bomItems = mockData.bom[targetProdId] || mockData.bom[2001] || [];
+            let dynamicShortages = [];
+            let mrpHtml = '';
 
-            // Render Results
+            bomItems.forEach(item => {
+              const matCode = item.material_code || 'MAT-5001';
+              const matName = item.material_name || 'Raw Material';
+              const grossReq = item.qty * targetQty;
+              const bal = mockData.balances.find(b => b.material_code === matCode) || { qty_on_hand: 0, safety_stock: 500 };
+              const onHand = bal.qty_on_hand;
+              const safety = bal.safety_stock || 500;
+              const netReq = Math.max(0, grossReq + safety - onHand);
+              const hasShortage = netReq > 0;
+
+              if (hasShortage) {
+                dynamicShortages.push({
+                  material_code: matCode,
+                  material_name: matName,
+                  deficit_qty: netReq
+                });
+              }
+
+              mrpHtml += `
+                <tr>
+                  <td><strong>${matCode}</strong><br><span style="font-size:0.75rem;color:var(--text-sub);">${matName}</span></td>
+                  <td>${grossReq.toLocaleString()} KG</td>
+                  <td>${onHand.toLocaleString()} KG</td>
+                  <td>${safety.toLocaleString()} KG</td>
+                  <td><span style="color:${hasShortage ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">${netReq > 0 ? netReq.toLocaleString() + ' KG' : '0 KG (Sufficient)'}</span></td>
+                  <td><strong>${netReq > 0 ? netReq.toLocaleString() + ' KG' : 'Direct Stock'}</strong></td>
+                  <td><span class="badge ${hasShortage ? 'badge-danger' : 'badge-success'}">${hasShortage ? 'Shortage' : 'Available'}</span></td>
+                </tr>
+              `;
+            });
+
+            window._lastMRPShortages = dynamicShortages;
+            logConsole('mrp-console', `MRP Status: ${status} - Evaluated ${bomItems.length} components. Found ${dynamicShortages.length} material deficit(s) requiring PR generation.`, dynamicShortages.length > 0 ? 'warn' : 'info');
+
             const mrpBody = document.getElementById('mrp-results-body');
-            mrpBody.innerHTML = `
-              <tr>
-                <td><strong>MAT-5001</strong><br>Steel Sheet</td>
-                <td>150 KG</td>
-                <td>400 KG</td>
-                <td>500 KG</td>
-                <td><span style="color:var(--danger)">250 KG</span></td>
-                <td><strong>250 KG</strong> (Batch standard)</td>
-                <td><span class="badge badge-danger">Shortage</span></td>
-              </tr>
-              <tr>
-                <td><strong>MAT-5002</strong><br>Steel Coil</td>
-                <td>400 KG</td>
-                <td>200 KG</td>
-                <td>300 KG</td>
-                <td><span style="color:var(--danger)">500 KG</span></td>
-                <td><strong>500 KG</strong> (Direct buy)</td>
-                <td><span class="badge badge-danger">Shortage</span></td>
-              </tr>
-              <tr>
-                <td><strong>MAT-5004</strong><br>Copper Wire</td>
-                <td>100 KG</td>
-                <td>80 KG</td>
-                <td>100 KG</td>
-                <td><span style="color:var(--danger)">120 KG</span></td>
-                <td><strong>120 KG</strong> (Low stock)</td>
-                <td><span class="badge badge-danger">Shortage</span></td>
-              </tr>
-            `;
+            if (mrpBody) mrpBody.innerHTML = mrpHtml;
 
-            document.getElementById('btn-raise-pr').style.display = 'inline-flex';
+            const btnPr = document.getElementById('btn-raise-pr');
+            if (btnPr) btnPr.style.display = dynamicShortages.length > 0 ? 'inline-flex' : 'none';
 
           }, 1000);
         }, 800);
@@ -3673,13 +3727,28 @@
           console.error(e);
         }
       } else {
-        alert('Demo Mode: Raised 3 Purchase Requisitions: PR-2026-0001, PR-2026-0002, PR-2026-0003.');
-        mockData.prs.push(
-          { id: 805, number: 'PR-2026-0005', material_code: 'MAT-5001', qty: 250, rating: 4.8, priority: 'HIGH', status: 'SUBMITTED' },
-          { id: 806, number: 'PR-2026-0006', material_code: 'MAT-5002', qty: 500, rating: 4.2, priority: 'HIGH', status: 'SUBMITTED' }
-        );
-        mockData.dashboard.open_prs += 2;
+        const shortages = window._lastMRPShortages || [
+          { material_code: 'MAT-5001', deficit_qty: 250 },
+          { material_code: 'MAT-5002', deficit_qty: 500 }
+        ];
+
+        shortages.forEach(s => {
+          const newPrNum = `PR-2026-000${mockData.prs.length + 1}`;
+          mockData.prs.unshift({
+            id: 850 + mockData.prs.length + 1,
+            number: newPrNum,
+            material_code: s.material_code,
+            qty: s.deficit_qty,
+            rating: 4.8,
+            priority: 'HIGH',
+            status: 'SUBMITTED'
+          });
+          mockData.dashboard.open_prs++;
+        });
+
+        alert(`Demo Mode: Raised ${shortages.length} Purchase Requisition(s) dynamically calculated from MRP net deficiency formulas.`);
         initUI();
+        switchTab('procurement');
       }
     }
 
