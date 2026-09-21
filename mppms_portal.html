@@ -1360,6 +1360,510 @@
         scroll-behavior: auto !important;
       }
     }
+
+    /* ============================================================
+       ARIA — AI Procurement Assistant Styles
+    ============================================================ */
+    #aria-toggle-pill {
+      position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+      z-index: 9000; display: flex; align-items: center; gap: 8px;
+      background: rgba(4,10,22,0.95); border: 1px solid rgba(0,212,138,0.35);
+      border-right: none; border-radius: 16px 0 0 16px;
+      padding: 10px 14px 10px 10px; cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: -4px 0 30px rgba(0,212,138,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+    }
+    #aria-toggle-pill:hover {
+      background: rgba(0,212,138,0.08); border-color: rgba(0,212,138,0.6);
+      box-shadow: -4px 0 40px rgba(0,212,138,0.25); padding-right: 18px;
+    }
+    .aria-pill-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(0,212,138,0.12); border: 1.5px solid rgba(0,212,138,0.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; color: var(--primary);
+      position: relative; flex-shrink: 0;
+      animation: ariaPillPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes ariaPillPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,212,138,0.4), 0 0 10px rgba(0,212,138,0.2); }
+      50%      { box-shadow: 0 0 0 6px rgba(0,212,138,0), 0 0 18px rgba(0,212,138,0.4); }
+    }
+    .aria-pill-text {
+      font-size: 0.78rem; font-weight: 800; color: var(--primary);
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .aria-pill-badge {
+      position: absolute; top: -3px; right: -3px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--danger); color: #fff; font-size: 0.6rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 8px rgba(255,71,87,0.6);
+    }
+    #aria-overlay {
+      position: fixed; inset: 0; z-index: 9100;
+      background: rgba(0,0,0,0.45); opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease; backdrop-filter: blur(2px);
+    }
+    #aria-overlay.open { opacity: 1; pointer-events: all; }
+    #aria-drawer {
+      position: fixed; right: 0; top: 0; bottom: 0; width: 380px; z-index: 9200;
+      background: linear-gradient(180deg, rgba(4,9,20,0.99) 0%, rgba(6,12,24,0.98) 100%);
+      border-left: 1px solid rgba(0,212,138,0.2);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: -20px 0 80px rgba(0,0,0,0.7), -1px 0 0 rgba(0,212,138,0.1);
+    }
+    #aria-drawer.open { transform: translateX(0); }
+    .aria-header {
+      padding: 18px 20px 16px; border-bottom: 1px solid rgba(0,212,138,0.1);
+      display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+      background: rgba(0,212,138,0.02);
+    }
+    .aria-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,212,138,0.15) 0%, rgba(0,200,212,0.08) 100%);
+      border: 2px solid rgba(0,212,138,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 900; color: var(--primary);
+      position: relative; flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(0,212,138,0.25), inset 0 0 15px rgba(0,212,138,0.05);
+    }
+    .aria-avatar::before {
+      content: ''; position: absolute; inset: -5px; border-radius: 50%;
+      border: 1.5px solid rgba(0,212,138,0.2);
+      animation: ariaRing1 3s linear infinite;
+    }
+    .aria-avatar::after {
+      content: ''; position: absolute; inset: -10px; border-radius: 50%;
+      border: 1px solid rgba(0,212,138,0.1);
+      animation: ariaRing2 4s linear infinite reverse;
+    }
+    @keyframes ariaRing1 {
+      0% { transform: rotate(0deg) scale(1); opacity: 1; }
+      50% { transform: rotate(180deg) scale(1.05); opacity: 0.6; }
+      100% { transform: rotate(360deg) scale(1); opacity: 1; }
+    }
+    @keyframes ariaRing2 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .aria-avatar.listening {
+      border-color: #00c8d4;
+      box-shadow: 0 0 30px rgba(0,200,212,0.5), inset 0 0 20px rgba(0,200,212,0.1);
+      animation: ariaListenPulse 0.6s ease-in-out infinite alternate;
+    }
+    .aria-avatar.speaking {
+      border-color: var(--primary);
+      box-shadow: 0 0 30px rgba(0,212,138,0.5);
+      animation: ariaSpeakPulse 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes ariaListenPulse {
+      from { box-shadow: 0 0 20px rgba(0,200,212,0.4); }
+      to   { box-shadow: 0 0 40px rgba(0,200,212,0.8), 0 0 60px rgba(0,200,212,0.3); }
+    }
+    @keyframes ariaSpeakPulse {
+      from { box-shadow: 0 0 20px rgba(0,212,138,0.4); }
+      to   { box-shadow: 0 0 40px rgba(0,212,138,0.8), 0 0 60px rgba(0,212,138,0.3); }
+    }
+    .aria-header-info { flex: 1; }
+    .aria-name { font-size: 1rem; font-weight: 800; color: #e8f4f0; letter-spacing: 0.5px; }
+    .aria-subtitle { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; }
+    .aria-online-dot {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.65rem; color: var(--primary); margin-top: 3px; font-weight: 600;
+    }
+    .aria-online-dot::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--primary); box-shadow: 0 0 8px var(--primary);
+      animation: pulseGreen 2s ease-in-out infinite;
+    }
+    .aria-close-btn {
+      width: 32px; height: 32px; border-radius: 8px; border: none;
+      background: rgba(255,255,255,0.05); color: var(--text-muted);
+      cursor: pointer; font-size: 1.1rem; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .aria-close-btn:hover { background: rgba(255,71,87,0.15); color: var(--danger); }
+    .aria-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      scrollbar-width: thin; scrollbar-color: rgba(0,212,138,0.15) transparent;
+    }
+    .aria-messages::-webkit-scrollbar { width: 4px; }
+    .aria-messages::-webkit-scrollbar-thumb { background: rgba(0,212,138,0.2); border-radius: 4px; }
+    .aria-msg-row { display: flex; align-items: flex-end; gap: 8px; animation: ariaMsgIn 0.25s ease-out; }
+    .aria-msg-row.user { flex-direction: row-reverse; }
+    @keyframes ariaMsgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .aria-msg-avatar-sm {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(0,212,138,0.1); border: 1px solid rgba(0,212,138,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 800; color: var(--primary);
+    }
+    .aria-bubble {
+      max-width: 280px; padding: 11px 14px; border-radius: 16px;
+      font-size: 0.84rem; line-height: 1.6; position: relative;
+    }
+    .aria-bubble.aria-side {
+      background: rgba(8,16,32,0.9); border: 1px solid rgba(0,212,138,0.15);
+      border-radius: 4px 16px 16px 16px; color: var(--text-main);
+      border-left: 3px solid var(--primary); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .aria-bubble.user-side {
+      background: linear-gradient(135deg, rgba(0,212,138,0.18) 0%, rgba(0,200,212,0.12) 100%);
+      border: 1px solid rgba(0,212,138,0.25);
+      border-radius: 16px 4px 16px 16px; color: var(--text-main); text-align: right;
+    }
+    .aria-bubble-time { font-size: 0.6rem; color: var(--text-muted); margin-top: 4px; opacity: 0.7; }
+    .aria-msg-row.user .aria-bubble-time { text-align: right; }
+    .aria-typing { display: flex; align-items: center; gap: 4px; padding: 14px 16px; }
+    .aria-typing span {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--primary); opacity: 0.7;
+      animation: ariaTypingDot 1.2s ease-in-out infinite;
+    }
+    .aria-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .aria-typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes ariaTypingDot {
+      0%,80%,100% { transform: scale(0.7); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .aria-action-card {
+      background: rgba(5,12,26,0.95); border: 1px solid rgba(0,212,138,0.25);
+      border-radius: 12px; overflow: hidden; max-width: 300px; margin-top: 8px;
+    }
+    .aria-action-card-header {
+      background: linear-gradient(135deg, rgba(0,212,138,0.2), rgba(0,200,212,0.1));
+      padding: 9px 14px; font-size: 0.78rem; font-weight: 700; color: var(--primary);
+      border-bottom: 1px solid rgba(0,212,138,0.15); display: flex; align-items: center; gap: 7px;
+    }
+    .aria-action-card-body { padding: 12px 14px; }
+    .aria-action-row {
+      display: flex; justify-content: space-between; padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.78rem;
+    }
+    .aria-action-row:last-child { border-bottom: none; }
+    .aria-action-row span:first-child { color: var(--text-muted); }
+    .aria-action-row span:last-child { color: var(--text-main); font-weight: 600; }
+    .aria-action-btns { display: flex; gap: 8px; padding: 12px 14px 14px; }
+    .aria-btn-confirm {
+      flex: 1; padding: 9px; border-radius: 8px; border: none;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .aria-btn-confirm:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .aria-btn-cancel {
+      flex: 1; padding: 9px; border-radius: 8px; background: transparent;
+      border: 1px solid rgba(255,71,87,0.3); color: var(--danger);
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .aria-btn-cancel:hover { background: rgba(255,71,87,0.1); }
+    .aria-mini-table {
+      width: 100%; font-size: 0.75rem; border-collapse: collapse; margin-top: 6px;
+    }
+    .aria-mini-table th {
+      background: rgba(0,212,138,0.1); color: var(--primary); padding: 5px 8px;
+      text-align: left; font-weight: 700; font-size: 0.68rem; text-transform: uppercase;
+    }
+    .aria-mini-table td {
+      padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text-sub);
+    }
+    .aria-mini-table tr:hover td { background: rgba(0,212,138,0.04); }
+    .aria-chips-section {
+      padding: 10px 14px 8px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
+    }
+    .aria-chips-label {
+      font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 1.5px; font-weight: 700; margin-bottom: 7px;
+    }
+    .aria-chips-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .aria-chip {
+      padding: 5px 11px; border-radius: 20px; border: 1px solid rgba(0,212,138,0.2);
+      background: rgba(0,212,138,0.05); color: var(--text-sub); font-size: 0.74rem;
+      cursor: pointer; transition: all 0.18s; font-weight: 500; white-space: nowrap;
+    }
+    .aria-chip:hover {
+      background: rgba(0,212,138,0.12); border-color: rgba(0,212,138,0.45);
+      color: var(--primary); transform: translateY(-1px);
+    }
+    .aria-input-section {
+      padding: 12px 14px 16px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
+    }
+    .aria-input-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 6px 8px 6px 6px; transition: all 0.2s;
+    }
+    .aria-input-bar:focus-within {
+      border-color: rgba(0,212,138,0.4); box-shadow: 0 0 20px rgba(0,212,138,0.1);
+      background: rgba(0,212,138,0.03);
+    }
+    #aria-mic-btn {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(0,212,138,0.1); border: 1px solid rgba(0,212,138,0.25);
+      color: var(--primary); cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    #aria-mic-btn:hover { background: rgba(0,212,138,0.2); box-shadow: 0 0 14px rgba(0,212,138,0.3); }
+    #aria-mic-btn.listening {
+      background: rgba(255,71,87,0.15); border-color: rgba(255,71,87,0.4); color: var(--danger);
+      animation: ariaMicPulse 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes ariaMicPulse {
+      from { box-shadow: 0 0 8px rgba(255,71,87,0.3); }
+      to   { box-shadow: 0 0 20px rgba(255,71,87,0.6); }
+    }
+    #aria-text-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text-main); font-size: 0.84rem; font-family: inherit; padding: 2px 0;
+    }
+    #aria-text-input::placeholder { color: var(--text-muted); font-size: 0.82rem; }
+    #aria-send-btn {
+      width: 36px; height: 36px; border-radius: 10px; border: none; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,212,138,0.3);
+    }
+    #aria-send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,138,0.45); }
+    #aria-voice-card {
+      position: fixed; bottom: 90px; right: 400px; z-index: 9500;
+      background: rgba(4,10,22,0.97); border: 1px solid rgba(0,200,212,0.4);
+      border-radius: 18px; padding: 20px 24px; text-align: center; min-width: 220px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(0,200,212,0.15);
+      backdrop-filter: blur(20px);
+      animation: ariaVoiceSlide 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    @keyframes ariaVoiceSlide {
+      from { opacity:0; transform: scale(0.9) translateY(10px); }
+      to   { opacity:1; transform: scale(1) translateY(0); }
+    }
+    .aria-wave-ring {
+      width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 14px;
+      border: 2px solid #00c8d4; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      animation: ariaWaveRing 1s ease-in-out infinite alternate;
+    }
+    @keyframes ariaWaveRing {
+      from { box-shadow: 0 0 10px rgba(0,200,212,0.4), 0 0 0 0 rgba(0,200,212,0.3); }
+      to   { box-shadow: 0 0 20px rgba(0,200,212,0.7), 0 0 30px rgba(0,200,212,0.1); }
+    }
+    .aria-wave-ring::before, .aria-wave-ring::after {
+      content: ''; position: absolute; border-radius: 50%;
+      border: 1px solid rgba(0,200,212,0.3);
+      animation: ariaRipple 1.2s ease-out infinite;
+    }
+    .aria-wave-ring::before { inset: -10px; animation-delay: 0s; }
+    .aria-wave-ring::after  { inset: -20px; animation-delay: 0.4s; }
+    @keyframes ariaRipple {
+      0%   { opacity: 0.6; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.4); }
+    }
+    #aria-live-transcript {
+      font-size: 0.8rem; color: var(--text-sub); min-height: 20px;
+      margin-bottom: 12px; font-style: italic; max-width: 180px; word-break: break-word;
+    }
+    .aria-voice-label {
+      font-size: 0.75rem; font-weight: 700; color: #00c8d4;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+    }
+    /* ── Top Header Actions: Currency & Role Switchers & Docs ── */
+    .currency-switcher-pill {
+      display: flex; align-items: center; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border); border-radius: 20px; padding: 2px 4px;
+      gap: 2px;
+    }
+    .curr-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 0.72rem; font-weight: 600; padding: 4px 8px; border-radius: 14px;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .curr-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.08); }
+    .curr-btn.active {
+      background: linear-gradient(135deg, rgba(0,212,138,0.25), rgba(0,200,212,0.15));
+      border: 1px solid rgba(0,212,138,0.4); color: var(--primary);
+      box-shadow: 0 0 10px rgba(0,212,138,0.2);
+    }
+    .role-selector-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 3px 10px;
+    }
+    .role-selector-pill select {
+      background: transparent; border: none; color: var(--text-main);
+      font-size: 0.75rem; font-weight: 600; font-family: inherit; outline: none;
+      cursor: pointer;
+    }
+    .role-selector-pill select option {
+      background: #081020; color: #fff;
+    }
+    .header-doc-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,200,212,0.1); border: 1px solid rgba(0,200,212,0.3);
+      color: #00c8d4; border-radius: 20px; padding: 5px 12px;
+      font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      font-family: inherit;
+    }
+    .header-doc-btn:hover {
+      background: rgba(0,200,212,0.22); border-color: rgba(0,200,212,0.5);
+      box-shadow: 0 0 14px rgba(0,200,212,0.35); transform: translateY(-1px);
+    }
+
+    /* ── ARIA Sound Wave Equalizer ── */
+    .aria-eq-wave {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 3px; height: 18px; margin: 0 6px;
+    }
+    .aria-eq-wave span {
+      display: block; width: 3px; height: 4px; border-radius: 2px;
+      background: var(--primary); transition: height 0.15s ease;
+    }
+    .aria-eq-wave.active span {
+      animation: ariaEqAnim 0.7s ease-in-out infinite alternate;
+    }
+    .aria-eq-wave.active span:nth-child(1) { animation-delay: 0.1s; height: 14px; }
+    .aria-eq-wave.active span:nth-child(2) { animation-delay: 0.3s; height: 18px; }
+    .aria-eq-wave.active span:nth-child(3) { animation-delay: 0.0s; height: 8px; }
+    .aria-eq-wave.active span:nth-child(4) { animation-delay: 0.4s; height: 20px; }
+    .aria-eq-wave.active span:nth-child(5) { animation-delay: 0.2s; height: 12px; }
+    .aria-eq-wave.active span:nth-child(6) { animation-delay: 0.5s; height: 16px; }
+    .aria-eq-wave.active span:nth-child(7) { animation-delay: 0.15s; height: 10px; }
+    @keyframes ariaEqAnim {
+      0%   { transform: scaleY(0.25); background: #00d48a; }
+      50%  { transform: scaleY(1.0); background: #00c8d4; }
+      100% { transform: scaleY(0.35); background: #00d48a; }
+    }
+
+    /* ── Spacebar Push-to-Talk Toast ── */
+    #aria-ptt-hint {
+      font-size: 0.68rem; color: var(--text-muted); opacity: 0.8;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      margin-top: 4px;
+    }
+    #aria-ptt-hint kbd {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px; padding: 1px 5px; font-size: 0.65rem; color: var(--primary);
+    }
+
+    /* ── Zamil Official Document Hub Modal & Paper ── */
+    #zamil-doc-modal {
+      position: fixed; inset: 0; z-index: 99999;
+      background: rgba(3,7,18,0.88); backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; overflow-y: auto;
+    }
+    #zamil-doc-modal.open { display: flex; }
+    .doc-modal-container {
+      background: #0d1527; border: 1px solid rgba(0,212,138,0.3);
+      border-radius: 16px; width: 900px; max-width: 95vw; max-height: 92vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.85), 0 0 35px rgba(0,212,138,0.15);
+    }
+    .doc-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px; background: rgba(5,11,24,0.95);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .doc-tabs-row { display: flex; gap: 8px; }
+    .doc-tab-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+      color: var(--text-muted); font-size: 0.8rem; font-weight: 600;
+      padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .doc-tab-btn.active {
+      background: linear-gradient(135deg, rgba(0,212,138,0.2), rgba(0,200,212,0.15));
+      border-color: rgba(0,212,138,0.5); color: var(--primary);
+    }
+    .doc-action-btns { display: flex; align-items: center; gap: 10px; }
+    .doc-btn-print {
+      display: flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none; color: #fff; font-size: 0.82rem; font-weight: 700;
+      padding: 7px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .doc-btn-print:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .doc-btn-close {
+      background: transparent; border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-muted); font-size: 0.82rem; padding: 6px 12px;
+      border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .doc-btn-close:hover { background: rgba(255,71,87,0.15); color: var(--danger); border-color: rgba(255,71,87,0.3); }
+
+    .doc-paper-wrap {
+      flex: 1; overflow-y: auto; padding: 24px;
+      background: #080e1b; display: flex; justify-content: center;
+    }
+    .official-paper {
+      background: #ffffff; color: #1e293b; width: 100%; max-width: 800px;
+      min-height: 980px; padding: 42px 48px; border-radius: 6px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.45; position: relative;
+    }
+    .paper-header {
+      display: flex; justify-content: space-between; border-bottom: 2px solid #0f172a;
+      padding-bottom: 16px; margin-bottom: 20px;
+    }
+    .paper-logo-text h2 { margin: 0; font-size: 1.25rem; font-weight: 900; color: #0f172a; letter-spacing: 0.5px; }
+    .paper-logo-text p { margin: 2px 0 0; font-size: 0.76rem; color: #475569; }
+    .paper-title-block { text-align: right; }
+    .paper-title-block h1 { margin: 0; font-size: 1.35rem; font-weight: 800; color: #0284c7; }
+    .paper-title-block .doc-no { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 4px; }
+    .paper-meta-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-bottom: 22px; font-size: 0.8rem;
+    }
+    .meta-box {
+      border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px 14px; background: #f8fafc;
+    }
+    .meta-box-title { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+    .meta-box p { margin: 2px 0; color: #1e293b; font-size: 0.82rem; }
+    .paper-table {
+      width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.8rem;
+    }
+    .paper-table th {
+      background: #0f172a; color: #ffffff; padding: 8px 10px;
+      text-align: left; font-size: 0.74rem; text-transform: uppercase; font-weight: 700;
+    }
+    .paper-table td {
+      padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #334155;
+    }
+    .paper-table tr:nth-child(even) td { background: #f8fafc; }
+    .paper-totals-row {
+      display: flex; justify-content: flex-end; margin-bottom: 24px;
+    }
+    .totals-table { width: 320px; border-collapse: collapse; font-size: 0.82rem; }
+    .totals-table td { padding: 5px 8px; }
+    .totals-table tr.grand-total { border-top: 2px solid #0f172a; font-weight: 800; font-size: 0.95rem; color: #0f172a; }
+    .paper-signatures {
+      display: flex; justify-content: space-between; margin-top: 40px; padding-top: 14px;
+      border-top: 1px dashed #94a3b8; font-size: 0.78rem;
+    }
+    .sign-col { width: 220px; text-align: center; }
+    .sign-line { border-bottom: 1px solid #475569; height: 35px; margin-bottom: 6px; }
+    .qr-badge-box {
+      border: 1px solid #cbd5e1; padding: 6px; border-radius: 4px; display: inline-block;
+      text-align: center; background: #f1f5f9; font-size: 0.65rem; color: #475569;
+    }
+    .barcode-display {
+      font-family: monospace; letter-spacing: 5px; font-size: 1.3rem; font-weight: 900;
+      color: #0f172a; margin: 8px 0;
+    }
+
+    /* ── Clean Print Optimization ── */
+    @media print {
+      body * { visibility: hidden !important; }
+      #zamil-doc-modal, #zamil-doc-modal * { visibility: visible !important; }
+      #zamil-doc-modal {
+        position: absolute !important; left: 0 !important; top: 0 !important;
+        width: 100% !important; background: #fff !important; padding: 0 !important;
+        display: block !important;
+      }
+      .doc-modal-header, .doc-modal-container {
+        border: none !important; box-shadow: none !important; background: transparent !important;
+      }
+      .doc-modal-header { display: none !important; }
+      .doc-paper-wrap { padding: 0 !important; background: #fff !important; }
+      .official-paper { box-shadow: none !important; padding: 0 !important; max-width: 100% !important; }
+    }
   </style>
 </head>
 <body>
@@ -1493,6 +1997,30 @@
         </div>
 
         <div class="header-actions">
+          <!-- Currency Switcher Pill (SAR Native / USD / EUR / INR) -->
+          <div class="currency-switcher-pill" id="currency-switcher-pill" title="Toggle Display Currency (Real-time FX)">
+            <button class="curr-btn active" data-curr="SAR" onclick="setCurrency('SAR')">🇸🇦 SAR</button>
+            <button class="curr-btn" data-curr="USD" onclick="setCurrency('USD')">🇺🇸 USD</button>
+            <button class="curr-btn" data-curr="EUR" onclick="setCurrency('EUR')">🇪🇺 EUR</button>
+            <button class="curr-btn" data-curr="INR" onclick="setCurrency('INR')">🇮🇳 INR</button>
+          </div>
+
+          <!-- Executive Persona / Role Selector -->
+          <div class="role-selector-pill" id="role-selector-pill" title="Active Executive Persona">
+            <i data-lucide="shield" style="width:13px;height:13px;color:var(--primary);"></i>
+            <select id="user-role-select" onchange="setUserRole(this.value)">
+              <option value="vp">👑 VP Supply Chain (Zamil)</option>
+              <option value="procurement" selected>📋 Procurement Lead</option>
+              <option value="warehouse">🏭 Warehouse Lead</option>
+            </select>
+          </div>
+
+          <!-- Official Document Generator Hub Button -->
+          <button class="header-doc-btn" onclick="openDocHubModal('po')" title="Zamil Official Document Generator & PDF Export">
+            <i data-lucide="printer" style="width:13px;height:13px;"></i>
+            <span>Docs Hub</span>
+          </button>
+
           <!-- Status Pill (sketch: red dot + text top right) -->
           <div class="status-pill" id="status-pill">
             <div class="status-dot-small" id="status-dot-small"></div>
@@ -1547,7 +2075,7 @@
             <div class="kpi-value" id="kpi-plans">0</div>
             <div class="kpi-footer">
               <span>Spend: </span>
-              <span class="trend-up" id="kpi-spend">₹0</span>
+              <span class="trend-up" id="kpi-spend">SAR 0</span>
             </div>
           </div>
         </div>
@@ -1668,26 +2196,47 @@
       <!-- TAB 3: MRP PLANNER -->
       <section id="tab-mrp" class="content-body">
         <div class="row-2" style="grid-template-columns: 1fr 2.2fr;">
-          <div class="glass-card">
-            <div class="card-title-section">
-              <h3>Execute MRP Run</h3>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="glass-card">
+              <div class="card-title-section">
+                <h3>Execute MRP Run</h3>
+              </div>
+              <div class="form-group">
+                <label for="mrp-plan-select">Select Approved Production Plan</label>
+                <select id="mrp-plan-select">
+                  <!-- Dynamic options -->
+                </select>
+              </div>
+              <button class="btn-primary" onclick="runMRP()" style="width: 100%;">
+                <i data-lucide="play-circle"></i> Run MRP Calculation
+              </button>
+              
+              <div class="progress-bar-container" id="mrp-progress-container" style="display:none;">
+                <div class="progress-bar-fill" id="mrp-progress-fill"></div>
+              </div>
+              
+              <div class="console-box" id="mrp-console">
+                <div class="console-line info">&gt; MRP engine standby. Ready to load production plan...</div>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="mrp-plan-select">Select Approved Production Plan</label>
-              <select id="mrp-plan-select">
-                <!-- Dynamic options -->
-              </select>
-            </div>
-            <button class="btn-primary" onclick="runMRP()" style="width: 100%;">
-              <i data-lucide="play-circle"></i> Run MRP Calculation
-            </button>
-            
-            <div class="progress-bar-container" id="mrp-progress-container" style="display:none;">
-              <div class="progress-bar-fill" id="mrp-progress-fill"></div>
-            </div>
-            
-            <div class="console-box" id="mrp-console">
-              <div class="console-line info">&gt; MRP engine standby. Ready to load production plan...</div>
+
+            <!-- What-If Scenario Simulator -->
+            <div class="glass-card">
+              <div class="card-title-section">
+                <h3>What-If Scenario Simulator</h3>
+              </div>
+              <div class="form-group">
+                <label>Raw Material Price Hike (%)</label>
+                <input type="number" id="whatif-price-hike" value="0" min="0" max="100" class="search-input" style="width: 100%; background: rgba(0,0,0,0.2);">
+              </div>
+              <div class="form-group">
+                <label>Surge Demand Multiplier (x)</label>
+                <input type="number" id="whatif-surge-demand" value="1.0" min="1.0" step="0.1" class="search-input" style="width: 100%; background: rgba(0,0,0,0.2);">
+              </div>
+              <div class="form-group">
+                <label>Supplier Delay (Days)</label>
+                <input type="number" id="whatif-delay" value="0" min="0" class="search-input" style="width: 100%; background: rgba(0,0,0,0.2);">
+              </div>
             </div>
           </div>
 
@@ -2168,15 +2717,15 @@
             <div class="alert-list" id="ap-ageing-widget">
               <div class="alert-item info">
                 <div class="alert-details"><h4>Current (0-30 Days)</h4><p>Active un-matched invoices</p></div>
-                <div class="alert-value"><span class="main-val">₹ 1,85,000</span></div>
+                <div class="alert-value"><span class="main-val">SAR 185,000</span></div>
               </div>
               <div class="alert-item warning">
                 <div class="alert-details"><h4>31-60 Days</h4><p>Pending receipt verification</p></div>
-                <div class="alert-value"><span class="main-val">₹ 42,500</span></div>
+                <div class="alert-value"><span class="main-val">SAR 42,500</span></div>
               </div>
               <div class="alert-item">
                 <div class="alert-details"><h4>61+ Days Overdue</h4><p>Hold release required</p></div>
-                <div class="alert-value"><span class="main-val">₹ 12,000</span></div>
+                <div class="alert-value"><span class="main-val">SAR 12,000</span></div>
               </div>
             </div>
           </div>
@@ -2246,12 +2795,12 @@
             </div>
             <div class="alert-list" id="ppv-log-widget">
               <div class="alert-item warning">
-                <div class="alert-details"><h4>MAT-5001 Hot Rolled Sheet</h4><p>PO Price: ₹88.50 vs Std: ₹85.50</p></div>
-                <div class="alert-value"><span class="main-val" style="color:var(--danger);">+₹ 1,500 ADVERSE</span></div>
+                <div class="alert-details"><h4>MAT-5001 Hot Rolled Sheet</h4><p>PO Price: SAR 88.50 vs Std: SAR 85.50</p></div>
+                <div class="alert-value"><span class="main-val" style="color:var(--danger);">+SAR 1,500 ADVERSE</span></div>
               </div>
               <div class="alert-item info">
-                <div class="alert-details"><h4>MAT-5003 Aluminium Ingot</h4><p>PO Price: ₹218.00 vs Std: ₹225.00</p></div>
-                <div class="alert-value"><span class="main-val" style="color:var(--success);">-₹ 3,500 FAVOURABLE</span></div>
+                <div class="alert-details"><h4>MAT-5003 Aluminium Ingot</h4><p>PO Price: SAR 218.00 vs Std: SAR 225.00</p></div>
+                <div class="alert-value"><span class="main-val" style="color:var(--success);">-SAR 3,500 FAVOURABLE</span></div>
               </div>
             </div>
           </div>
@@ -2794,7 +3343,7 @@
       document.getElementById('kpi-pos').innerText = mockData.dashboard.open_pos;
       document.getElementById('kpi-shortages').innerText = mockData.dashboard.shortages;
       document.getElementById('kpi-plans').innerText = mockData.dashboard.active_plans;
-      document.getElementById('kpi-spend').innerText = '₹' + mockData.dashboard.monthly_spend.toLocaleString();
+      document.getElementById('kpi-spend').innerText = formatMoney(mockData.dashboard.monthly_spend);
 
       // Populate selects
       populateSelects();
@@ -3003,7 +3552,7 @@
           document.getElementById('kpi-pos').innerText = stats.open_pos;
           document.getElementById('kpi-shortages').innerText = stats.shortages;
           document.getElementById('kpi-plans').innerText = stats.active_plans;
-          document.getElementById('kpi-spend').innerText = '₹' + stats.monthly_spend.toLocaleString();
+          document.getElementById('kpi-spend').innerText = formatMoney(stats.monthly_spend);
         }
 
         // Fetch PR ledger
@@ -3422,7 +3971,7 @@
               <div class="supplier">${po.supplier}</div>
             </div>
             <div class="delivery-value">
-              ₹${po.value.toLocaleString()}
+              ${formatMoney(po.value)}
               <span class="due-date">Due: ${po.delivery}</span>
             </div>
           </div>
@@ -3461,7 +4010,7 @@
           <tr style="cursor:pointer;" onclick="openPODetails(${po.id})">
             <td><strong style="color:var(--primary);">${po.number}</strong></td>
             <td>${po.supplier}</td>
-            <td>₹${po.value.toLocaleString()}</td>
+            <td>${formatMoney(po.value)}</td>
             <td>${po.date}</td>
             <td>${po.delivery}</td>
             <td><span class="badge ${po.tracking === 'RECEIVED' ? 'badge-success' : po.tracking === 'IN_TRANSIT' ? 'badge-info' : 'badge-warning'}">${po.tracking}</span></td>
@@ -3519,7 +4068,7 @@
           </div>
           <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
             <div style="color:var(--text-sub); font-size:0.75rem;">ESTIMATED BATCH VALUATION</div>
-            <strong style="color:var(--success); font-size:1.05rem;">₹${totalVal.toLocaleString()}</strong>
+            <strong style="color:var(--success); font-size:1.05rem;">${formatMoney(totalVal)}</strong>
           </div>
           <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
             <div style="color:var(--text-sub); font-size:0.75rem;">SUPPLIER RATING SCORE</div>
@@ -3573,7 +4122,7 @@
           </div>
           <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
             <div style="color:var(--text-sub); font-size:0.75rem;">TOTAL ORDER VALUE</div>
-            <strong style="color:var(--success); font-size:1.05rem;">₹${po.value.toLocaleString()}</strong>
+            <strong style="color:var(--success); font-size:1.05rem;">${formatMoney(po.value)}</strong>
           </div>
           <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; border:1px solid var(--glass-border);">
             <div style="color:var(--text-sub); font-size:0.75rem;">ORDER ISSUED DATE</div>
@@ -3592,6 +4141,9 @@
 
       actions.innerHTML = `
         <button class="btn-secondary" onclick="closeProcurementModal()">Close</button>
+        <button class="btn-secondary" style="border-color:#0284c7; color:#38bdf8;" onclick="openDocHubModal('po', '${po.id}'); closeProcurementModal();">
+          <i data-lucide="printer"></i> Print Official PO
+        </button>
         ${po.tracking !== 'RECEIVED' ? `
           <button class="btn-primary" style="background:var(--success);" onclick="migoReceipt('${po.number}', '${po.id}'); closeProcurementModal();">
             <i data-lucide="package-check"></i> Post MIGO 101 Goods Receipt
@@ -3733,7 +4285,7 @@
                     ${stockBadge}
                   </div>
                   <div>Batch Required Qty: <span class="node-qty">${lineQty.toLocaleString()} KG</span></div>
-                  <div class="node-cost">Standard Cost: ₹${standardCost}/KG | Extended Valuation: ₹${totalCost.toLocaleString()}</div>
+                  <div class="node-cost">Standard Cost: ${formatMoney(standardCost)}/KG | Extended Valuation: ${formatMoney(totalCost)}</div>
                 </div>
               </div>
             </div>
@@ -3747,7 +4299,7 @@
                 <i data-lucide="dollar-sign" style="vertical-align:middle; color:var(--success);"></i>
                 <strong style="color:var(--text-main);">Total Assembly Standard Cost Roll-Up:</strong>
               </div>
-              <strong style="font-size:1.1rem; color:var(--success);">₹${totalVal.toLocaleString()}</strong>
+              <strong style="font-size:1.1rem; color:var(--success);">${formatMoney(totalVal)}</strong>
             </div>
           </div>
           <div style="margin-top: 18px; padding: 14px 18px; background: rgba(91, 156, 246, 0.08); border: 1px dashed var(--primary); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -3843,12 +4395,29 @@
               }
             }
 
+            // What-If Scenario Simulator Inputs
+            const surgeMultiplier = parseFloat(document.getElementById('whatif-surge-demand') ? document.getElementById('whatif-surge-demand').value : 1.0);
+            const priceHike = parseFloat(document.getElementById('whatif-price-hike') ? document.getElementById('whatif-price-hike').value : 0) / 100;
+            const supplierDelay = parseInt(document.getElementById('whatif-delay') ? document.getElementById('whatif-delay').value : 0);
+
             // Calculate dynamic net requirements from BOM items for this product
             const targetProdId = plan ? plan.prod_id : 2001;
-            const targetQty = plan ? plan.qty : 10;
+            const targetQty = (plan ? plan.qty : 10) * surgeMultiplier;
+            
+            if (surgeMultiplier > 1.0) {
+              logConsole('mrp-console', `⚠️ SURGE DEMAND: Target volume increased by ${surgeMultiplier}x to ${targetQty} Units!`, 'warn');
+            }
+            if (supplierDelay > 0) {
+              logConsole('mrp-console', `⚠️ SUPPLIER DELAY: Adjusting safety stock buffers for a ${supplierDelay}-day disruption...`, 'warn');
+            }
+            if (priceHike > 0) {
+              logConsole('mrp-console', `⚠️ PRICE HIKE: Applying ${priceHike * 100}% inflation to material costs...`, 'warn');
+            }
+
             const bomItems = mockData.bom[targetProdId] || mockData.bom[2001] || [];
             let dynamicShortages = [];
             let mrpHtml = '';
+            let totalAdditionalCost = 0;
 
             bomItems.forEach(item => {
               const matCode = item.material_code || 'MAT-5001';
@@ -3856,9 +4425,17 @@
               const grossReq = item.qty * targetQty;
               const bal = mockData.balances.find(b => b.material_code === matCode) || { qty_on_hand: 0, safety_stock: 500 };
               const onHand = bal.qty_on_hand;
-              const safety = bal.safety_stock || 500;
+              // Add a dynamic safety stock buffer if there is a supplier delay (e.g. +100 units per day delayed)
+              const safety = (bal.safety_stock || 500) + (supplierDelay * 100);
               const netReq = Math.max(0, grossReq + safety - onHand);
               const hasShortage = netReq > 0;
+              
+              // Calculate estimated cost impact
+              const baseCost = item.unit_cost || 15;
+              const inflatedCost = baseCost * (1 + priceHike);
+              if (hasShortage && priceHike > 0) {
+                 totalAdditionalCost += (inflatedCost - baseCost) * netReq;
+              }
 
               if (hasShortage) {
                 dynamicShortages.push({
@@ -3875,7 +4452,7 @@
                   <td>${onHand.toLocaleString()} KG</td>
                   <td>${safety.toLocaleString()} KG</td>
                   <td><span style="color:${hasShortage ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">${netReq > 0 ? netReq.toLocaleString() + ' KG' : '0 KG (Sufficient)'}</span></td>
-                  <td><strong>${netReq > 0 ? netReq.toLocaleString() + ' KG' : 'Direct Stock'}</strong></td>
+                  <td><strong>${netReq > 0 ? 'PO-2026-TBD' : 'Direct Stock'}</strong></td>
                   <td><span class="badge ${hasShortage ? 'badge-danger' : 'badge-success'}">${hasShortage ? 'Shortage' : 'Available'}</span></td>
                 </tr>
               `;
@@ -3883,9 +4460,14 @@
 
             window._lastMRPShortages = dynamicShortages;
             logConsole('mrp-console', `MRP Status: ${status} - Evaluated ${bomItems.length} components. Found ${dynamicShortages.length} material deficit(s) requiring PR generation.`, dynamicShortages.length > 0 ? 'warn' : 'info');
+            
+            if (priceHike > 0 && totalAdditionalCost > 0) {
+              logConsole('mrp-console', `💸 ESTIMATED COST IMPACT: Price hike adds ${formatMoney(totalAdditionalCost)} to total net requirements cost.`, 'danger');
+            }
 
             const mrpBody = document.getElementById('mrp-results-body');
             if (mrpBody) mrpBody.innerHTML = mrpHtml;
+
 
             const btnPr = document.getElementById('btn-raise-pr');
             if (btnPr) btnPr.style.display = dynamicShortages.length > 0 ? 'inline-flex' : 'none';
@@ -3943,7 +4525,7 @@
     }
 
     // 3. Procurement Actions
-    async function approvePR(prId) {
+    async function approvePR(prId, quiet = false) {
       if(liveMode) {
         try {
           await fetch(`${baseRestUrl}/procurement/approve_pr`, {
@@ -3951,16 +4533,16 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pr_id: prId, user: 'REST_API' })
           });
-          alert('PR approved successfully.');
+          if (!quiet) alert('PR approved successfully.');
           refreshAllData();
         } catch(e) {
-          alert('Error approving PR');
+          if (!quiet) alert('Error approving PR');
         }
       } else {
         const pr = mockData.prs.find(p => p.id === prId);
         if (pr) {
           pr.status = 'APPROVED';
-          alert(`Approved ${pr.number}. Ready to convert to Purchase Order.`);
+          if (!quiet) alert(`Approved ${pr.number}. Ready to convert to Purchase Order.`);
         }
         initUI();
       }
@@ -3981,7 +4563,7 @@
       }
     }
 
-    async function autoPO(prId) {
+    async function autoPO(prId, quiet = false) {
       if(liveMode) {
         try {
           const pr = mockData.prs.find(p => p.id === prId);
@@ -3995,10 +4577,10 @@
             body: JSON.stringify({ pr_id: prId, supplier_id: supplierId, user: 'REST_API' })
           });
           const poData = await poRes.json();
-          alert(`PO Raised successfully: ${poData.po_number}`);
+          if (!quiet) alert(`PO Raised successfully: ${poData.po_number}`);
           refreshAllData();
         } catch(e) {
-          alert('Error generating PO');
+          if (!quiet) alert('Error generating PO');
         }
       } else {
         const pr = mockData.prs.find(p => p.id === prId);
@@ -4027,7 +4609,7 @@
           tracking: 'IN_TRANSIT'
         });
 
-        alert(`PO Raised successfully: ${newPoNum} for ${pr.qty.toLocaleString()} units (${pr.client_name || 'Zamil'}).`);
+        if (!quiet) alert(`PO Raised successfully: ${newPoNum} for ${pr.qty.toLocaleString()} units (${pr.client_name || 'Zamil'}).`);
         initUI();
       }
     }
@@ -4638,8 +5220,8 @@
         <tr>
           <td><strong>${i.inv}</strong></td>
           <td>${i.supp}</td>
-          <td>₹ ${i.invAmt.toLocaleString()}</td>
-          <td>₹ ${i.poAmt.toLocaleString()}</td>
+          <td>${formatMoney(i.invAmt)}</td>
+          <td>${formatMoney(i.poAmt)}</td>
           <td><span class="badge ${i.status==='MATCHED'?'badge-success':'badge-danger'}">${i.status}</span></td>
           <td><span class="badge ${i.alert==='PASSED'?'badge-info':'badge-warning'}">${i.alert}</span></td>
           <td><button class="btn-secondary" style="padding:4px 8px; font-size:0.75rem;">${i.action}</button></td>
@@ -4682,8 +5264,8 @@
           <td>${c.name}</td>
           <td><span class="badge badge-info">${c.cat}</span></td>
           <td>${c.qty.toLocaleString()}</td>
-          <td>₹ ${c.stdCost.toFixed(2)}</td>
-          <td><strong style="color:var(--success);">₹ ${c.val.toLocaleString()}</strong></td>
+          <td>${formatMoney(c.stdCost)}</td>
+          <td><strong style="color:var(--success);">${formatMoney(c.val)}</strong></td>
         </tr>
       `).join('');
     }
@@ -5057,7 +5639,6 @@
   })();
   </script>
 
-</body>
 <script>
 // ============================================================
 // MPPMS Phase 12 — Digital Twin & Smart Sourcing JS Engine
@@ -5068,8 +5649,8 @@ let _currentStrategy = 'BALANCED_RISK';
 let _lastOptId       = null;
 
 // ---- Utility ----
-function fmt(n)  { return n == null ? '—' : Number(n).toLocaleString('en-IN'); }
-function fmtInr(n){ return '₹' + fmt(Math.round(n)); }
+function fmt(n)  { return n == null ? '—' : Number(n).toLocaleString('en-US'); }
+function fmtInr(n){ return (typeof formatMoney === 'function') ? formatMoney(n) : ('SAR ' + fmt(Math.round(n))); }
 
 // ============================================================
 // DIGITAL TWIN — Slider UI helpers
@@ -5352,6 +5933,1170 @@ function acceptSourcingSplit() {
     alert('✅ Demo Mode: Split accepted! In Live Mode, this creates ' + document.querySelectorAll('#ss-allocation-body tr').length + ' Purchase Orders via PKG_SMART_SOURCING.ACCEPT_SPLIT().');
   }
 }
+</script>
+
+<!-- ============================================================
+     ZAMIL OFFICIAL DOCUMENT HUB (PO & MIGO Goods Receipt Slip)
+============================================================ -->
+<div id="zamil-doc-modal">
+  <div class="doc-modal-container">
+    <div class="doc-modal-header doc-no-print">
+      <div class="doc-tabs-row">
+        <button class="doc-tab-btn active" id="doc-tab-po-btn" onclick="switchDocTab('po')">📄 Official Purchase Order</button>
+        <button class="doc-tab-btn" id="doc-tab-migo-btn" onclick="switchDocTab('migo')">📦 MIGO 101 Goods Slip</button>
+      </div>
+      <div class="doc-action-btns">
+        <button class="doc-btn-print" onclick="window.print()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / Save PDF
+        </button>
+        <button class="doc-btn-close" onclick="closeDocHubModal()">✕ Close</button>
+      </div>
+    </div>
+    <div class="doc-paper-wrap">
+      <div class="official-paper" id="official-doc-render">
+        <!-- Dynamic content injected by renderOfficialPO() / renderOfficialMIGO() -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ARIA — AI Procurement Assistant (HTML Structure)
+============================================================ -->
+<div id="aria-toggle-pill" onclick="ariaToggle()" title="Open ARIA — AI Assistant (Ctrl+/)">
+  <div class="aria-pill-avatar">
+    A
+    <span class="aria-pill-badge" id="aria-pill-badge" style="display:none">0</span>
+  </div>
+  <span class="aria-pill-text">ARIA</span>
+</div>
+
+<div id="aria-overlay" onclick="ariaToggle()"></div>
+
+<div id="aria-drawer">
+  <div class="aria-header">
+    <div class="aria-avatar" id="aria-avatar">A</div>
+    <div class="aria-header-info">
+      <div class="aria-name">
+        ARIA
+        <div class="aria-eq-wave" id="aria-header-eq">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="aria-subtitle">AI Procurement Assistant</div>
+      <div class="aria-online-dot">online</div>
+    </div>
+    <button class="aria-close-btn" onclick="ariaToggle()" title="Close">✕</button>
+  </div>
+  <div class="aria-messages" id="aria-messages"></div>
+  <div class="aria-chips-section">
+    <div class="aria-chips-label">Quick Actions</div>
+    <div class="aria-chips-row" id="aria-chips"></div>
+  </div>
+  <div class="aria-input-section">
+    <div class="aria-input-bar">
+      <button id="aria-mic-btn" onclick="ariaVoiceToggle()" title="Voice input">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <input id="aria-text-input" type="text" placeholder="Ask ARIA or speak..." autocomplete="off"
+             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();ariaSend();}">
+      <button id="aria-send-btn" onclick="ariaSend()" title="Send">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+    <div id="aria-ptt-hint">Tip: Hold <kbd>Space</kbd> anywhere to talk &bull; <kbd>Ctrl</kbd>+<kbd>/</kbd> to toggle</div>
+  </div>
+</div>
+
+<div id="aria-voice-card" style="display:none">
+  <div class="aria-voice-label">Listening...</div>
+  <div class="aria-wave-ring">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00c8d4" stroke-width="2" width="22" height="22"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+  </div>
+  <div class="aria-eq-wave active" id="aria-voice-card-eq" style="margin-bottom:12px;">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div id="aria-live-transcript">Say something...</div>
+  <button id="aria-voice-stop-btn" onclick="ariaVoiceStop()">&#9632; Stop</button>
+</div>
+
+<script>
+// ================================================================
+// ZAMIL MULTI-CURRENCY FX ENGINE (SAR Native / USD / EUR / INR)
+// ================================================================
+window.currentCurrency = 'SAR';
+const CURRENCY_RATES = {
+  SAR: { code: 'SAR', symbol: 'SAR', rate: 1.0, flag: '🇸🇦', name: 'Saudi Riyal' },
+  USD: { code: 'USD', symbol: '$', rate: 0.2667, flag: '🇺🇸', name: 'US Dollar' },
+  EUR: { code: 'EUR', symbol: '€', rate: 0.2450, flag: '🇪🇺', name: 'Euro' },
+  INR: { code: 'INR', symbol: '₹', rate: 22.35, flag: '🇮🇳', name: 'Indian Rupee' }
+};
+
+function formatMoney(amountInSAR) {
+  if (amountInSAR === undefined || amountInSAR === null || isNaN(amountInSAR)) return '—';
+  const c = CURRENCY_RATES[window.currentCurrency] || CURRENCY_RATES.SAR;
+  const converted = amountInSAR * c.rate;
+  let formatted = '';
+  if (c.code === 'INR') {
+    formatted = Math.round(converted).toLocaleString('en-IN');
+  } else {
+    formatted = Math.round(converted).toLocaleString('en-US');
+  }
+  return c.symbol + ' ' + formatted;
+}
+
+function setCurrency(code) {
+  if (!CURRENCY_RATES[code]) return;
+  window.currentCurrency = code;
+  document.querySelectorAll('.curr-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-curr') === code);
+  });
+  if (typeof initUI === 'function') initUI();
+  if (typeof renderProcurementData === 'function') renderProcurementData();
+  if (typeof renderInvoiceData === 'function') renderInvoiceData();
+  if (typeof renderCostingData === 'function') renderCostingData();
+  
+  const c = CURRENCY_RATES[code];
+  if (typeof ariaAddMsg === 'function') {
+    ariaAddMsg('aria', `💱 Display currency set to **${c.name} (${c.code})** ${c.flag}. Real-time FX conversion active (1 SAR = ${c.rate} ${c.code}).`);
+    ariaSpeak(`Currency set to ${c.name}`);
+  }
+}
+
+// ================================================================
+// ZAMIL EXECUTIVE PERSONA & ROLE SYSTEM
+// ================================================================
+window.currentUserRole = 'procurement';
+const ROLES_CONFIG = {
+  vp: {
+    title: '👑 VP Supply Chain',
+    name: 'Eng. Fahad Al-Zamil',
+    subtitle: 'Zamil Group Executive Committee',
+    primaryTab: 'dashboard',
+    badgeText: 'Executive VP',
+    focus: 'Enterprise capital exposure, macro supplier risk, digital twin stress tests & strategic vendor allocation',
+    greeting: 'Showing enterprise-wide strategic risk radar and capital exposure for Zamil Industrial.',
+    chips: ['📊 Executive Briefing', '🌩️ Simulate 30d Delay', '🎯 Optimize Sourcing', '💰 Spend Analytics']
+  },
+  procurement: {
+    title: '📋 Procurement Manager',
+    name: 'Dharani',
+    subtitle: 'Dammam Plant 1 — Direct Materials',
+    primaryTab: 'procurement',
+    badgeText: 'Procurement Lead',
+    focus: 'Requisition sign-offs, vendor scorecards, purchase order execution & price variance management',
+    greeting: 'You have pending PR approvals and open purchase orders to review for Dammam Plant 1.',
+    chips: ['⏰ Pending PRs', '🔴 Shortages', '🛒 Raise PO', '⭐ Top Vendors']
+  },
+  warehouse: {
+    title: '🏭 Warehouse Operations Lead',
+    name: 'Tariq Al-Mansoor',
+    subtitle: 'Dammam Plant 1 — Receiving Dock',
+    primaryTab: 'inventory',
+    badgeText: 'Warehouse Lead',
+    focus: 'MIGO goods receipts, dock deliveries, storage bin balances & heat/lot serial tracking',
+    greeting: 'Dock operations active. Warehouse bins and incoming truck deliveries ready for receipting.',
+    chips: ['📬 Post MIGO 101', '📦 Open Receipts', '🔴 Critical Stock', '🏷️ Track Lot']
+  }
+};
+
+function setUserRole(roleKey) {
+  const r = ROLES_CONFIG[roleKey];
+  if (!r) return;
+  window.currentUserRole = roleKey;
+  if (typeof ARIA !== 'undefined') ARIA.userName = r.name;
+  const select = document.getElementById('user-role-select');
+  if (select) select.value = roleKey;
+  
+  if (typeof switchTab === 'function') switchTab(r.primaryTab);
+  if (typeof ariaAddMsg === 'function') {
+    ariaAddMsg('aria', `Persona switched to **${r.title}** (${r.name}). Active focus: *${r.focus}*.`);
+    ariaSpeak(`Active persona: ${r.title}. ${r.greeting}`);
+    ariaUpdateChips();
+  }
+}
+
+// ================================================================
+// ARIA AUDIO SYNTHESIZER (Micro-Chimes via Web Audio API)
+// ================================================================
+const AriaAudio = {
+  ctx: null,
+  init() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  chime(type) {
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      if (type === 'start') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === 'stop') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 0.12);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === 'success') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+    } catch(e) {}
+  }
+};
+
+// ================================================================
+// ZAMIL OFFICIAL DOCUMENT HUB (PO & MIGO Goods Receipt Slip)
+// ================================================================
+window.currentDocType = 'po';
+window.currentDocRefId = null;
+
+function openDocHubModal(type, refId) {
+  window.currentDocType = type || 'po';
+  window.currentDocRefId = refId || null;
+  const modal = document.getElementById('zamil-doc-modal');
+  if (modal) modal.classList.add('open');
+  switchDocTab(window.currentDocType, refId);
+}
+
+function closeDocHubModal() {
+  const modal = document.getElementById('zamil-doc-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function switchDocTab(type, refId) {
+  window.currentDocType = type;
+  var poBtn = document.getElementById('doc-tab-po-btn');
+  var migoBtn = document.getElementById('doc-tab-migo-btn');
+  if (poBtn) poBtn.classList.toggle('active', type === 'po');
+  if (migoBtn) migoBtn.classList.toggle('active', type === 'migo');
+  if (type === 'po') renderOfficialPO(refId || window.currentDocRefId);
+  else renderOfficialMIGO(refId || window.currentDocRefId);
+}
+
+function renderOfficialPO(poId) {
+  const pos = (window.mockData && window.mockData.pos) ? window.mockData.pos : [];
+  const po = pos.find(p => p.id == poId) || pos[0] || {
+    number: 'ZML-PO-2026-0001', supplier: 'Zamil Steel Industries',
+    value: 154000, date: '10-Aug-2026', delivery: '17-Aug-2026', tracking: 'PARTIALLY_RECEIVED'
+  };
+  const subtotal = po.value || 154000;
+  const vat = subtotal * 0.15;
+  const total = subtotal + vat;
+  const paper = document.getElementById('official-doc-render');
+  if (!paper) return;
+
+  paper.innerHTML = `
+    <div class="paper-header">
+      <div class="paper-logo-text">
+        <h2>ZAMIL INDUSTRIAL INVESTMENT COMPANY</h2>
+        <p>Corporate Procurement &amp; Supply Chain Management Division</p>
+        <p>Dammam 1st Industrial City, P.O. Box 14441, Dammam 31424 &bull; Kingdom of Saudi Arabia</p>
+        <p style="font-size:0.72rem; color:#64748b;">CR No: 2050004128 &bull; Unified VAT ID: 300052341200003 &bull; ISO 9001:2015 Certified</p>
+      </div>
+      <div class="paper-title-block">
+        <h1>PURCHASE ORDER</h1>
+        <div class="doc-no">${po.number}</div>
+        <div style="font-size:0.78rem; color:#64748b; margin-top:2px;">Date: ${po.date || '10-Aug-2026'}</div>
+        <span style="display:inline-block; margin-top:6px; background:#dcfce7; color:#166534; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">STATUS: ISSUED</span>
+      </div>
+    </div>
+
+    <div class="paper-meta-grid">
+      <div class="meta-box">
+        <div class="meta-box-title">Vendor / Supplier Details</div>
+        <p><strong>${po.supplier}</strong></p>
+        <p>Approved Vendor Code: <strong>VEND-1001</strong></p>
+        <p>Kingdom of Saudi Arabia / International Supply</p>
+        <p>Contact: Procurement Contract Compliance Unit</p>
+      </div>
+      <div class="meta-box">
+        <div class="meta-box-title">Delivery &amp; Commercial Terms</div>
+        <p>Ship To: <strong>Dammam Plant 1 (Warehouse RAW-01)</strong></p>
+        <p>Delivery Promised: <strong>${po.delivery || '17-Aug-2026'}</strong></p>
+        <p>Payment Terms: <strong>Net 60 Days via Corporate LC</strong></p>
+        <p>Incoterms 2020: <strong>CIF Dammam Commercial Port</strong></p>
+      </div>
+    </div>
+
+    <table class="paper-table">
+      <thead>
+        <tr>
+          <th style="width:40px;">#</th>
+          <th>Material SKU</th>
+          <th>Description &amp; Specifications</th>
+          <th style="text-align:right;">Qty</th>
+          <th>UOM</th>
+          <th style="text-align:right;">Unit Price</th>
+          <th style="text-align:right;">Extended Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>ZML-ST-BEAM-H</strong></td>
+          <td>ASTM A992 Heavy Structural Steel H-Beam Grade 50 (PEB Mainframe Component)</td>
+          <td style="text-align:right;"><strong>500</strong></td>
+          <td>MT</td>
+          <td style="text-align:right;">${formatMoney(Math.round(subtotal / 500))}</td>
+          <td style="text-align:right;"><strong>${formatMoney(subtotal)}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="paper-totals-row">
+      <table class="totals-table">
+        <tr>
+          <td style="color:#64748b;">Subtotal (Excl. VAT):</td>
+          <td style="text-align:right;"><strong>${formatMoney(subtotal)}</strong></td>
+        </tr>
+        <tr>
+          <td style="color:#64748b;">KSA Standard VAT (15%):</td>
+          <td style="text-align:right;"><strong>${formatMoney(vat)}</strong></td>
+        </tr>
+        <tr class="grand-total">
+          <td>Grand Total (${window.currentCurrency}):</td>
+          <td style="text-align:right; color:#0284c7;">${formatMoney(total)}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; padding:10px 14px; font-size:0.74rem; color:#475569; margin-bottom:20px;">
+      <strong>Terms &amp; Instructions:</strong> All deliveries must reference PO #${po.number} on Bill of Lading and Delivery Note. Mill Test Certificates (IS-2062/ASTM A992 Grade 50) and heat numbers must accompany delivery dock arrival at Dammam Plant 1.
+    </div>
+
+    <div class="paper-signatures">
+      <div class="sign-col">
+        <div class="sign-line"></div>
+        <p><strong>Dharani</strong><br><span style="color:#64748b; font-size:0.72rem;">Procurement Lead (Dammam)</span></p>
+      </div>
+      <div class="sign-col">
+        <div class="qr-badge-box">
+          <div style="font-weight:800; color:#0f172a; margin-bottom:2px;">🔒 ZAMIL SECURE ERP</div>
+          <div>ZML-HASH-PO994821</div>
+          <div style="font-size:0.6rem; color:#64748b;">ZATCA / ERP Verified</div>
+        </div>
+      </div>
+      <div class="sign-col">
+        <div class="sign-line"></div>
+        <p><strong>Eng. Fahad Al-Zamil</strong><br><span style="color:#64748b; font-size:0.72rem;">VP Supply Chain (Authorized Signatory)</span></p>
+      </div>
+    </div>
+  `;
+}
+
+function renderOfficialMIGO(migoId) {
+  const paper = document.getElementById('official-doc-render');
+  if (!paper) return;
+
+  paper.innerHTML = `
+    <div class="paper-header">
+      <div class="paper-logo-text">
+        <h2>ZAMIL INDUSTRIAL INVESTMENT COMPANY</h2>
+        <p>Central Warehouse &amp; Inventory Management Logistics</p>
+        <p>Dammam Plant 1 &bull; Receiving Dock Bay 4 &bull; Kingdom of Saudi Arabia</p>
+      </div>
+      <div class="paper-title-block">
+        <h1 style="color:#10b981;">GOODS RECEIPT SLIP</h1>
+        <div class="doc-no">MIGO-101-2026-004812</div>
+        <div style="font-size:0.78rem; color:#64748b; margin-top:2px;">SAP Movement Type: <strong>101 (PO to Warehouse)</strong></div>
+        <span style="display:inline-block; margin-top:6px; background:#dcfce7; color:#166534; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:4px; border:1px solid #bbf7d0;">POSTED &bull; COMMITTED</span>
+      </div>
+    </div>
+
+    <div class="paper-meta-grid">
+      <div class="meta-box">
+        <div class="meta-box-title">Receipt Reference &amp; Vendor</div>
+        <p>PO Reference: <strong>ZML-PO-2026-0001</strong></p>
+        <p>Vendor: <strong>Zamil Steel Industries</strong></p>
+        <p>Delivery Note: <strong>ZML-DN-994821</strong></p>
+        <p>Carrier / Truck: <strong>Fleet Express (Trailer KSA-5819)</strong></p>
+      </div>
+      <div class="meta-box">
+        <div class="meta-box-title">Warehouse Location &amp; Custody</div>
+        <p>Plant: <strong>Dammam Plant 1 (Warehouse RAW-01)</strong></p>
+        <p>Storage Bin: <strong>BIN-A1-RACK1 (Bay 4 Yard)</strong></p>
+        <p>Received By: <strong>Tariq Al-Mansoor (Warehouse Lead)</strong></p>
+        <p>Inspection Lot: <strong>QC-LOT-2026-0819 (ASTM PASSED)</strong></p>
+      </div>
+    </div>
+
+    <div style="text-align:center; padding:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; margin-bottom:20px;">
+      <div class="barcode-display">||| | | ||||| ||| || |||||| | |||</div>
+      <div style="font-family:monospace; font-size:0.8rem; font-weight:700; color:#475569;">*MIGO101-2026-004812-BIN-A1-RACK1*</div>
+    </div>
+
+    <table class="paper-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Material SKU</th>
+          <th>Material Description</th>
+          <th>Batch / Heat No.</th>
+          <th style="text-align:right;">Ordered</th>
+          <th style="text-align:right;">Received</th>
+          <th>Storage Bin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>ZML-ST-BEAM-H</strong></td>
+          <td>Zamil H-Beam Structural Steel Grade 50</td>
+          <td><strong>HT-2026-9812A</strong></td>
+          <td style="text-align:right;">500 MT</td>
+          <td style="text-align:right;"><strong style="color:#166534;">500 MT</strong></td>
+          <td>BIN-A1-RACK1</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:4px; padding:12px; font-size:0.76rem; color:#065f46; margin-bottom:24px;">
+      ✅ <strong>Quality Assurance Inspection:</strong> All 500 MT inspected visually and dimensionally against ASTM A992 / IS-2062 criteria. Zero surface cracks detected. Material transferred from Quarantine to Unrestricted Use Inventory.
+    </div>
+
+    <div class="paper-signatures">
+      <div class="sign-col">
+        <div class="sign-line"></div>
+        <p><strong>Tariq Al-Mansoor</strong><br><span style="color:#64748b; font-size:0.72rem;">Warehouse Receiving Officer</span></p>
+      </div>
+      <div class="sign-col">
+        <div class="sign-line"></div>
+        <p><strong>Quality Control Inspector</strong><br><span style="color:#64748b; font-size:0.72rem;">IS-2062 Metallurgical QA</span></p>
+      </div>
+      <div class="sign-col">
+        <div class="sign-line"></div>
+        <p><strong>Inventory Controller</strong><br><span style="color:#64748b; font-size:0.72rem;">Stock Ledger Verified</span></p>
+      </div>
+    </div>
+  `;
+}
+
+// ================================================================
+// ARIA — Autonomous Resource & Intelligence Assistant
+// AI Procurement Chat Engine for MPPMS Portal
+// ================================================================
+
+const ARIA = {
+  isOpen: false, isListening: false, isSpeaking: false,
+  recognition: null, synth: window.speechSynthesis,
+  history: [], pendingAction: null, currentTab: 'dashboard',
+  initialized: false, userName: 'Dharani',
+  contextState: { entity: null }
+};
+
+const ARIA_CHIPS = {
+  dashboard:    ['📊 Morning Briefing','🔴 Shortages','⏰ Pending PRs','📦 Todays POs'],
+  bom:          ['💥 Explode Pump BOM','🏗️ Explode Frame BOM','💰 Cost Rollup'],
+  mrp:          ['⚡ Run Q3 MRP','⚡ Run Q4 MRP','📉 Show Deficits'],
+  procurement:  ['✅ Pending Approvals','📋 All PRs','🛒 Raise PO'],
+  inventory:    ['📬 Post MIGO 101','🔴 Critical Stock','📊 Bin Balances'],
+  rgb:          ['📦 Open Receipts','✅ Post Delivery'],
+  forecast:     ['📈 Q4 Forecast','📊 Annual Trend'],
+  scorecard:    ['⭐ Top Vendors','⚠️ Low Scorers'],
+  asl:          ['✅ Approved Vendors','❌ Suspended'],
+  invoice:      ['🔍 Unmatched Invoices','✅ Matched Today'],
+  qc:           ['🧪 Pending Inspections','❌ Failed QC'],
+  costing:      ['💱 Price Variances','📊 Period Summary'],
+  lot_serial:   ['🏷️ Track Lot','📋 Expiring Soon'],
+  digital_twin: ['🌩️ Simulate 30d Delay','📈 Demand Surge 30%','⚡ Tariff Shock'],
+  smart_sourcing:['🎯 Optimize H-Beams','🎯 Optimize Bolts','⚖️ Balanced Risk']
+};
+
+// ── INIT ─────────────────────────────────────────────────────────
+function ariaInit() {
+  if (ARIA.initialized) return;
+  ARIA.initialized = true;
+  try {
+    const saved = localStorage.getItem('aria_history_mppms');
+    if (saved) ARIA.history = JSON.parse(saved);
+  } catch(e) { ARIA.history = []; }
+  ariaRenderHistory();
+  if (ARIA.history.length === 0) setTimeout(ariaGreet, 500);
+  ariaUpdateChips();
+  ariaUpdateBadge();
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === '/') { e.preventDefault(); ariaToggle(); }
+    if (e.key === 'Escape' && ARIA.isOpen) ariaToggle();
+  });
+}
+
+// ── TOGGLE ────────────────────────────────────────────────────────
+function ariaToggle() {
+  ARIA.isOpen = !ARIA.isOpen;
+  var drawer  = document.getElementById('aria-drawer');
+  var overlay = document.getElementById('aria-overlay');
+  var pill    = document.getElementById('aria-toggle-pill');
+  if (ARIA.isOpen) {
+    drawer.classList.add('open'); overlay.classList.add('open');
+    pill.style.opacity = '0.4';
+    setTimeout(function() {
+      var inp = document.getElementById('aria-text-input');
+      if (inp) inp.focus();
+      ariaScrollToBottom();
+    }, 350);
+    if (!ARIA.initialized) ariaInit();
+  } else {
+    drawer.classList.remove('open'); overlay.classList.remove('open');
+    pill.style.opacity = '1';
+    if (ARIA.isListening) ariaVoiceStop();
+  }
+}
+
+// ── GREETING ─────────────────────────────────────────────────────
+function ariaGreet() {
+  var h = new Date().getHours();
+  var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  var d = (window.mockData && window.mockData.dashboard) ? window.mockData.dashboard : {};
+  var prs = d.open_prs || 0; var sh = d.shortages || 0; var pos = d.open_pos || 0;
+  var roleInfo = (typeof ROLES_CONFIG !== 'undefined' && ROLES_CONFIG[window.currentUserRole]) ? ROLES_CONFIG[window.currentUserRole] : null;
+  var userTitle = roleInfo ? roleInfo.title + ' (' + ARIA.userName + ')' : ARIA.userName;
+  var msg = g + ', ' + userTitle + '! ';
+  var parts = [];
+  if (prs > 0) parts.push('**' + prs + ' PR approval' + (prs>1?'s':'') + '** awaiting sign-off');
+  if (sh > 0)  parts.push('**' + sh + ' material shortage' + (sh>1?'s':'') + '** at Dammam Plant 1');
+  if (pos > 0) parts.push('**' + pos + ' open PO' + (pos>1?'s':'') + '** in transit');
+  if (parts.length > 0) msg += 'You have ' + parts.join(', and ') + '. ';
+  else msg += 'All systems look healthy — no critical alerts today. ';
+  msg += 'Default currency is **' + window.currentCurrency + '**. How can I assist you today?';
+  ariaAddMsg('aria', msg);
+  ariaSpeak(g + ' ' + ARIA.userName + '. ' + (sh>0 ? sh + ' shortages detected. ' : '') + (prs>0 ? prs + ' pending approvals. ' : '') + 'How can I assist?');
+}
+
+// ── BADGE ─────────────────────────────────────────────────────────
+function ariaUpdateBadge() {
+  var d = (window.mockData && window.mockData.dashboard) ? window.mockData.dashboard : {};
+  var count = (d.open_prs || 0) + (d.shortages || 0);
+  var badge = document.getElementById('aria-pill-badge');
+  if (!badge) return;
+  if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
+  else badge.style.display = 'none';
+}
+
+// ── ADD / RENDER MESSAGE ──────────────────────────────────────────
+function ariaAddMsg(role, content, cardHtml) {
+  var now = new Date();
+  var time = ('0'+now.getHours()).slice(-2) + ':' + ('0'+now.getMinutes()).slice(-2);
+  var entry = { role: role, content: content, time: time, cardHtml: cardHtml || null };
+  ARIA.history.push(entry);
+  try { localStorage.setItem('aria_history_mppms', JSON.stringify(ARIA.history.slice(-60))); } catch(e) {}
+  ariaRenderMsg(entry);
+  ariaScrollToBottom();
+}
+
+function ariaRenderMsg(entry) {
+  var container = document.getElementById('aria-messages');
+  if (!container) return;
+  var isAria = entry.role === 'aria';
+  var row = document.createElement('div');
+  row.className = 'aria-msg-row' + (isAria ? '' : ' user');
+  if (isAria) {
+    row.innerHTML = '<div class="aria-msg-avatar-sm">A</div><div>' +
+      '<div class="aria-bubble aria-side">' + ariaMarkdown(entry.content) + '</div>' +
+      (entry.cardHtml ? entry.cardHtml : '') +
+      '<div class="aria-bubble-time">' + entry.time + '</div></div>';
+  } else {
+    row.innerHTML = '<div><div class="aria-bubble user-side">' + ariaEsc(entry.content) + '</div>' +
+      '<div class="aria-bubble-time">' + entry.time + '</div></div>';
+  }
+  container.appendChild(row);
+}
+
+function ariaRenderHistory() {
+  var c = document.getElementById('aria-messages');
+  if (c) { c.innerHTML = ''; ARIA.history.forEach(function(e){ ariaRenderMsg(e); }); ariaScrollToBottom(); }
+}
+
+function ariaScrollToBottom() {
+  var el = document.getElementById('aria-messages');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+function ariaShowTyping() {
+  var c = document.getElementById('aria-messages');
+  var el = document.createElement('div');
+  el.id = 'aria-typing-indicator'; el.className = 'aria-msg-row';
+  el.innerHTML = '<div class="aria-msg-avatar-sm">A</div><div class="aria-bubble aria-side"><div class="aria-typing"><span></span><span></span><span></span></div></div>';
+  if (c) { c.appendChild(el); ariaScrollToBottom(); }
+}
+function ariaHideTyping() { var el = document.getElementById('aria-typing-indicator'); if (el) el.remove(); }
+
+// ── SEND ──────────────────────────────────────────────────────────
+function ariaSend(override) {
+  var input = document.getElementById('aria-text-input');
+  var text = (override || (input ? input.value : '') || '').trim();
+  if (!text) return;
+  if (input) input.value = '';
+  ariaAddMsg('user', text);
+  ariaShowTyping();
+  setTimeout(function(){ ariaParseIntent(text.toLowerCase()); }, 650);
+}
+
+// ── NLP INTENT PARSER ─────────────────────────────────────────────
+function ariaParseIntent(t) {
+  ariaHideTyping();
+  
+  // ARIA Multi-Turn Memory: Pronoun Resolution
+  if (ARIA.contextState && ARIA.contextState.entity) {
+    if (/\b(it|this|that|its|these|them)\b/i.test(t)) {
+      var oldT = t;
+      t = t.replace(/\b(it|this|that|its|these|them)\b/gi, ARIA.contextState.entity);
+      console.log('ARIA Memory: Resolved pronoun "' + oldT + '" -> "' + t + '"');
+    }
+  }
+
+  if (/^(help|what can you do|commands|show commands)/.test(t)) return ariaHandleHelp();
+  if (/^(hi|hello|hey|good morning|good afternoon|good evening)/.test(t))
+    return ariaAddMsg('aria', 'Hey! I\'m ARIA, your AI procurement assistant. I can check stock, approve PRs, run MRP, post MIGO receipts, simulate supply chain scenarios, switch currencies, and generate official Zamil documents. Just ask or tap a quick action below!');
+  
+  // Currency Switch Intent
+  if (/(currency|switch currency|change currency|show in|currency to) (sar|riyal|usd|dollar|eur|euro|inr|rupee)/.test(t)) {
+    var c = 'SAR';
+    if (/usd|dollar/.test(t)) c = 'USD';
+    else if (/eur|euro/.test(t)) c = 'EUR';
+    else if (/inr|rupee/.test(t)) c = 'INR';
+    else if (/sar|riyal/.test(t)) c = 'SAR';
+    setCurrency(c);
+    return;
+  }
+  
+  // Persona / Role Switch Intent
+  if (/(switch role|change role|persona|switch to) (vp|executive|procurement|manager|warehouse|dock)/.test(t)) {
+    var r = 'procurement';
+    if (/vp|executive/.test(t)) r = 'vp';
+    else if (/warehouse|dock/.test(t)) r = 'warehouse';
+    setUserRole(r);
+    return;
+  }
+
+  // Official Document Generation Intent
+  if (/(print|generate|show|view) (official )?(po|purchase order)/.test(t)) {
+    openDocHubModal('po');
+    ariaAddMsg('aria', '📄 Generated official **Zamil Industrial Purchase Order** with Saudi 15% VAT and verification QR code. Ready to print or export to PDF.');
+    ariaSpeak('Official purchase order generated. Ready to print.');
+    return;
+  }
+  if (/(print|generate|show|view) (migo|goods receipt|receipt slip|dock slip)/.test(t)) {
+    openDocHubModal('migo');
+    ariaAddMsg('aria', '📦 Generated official **MIGO 101 Goods Movement Slip** with warehouse bin location and inspection stamp. Ready to print.');
+    ariaSpeak('MIGO goods movement slip generated. Ready to print.');
+    return;
+  }
+
+  if (/go to|open|navigate|take me to|show me the/.test(t)) return ariaHandleNavigation(t);
+  if (/summary|briefing|brief me|status update|how are we|overview/.test(t)) return ariaHandleSummary();
+  if (/shortage|critical|low stock|below safety|what.s low|out of stock/.test(t)) return ariaHandleShortages();
+  if (/how much|how many|stock of|quantity of|check stock|inventory for|available|do we have/.test(t)) return ariaHandleStockCheck(t);
+  if (/pending (approval|pr|requisition)|show (pr|requisition)|list pr|purchase req/.test(t)) return ariaHandlePRStatus();
+  if (/approve (pr|requisition)|sign off|authoris|authoriz/.test(t)) return ariaHandleApprovePR(t);
+  if (/(show|list|open|how many) (po|purchase order)|order status/.test(t)) return ariaHandlePOStatus();
+  if (/raise po|create (purchase order|po)|generate po/.test(t)) return ariaHandleRaisePO();
+  if (/received|receipt|goods receipt|migo|post stock|post receipt|post goods/.test(t)) return ariaHandleMIGO(t);
+  if (/run mrp|mrp (calculation|explosion|run|for)|material requirements|calculate (requirement|deficit)/.test(t)) return ariaHandleRunMRP(t);
+  if (/bom|bill of material|explode|breakdown (for|of)/.test(t)) return ariaHandleRunBOM();
+  if (/simulat|digital twin|monte carlo|stress test|shipping delay|tariff shock/.test(t)) return ariaHandleSimulation(t);
+  if (/sourc|vendor split|optimi|best vendor|allocation/.test(t)) return ariaHandleSourcing();
+  if (/vendor|supplier|scorecard|tata|hindalco|rating for|score for/.test(t)) return ariaHandleVendorQuery();
+  if (/forecast|demand for|predict|next quarter|projection|ai forecast/.test(t)) return ariaHandleForecast();
+  ariaAddMsg('aria', 'I didn\'t quite catch that. Try: *"check stock for H-Beams"*, *"switch currency to SAR"*, *"print official PO"*, *"run MRP for Q3"*, or say **"help"** to see all commands.');
+}
+
+// ── INTENT HANDLERS ───────────────────────────────────────────────
+function ariaHandleHelp() {
+  var tbl = '<table class="aria-mini-table"><tr><th colspan="2">ARIA Command Reference</th></tr>' +
+    '<tr><td>Currency</td><td>Switch currency to SAR / USD / EUR</td></tr>' +
+    '<tr><td>Persona</td><td>Switch role to VP / Warehouse</td></tr>' +
+    '<tr><td>Official PO</td><td>Print official purchase order</td></tr>' +
+    '<tr><td>MIGO Slip</td><td>Generate MIGO receipt slip</td></tr>' +
+    '<tr><td>Stock check</td><td>How much H-Beam do we have?</td></tr>' +
+    '<tr><td>Shortages</td><td>What is critically low?</td></tr>' +
+    '<tr><td>Pending PRs</td><td>Show pending approvals</td></tr>' +
+    '<tr><td>Approve PR</td><td>Approve PR-2026-0001</td></tr>' +
+    '<tr><td>Raise PO</td><td>Raise PO for approved PRs</td></tr>' +
+    '<tr><td>Post MIGO</td><td>400 MT H-Beams received</td></tr>' +
+    '<tr><td>Run MRP</td><td>Run MRP for Q3 plan</td></tr>' +
+    '<tr><td>BOM</td><td>Explode BOM for centrifugal pump</td></tr>' +
+    '<tr><td>Simulation</td><td>Simulate 30-day shipping delay</td></tr>' +
+    '<tr><td>Sourcing</td><td>Optimize sourcing for H-Beams</td></tr>' +
+    '<tr><td>Summary</td><td>Give me a briefing</td></tr></table>';
+  ariaAddMsg('aria', 'Here\'s everything I can help with:', tbl);
+  ariaSpeak('I can check stock, show shortages, approve requisitions, run MRP, switch currencies, generate official Zamil documents, and much more.');
+}
+
+function ariaHandleSummary() {
+  var d = (window.mockData && window.mockData.dashboard) ? window.mockData.dashboard : {};
+  var prs = d.open_prs||0, pos = d.open_pos||0, sh = d.shortages||0, pl = d.active_plans||0;
+  var spend = formatMoney(d.monthly_spend || 254000);
+  var tbl = '<table class="aria-mini-table"><tr><th>Metric</th><th>Value</th></tr>' +
+    '<tr><td>Open PRs</td><td><strong style="color:var(--warning)">' + prs + '</strong></td></tr>' +
+    '<tr><td>Open POs</td><td><strong style="color:var(--info)">' + pos + '</strong></td></tr>' +
+    '<tr><td>Shortages</td><td><strong style="color:var(--danger)">' + sh + '</strong></td></tr>' +
+    '<tr><td>Active Plans</td><td><strong style="color:var(--success)">' + pl + '</strong></td></tr>' +
+    '<tr><td>Monthly Spend</td><td><strong>' + spend + '</strong></td></tr></table>';
+  var msg = 'Here\'s your current snapshot: ';
+  if (sh > 0) msg += '🔴 **' + sh + ' material shortage' + (sh>1?'s':'') + '** need attention. ';
+  if (prs > 0) msg += '📝 **' + prs + ' PR' + (prs>1?'s':'') + '** awaiting approval. ';
+  if (pos > 0) msg += '🚚 **' + pos + ' PO' + (pos>1?'s':'') + '** in transit. ';
+  if (sh===0 && prs===0) msg += 'All systems healthy — no critical actions needed.';
+  
+  // ARIA Inline Chart Superpower
+  var spendTrend = [210000, 240000, 220000, 280000, d.monthly_spend || 254000];
+  var chartHtml = ariaChartCardHtml('Spend Trend', 'bar', ['May','Jun','Jul','Aug','Sep'], spendTrend);
+  
+  ariaAddMsg('aria', msg, tbl + chartHtml);
+  ariaSpeak('Current status: ' + sh + ' shortages, ' + prs + ' pending approvals, ' + pos + ' open orders.');
+}
+
+function ariaHandleShortages() {
+  var list = ((window.mockData && window.mockData.balances) ? window.mockData.balances : [])
+    .filter(function(b){ return b.stock_status === 'CRITICAL' || b.stock_status === 'LOW'; });
+  if (!list.length) {
+    ariaAddMsg('aria', '\u2705 Great news \u2014 no materials are below safety stock. All inventory is healthy.');
+    ariaSpeak('No shortages detected. All inventory within safe levels.');
+    return;
+  }
+  var rows = list.map(function(b){
+    var col = b.stock_status==='CRITICAL' ? 'var(--danger)' : 'var(--warning)';
+    return '<tr><td><strong>' + b.material_code + '</strong></td><td>' + (b.material_name||'').substring(0,22) + '...</td>' +
+      '<td style="color:' + col + '">' + b.stock_status + '</td>' +
+      '<td>' + (b.qty_on_hand||0) + ' / ' + (b.safety_stock||0) + '</td></tr>';
+  }).join('');
+  var tbl = '<table class="aria-mini-table"><tr><th>Code</th><th>Material</th><th>Status</th><th>On Hand/Safety</th></tr>' + rows + '</table>';
+  ariaAddMsg('aria', 'Found **' + list.length + '** material' + (list.length>1?'s':'') + ' below safety stock:', tbl);
+  ariaSpeak(list.length + ' materials below safety stock. ' + (list[0]&&list[0].material_name ? list[0].material_name : '') + ' is ' + (list[0]&&list[0].stock_status ? list[0].stock_status.toLowerCase() : '') + '.');
+}
+
+function ariaHandleStockCheck(text) {
+  var kw = text.replace(/how much|how many|stock of|quantity of|check stock|inventory for|available|do we have|is there/g,'').replace(/[?]/g,'').trim();
+  if (!kw || kw.length < 2) { ariaAddMsg('aria', 'Which material? Try: *"How much H-Beam do we have?"*'); return; }
+  var match = ((window.mockData && window.mockData.balances) ? window.mockData.balances : []).find(function(b){
+    return (b.material_name||'').toLowerCase().includes(kw) || (b.material_code||'').toLowerCase().includes(kw);
+  });
+  if (!match) { ariaAddMsg('aria', 'No material matching *"' + kw + '"* found in inventory. Try using the material code (e.g. ZML-ST-BEAM-H).'); return; }
+  
+  // Save context for multi-turn
+  ARIA.contextState.entity = match.material_name;
+  
+  var col = match.stock_status==='CRITICAL' ? 'var(--danger)' : match.stock_status==='LOW' ? 'var(--warning)' : 'var(--success)';
+  var tbl = '<table class="aria-mini-table"><tr><th colspan="2">' + match.material_code + '</th></tr>' +
+    '<tr><td>Name</td><td>' + match.material_name + '</td></tr>' +
+    '<tr><td>On Hand</td><td><strong>' + (match.qty_on_hand||0).toLocaleString() + '</strong></td></tr>' +
+    '<tr><td>Safety Stock</td><td>' + (match.safety_stock||0).toLocaleString() + '</td></tr>' +
+    '<tr><td>Status</td><td style="color:' + col + '"><strong>' + match.stock_status + '</strong></td></tr>' +
+    '<tr><td>Warehouse</td><td>' + (match.warehouse_code||'\u2014') + '</td></tr></table>';
+  ariaAddMsg('aria', '**' + match.material_code + '**: **' + (match.qty_on_hand||0).toLocaleString() + ' units** on hand. Status: **' + match.stock_status + '**.', tbl);
+  ariaSpeak(match.material_name + ': ' + (match.qty_on_hand||0) + ' units on hand. Status: ' + match.stock_status + '.');
+}
+
+function ariaHandlePRStatus() {
+  var prs = ((window.mockData && window.mockData.prs) ? window.mockData.prs : []).filter(function(p){ return p.status==='SUBMITTED'||p.status==='APPROVED'; });
+  if (!prs.length) { ariaAddMsg('aria', '\u2705 No pending purchase requisitions. All PRs are processed.'); return; }
+  var rows = prs.slice(0,6).map(function(p){
+    var col = p.status==='APPROVED' ? 'var(--success)' : 'var(--warning)';
+    return '<tr><td><strong>' + p.number + '</strong></td><td>' + p.material_code + '</td><td>' + (p.qty||0).toLocaleString() + '</td><td style="color:' + col + '">' + p.status + '</td></tr>';
+  }).join('');
+  var tbl = '<table class="aria-mini-table"><tr><th>PR #</th><th>Material</th><th>Qty</th><th>Status</th></tr>' + rows + '</table>';
+  ariaAddMsg('aria', '**' + prs.length + ' PR' + (prs.length>1?'s':'') + '** pending:', tbl);
+  ariaSpeak(prs.length + ' purchase requisitions pending.');
+}
+
+function ariaHandleApprovePR() {
+  var prs = ((window.mockData && window.mockData.prs) ? window.mockData.prs : []).filter(function(p){ return p.status==='SUBMITTED'; });
+  if (!prs.length) { ariaAddMsg('aria', '\u2705 No PRs currently waiting for approval.'); return; }
+  var pr = prs[0];
+  var card = ariaActionCardHtml('PR Approval', '\u2705', [
+    ['PR Number', pr.number], ['Material', pr.material_code],
+    ['Quantity', (pr.qty||0).toLocaleString() + ' units'], ['Priority', pr.priority||'MEDIUM']
+  ], 'ariaExecuteApprovePR', pr.id, '\u2705 Approve PR', 'Cancel');
+  ariaAddMsg('aria', 'Confirm approval of **' + pr.number + '** for ' + (pr.qty||0).toLocaleString() + ' units of **' + pr.material_code + '**?', card);
+  ariaSpeak('Ready to approve PR ' + pr.number + ' for ' + pr.material_code + '. Please confirm.');
+}
+
+function ariaHandlePOStatus() {
+  var pos = (window.mockData && window.mockData.pos) ? window.mockData.pos : [];
+  if (!pos.length) { ariaAddMsg('aria', 'No open purchase orders found.'); return; }
+  var rows = pos.slice(0,5).map(function(p){
+    var col = p.tracking==='RECEIVED' ? 'var(--success)' : 'var(--info)';
+    return '<tr><td><strong>' + p.number + '</strong></td><td>' + (p.supplier||'').substring(0,16) + '...</td>' +
+      '<td>\u20b9' + (p.value||0).toLocaleString() + '</td><td style="color:' + col + '">' + p.tracking + '</td></tr>';
+  }).join('');
+  var tbl = '<table class="aria-mini-table"><tr><th>PO #</th><th>Supplier</th><th>Value</th><th>Status</th></tr>' + rows + '</table>';
+  ariaAddMsg('aria', '**' + pos.length + ' Purchase Order' + (pos.length>1?'s':'') + '** active:', tbl);
+  ariaSpeak(pos.length + ' active purchase orders. ' + pos.filter(function(p){ return p.tracking!=='RECEIVED'; }).length + ' in transit.');
+}
+
+function ariaHandleRaisePO() {
+  var approved = ((window.mockData && window.mockData.prs) ? window.mockData.prs : []).filter(function(p){ return p.status==='APPROVED'; });
+  if (!approved.length) { ariaAddMsg('aria', 'No approved PRs to raise a PO from. Approve a requisition first.'); return; }
+  var pr = approved[0];
+  var vendor = (pr.rating && pr.rating > 4.5) ? 'Tata Steel India Ltd' : 'Hindalco Industries';
+  var card = ariaActionCardHtml('Raise Purchase Order', '\ud83d\uded2', [
+    ['Based on PR', pr.number], ['Material', pr.material_code],
+    ['Quantity', (pr.qty||0).toLocaleString() + ' units'], ['Preferred Vendor', vendor]
+  ], 'ariaExecuteRaisePO', pr.id, '\ud83d\uded2 Raise PO', 'Cancel');
+  ariaAddMsg('aria', 'Raise a PO from **' + pr.number + '** (' + pr.material_code + ', ' + (pr.qty||0).toLocaleString() + ' units)?', card);
+  ariaSpeak('Ready to raise purchase order from PR ' + pr.number + '. Please confirm.');
+}
+
+function ariaHandleMIGO(text) {
+  var qm = text.match(/(\d+(?:\.\d+)?)/);
+  var qty = qm ? parseFloat(qm[1]) : null;
+  var um = text.match(/\b(mt|kg|set|sft|ltr|ea|roll|pcs|ton|tons|units?)\b/i);
+  var uom = um ? um[1].toUpperCase() : 'units';
+  if (!qty) { ariaAddMsg('aria', 'Tell me the quantity and material. E.g.: *"400 MT H-Beams received"*'); return; }
+  var mats = (window.mockData && window.mockData.materials) ? window.mockData.materials : [];
+  var kw = text.replace(/\d+/g,'').replace(/received|receipt|migo|post|goods|on po|from|mt|kg|units?/gi,'').trim().split(' ').filter(function(w){ return w.length>2; })[0] || '';
+  var matched = mats.find(function(m){ return kw && ((m.name||'').toLowerCase().includes(kw)||(m.code||'').toLowerCase().includes(kw)); }) || mats[0];
+  ARIA.pendingAction = { type: 'MIGO', qty: qty, uom: uom, material: matched };
+  var card = ariaActionCardHtml('MIGO Goods Receipt', '\ud83d\udcec', [
+    ['Movement', '101 \u2014 PO Goods Receipt'],
+    ['Material', matched ? (matched.code||matched.material_code||'?') : '?'],
+    ['Quantity', qty.toLocaleString() + ' ' + uom],
+    ['Warehouse', 'Dammam Plant 1 \u2014 WH-RAW-01']
+  ], 'ariaExecuteMIGO', null, '\u2705 Confirm & Post', 'Cancel');
+  ariaAddMsg('aria', 'Post goods receipt of **' + qty.toLocaleString() + ' ' + uom + '** of **' + (matched ? (matched.name||matched.material_name||'material') : 'material') + '**?', card);
+  ariaSpeak('Ready to post goods receipt of ' + qty + ' ' + uom + '. Please confirm.');
+}
+
+function ariaHandleRunMRP(text) {
+  var plans = (window.mockData && window.mockData.plans) ? window.mockData.plans : [];
+  var plan = plans.find(function(p){ return p.status==='APPROVED'||p.status==='In Progress'; }) || plans[0];
+  if (!plan) { ariaAddMsg('aria', 'No approved plans found for MRP run.'); return; }
+  ariaAddMsg('aria', 'Running MRP calculation for **' + plan.name + '**... \ud83d\udd04');
+  ariaSpeak('Running MRP for ' + plan.name + '.');
+  if (typeof switchTab === 'function') switchTab('mrp');
+  setTimeout(function(){
+    var sel = document.getElementById('mrp-plan-select');
+    if (sel) sel.value = plan.id;
+    if (typeof runMRP === 'function') runMRP();
+    var deficits = ((window.mockData && window.mockData.balances) ? window.mockData.balances : []).filter(function(b){ return b.stock_status==='CRITICAL'||b.stock_status==='LOW'; }).length;
+    ariaAddMsg('aria', '\u2705 MRP complete for **' + plan.name + '**. Found **' + deficits + ' material deficit' + (deficits!==1?'s':'') + '**. Would you like me to review the shortages?');
+    ariaSpeak('MRP complete. ' + deficits + ' deficits found.');
+  }, 2500);
+}
+
+function ariaHandleRunBOM() {
+  var prods = (window.mockData && window.mockData.products) ? window.mockData.products : [];
+  if (typeof switchTab === 'function') switchTab('bom');
+  ariaAddMsg('aria', 'Opening Bill of Materials for **' + ((prods[0]&&prods[0].name)||'selected product') + '**. Running BOM explosion...');
+  setTimeout(function(){
+    if (typeof executeBOMBreakdown === 'function') executeBOMBreakdown();
+    ariaAddMsg('aria', '\u2705 BOM hierarchy exploded. Multi-level component tree is now visible in the BOM module.');
+    ariaSpeak('Bill of materials breakdown complete.');
+  }, 1200);
+}
+
+function ariaHandleNavigation(text) {
+  var map = {
+    dashboard:['dashboard','home','main','executive'],
+    bom:['bom','bill of material','component','hierarchy'],
+    mrp:['mrp','material requirement','planning','deficit'],
+    procurement:['procurement','purchase','requisition'],
+    inventory:['inventory','stock','warehouse','goods movement','migo'],
+    rgb:['goods receipt','receiving','dock','rgb'],
+    forecast:['forecast','demand','prediction','ai forecast'],
+    scorecard:['scorecard','vendor rating','supplier rating'],
+    asl:['approved supplier','asl','vendor list'],
+    invoice:['invoice','matching','ap','accounts payable'],
+    qc:['qc','quality','inspection'],
+    costing:['costing','ppv','price variance','standard cost'],
+    lot_serial:['lot','serial','traceability','heat number'],
+    digital_twin:['digital twin','simulation','monte carlo','stress'],
+    smart_sourcing:['smart sourcing','sourcing optimizer','vendor split']
+  };
+  var names = {
+    dashboard:'Executive Dashboard', bom:'Bill of Materials', mrp:'MRP Planner',
+    procurement:'Procurement', inventory:'Inventory & Goods Movements', rgb:'Goods Receipt',
+    forecast:'AI Forecasting', scorecard:'Vendor Scorecard', asl:'Approved Supplier List',
+    invoice:'Invoice Matching', qc:'QC Inspection', costing:'Standard Costing',
+    lot_serial:'Lot & Serial Tracking', digital_twin:'Digital Twin Simulator', smart_sourcing:'Smart Sourcing'
+  };
+  for (var tab in map) {
+    if (map[tab].some(function(kw){ return text.includes(kw); })) {
+      if (typeof switchTab === 'function') switchTab(tab);
+      ARIA.currentTab = tab; ariaUpdateChips();
+      ariaAddMsg('aria', 'Navigating to **' + names[tab] + '**.');
+      return;
+    }
+  }
+  ariaAddMsg('aria', 'Not sure which page you mean. Try: *"Go to procurement"*, *"Open MRP"*, or *"Show inventory"*.');
+}
+
+function ariaHandleSimulation(text) {
+  var dm = text.match(/(\d+)\s*(?:day|d)/);
+  var delay = dm ? parseInt(dm[1]) : 30;
+  if (typeof switchTab === 'function') switchTab('digital_twin');
+  ariaAddMsg('aria', '\ud83c\udf29\ufe0f Running Digital Twin Monte Carlo with **' + delay + '-day shipping delay**...');
+  setTimeout(function(){
+    var el = document.getElementById('dt-shipping-delay');
+    if (el) el.value = delay;
+    if (typeof runDigitalTwinSim === 'function') runDigitalTwinSim();
+    ariaAddMsg('aria', '\u2705 Simulation complete. Results visible in the Digital Twin panel.');
+    ariaSpeak('Simulation complete.');
+  }, 1000);
+}
+
+function ariaHandleSourcing() {
+  if (typeof switchTab === 'function') switchTab('smart_sourcing');
+  ariaAddMsg('aria', '\ud83c\udfaf Launching Smart Sourcing Optimizer with Balanced Risk strategy...');
+  setTimeout(function(){
+    if (typeof runSmartSourcing === 'function') runSmartSourcing();
+    ariaAddMsg('aria', '\u2705 Sourcing optimization complete. Vendor allocation splits are ready for review and acceptance.');
+    ariaSpeak('Sourcing optimization complete.');
+  }, 1000);
+}
+
+function ariaHandleVendorQuery() {
+  var vendors = (window.mockData && window.mockData.scorecards) ? window.mockData.scorecards : [];
+  if (!vendors.length) {
+    if (typeof switchTab === 'function') switchTab('scorecard');
+    ariaAddMsg('aria', 'Opening Vendor Scorecard module. Switch to Live Mode to pull real-time supplier performance data from the database.');
+    return;
+  }
+  var rows = vendors.slice(0,4).map(function(v){
+    var sc = v.score||v.overall_score||0;
+    return '<tr><td><strong>' + (v.code||v.supplier_code||'\u2014') + '</strong></td><td>' + (v.name||v.supplier_name||'').substring(0,18) + '...</td><td style="color:' + (sc>80?'var(--success)':'var(--warning)') + '">' + sc + '/100</td></tr>';
+  }).join('');
+  ariaAddMsg('aria', 'Top vendor performance:', '<table class="aria-mini-table"><tr><th>Code</th><th>Supplier</th><th>Score</th></tr>' + rows + '</table>');
+  ariaSpeak('Here are the top vendor scores.');
+}
+
+function ariaHandleForecast() {
+  if (typeof switchTab === 'function') switchTab('forecast');
+  ariaAddMsg('aria', '\ud83d\udcc8 Running AI Holt-Winters demand forecast...');
+  setTimeout(function(){
+    if (typeof calculateForecast === 'function') calculateForecast();
+    ariaAddMsg('aria', '\u2705 Forecast complete using Triple Exponential Smoothing (\u03b1=0.4, \u03b2=0.2, \u03b3=0.5). Results now visible in the chart.');
+    ariaSpeak('Demand forecast complete.');
+  }, 1200);
+}
+
+// ── ACTION CARD BUILDER ───────────────────────────────────────────
+function ariaChartCardHtml(title, chartType, labels, dataArr) {
+  var id = 'aria-chart-' + Math.random().toString(36).substr(2, 9);
+  var html = '<div class="aria-action-card">' +
+    '<div class="card-header"><i data-lucide="bar-chart"></i> ' + title + '</div>' +
+    '<div style="padding: 1rem; position: relative; height: 140px; width: 100%;">' +
+    '<canvas id="' + id + '"></canvas></div>' +
+    '</div>';
+  
+  setTimeout(function() {
+    var ctx = document.getElementById(id);
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: chartType,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: title,
+          data: dataArr,
+          backgroundColor: 'rgba(0, 212, 138, 0.4)',
+          borderColor: '#00d48a',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: true, ticks: { color: '#8898aa', font: { size: 9 } }, grid: { display: false } },
+          y: { display: true, ticks: { color: '#8898aa', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    });
+  }, 150);
+  return html;
+}
+
+function ariaActionCardHtml(title, icon, rows, confirmFn, confirmArg, confirmLabel, cancelLabel) {
+  var arg = (confirmArg !== null && confirmArg !== undefined) ? '\'' + confirmArg + '\'' : '';
+  var rowsHtml = rows.map(function(r){ return '<div class="aria-action-row"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join('');
+  return '<div class="aria-action-card">' +
+    '<div class="aria-action-card-header">' + icon + ' Action Detected \u2014 ' + title + '</div>' +
+    '<div class="aria-action-card-body">' + rowsHtml + '</div>' +
+    '<div class="aria-action-btns">' +
+    '<button class="aria-btn-confirm" onclick="' + confirmFn + '(' + arg + ')">' + (confirmLabel||'Confirm') + '</button>' +
+    '<button class="aria-btn-cancel" onclick="this.closest(\'.aria-action-card\').remove()">\u2715 ' + (cancelLabel||'Cancel') + '</button>' +
+    '</div></div>';
+}
+
+// ── ACTION EXECUTORS ──────────────────────────────────────────────
+function ariaExecuteApprovePR(prId) {
+  if (typeof approvePR === 'function') { approvePR(prId, true); }
+  AriaAudio.chime('success');
+  ariaAddMsg('aria', '✅ PR approved! The procurement team can now convert it to a Purchase Order.');
+  ariaSpeak('PR approved successfully.');
+  ariaUpdateBadge();
+}
+
+function ariaExecuteRaisePO(prId) {
+  if (typeof autoPO === 'function') { autoPO(prId, true); }
+  AriaAudio.chime('success');
+  ariaAddMsg('aria', '✅ Purchase Order raised and committed! Document PUR-PO-2026 is generated and ready for sign-off.');
+  ariaSpeak('Purchase order raised successfully.');
+  ariaUpdateBadge();
+}
+
+function ariaExecuteMIGO() {
+  var pa = ARIA.pendingAction;
+  if (!pa) return;
+  var qtyEl = document.getElementById('migo-quantity');
+  if (qtyEl) qtyEl.value = pa.qty;
+  if (typeof switchTab === 'function') switchTab('inventory');
+  if (typeof submitMIGO === 'function') submitMIGO();
+  AriaAudio.chime('success');
+  ariaAddMsg('aria', '✅ MIGO 101 posted — **' + pa.qty + ' ' + pa.uom + '** added to warehouse balance. Audit document committed.');
+  ariaSpeak('Goods receipt posted. ' + pa.qty + ' ' + pa.uom + ' added to inventory.');
+  ARIA.pendingAction = null;
+}
+
+// ── CHIPS ─────────────────────────────────────────────────────────
+function ariaUpdateChips() {
+  var el = document.getElementById('aria-chips');
+  if (!el) return;
+  var set = ARIA_CHIPS[ARIA.currentTab] || ARIA_CHIPS.dashboard;
+  el.innerHTML = set.map(function(c){
+    var safe = c.replace(/['"]/g,'').replace(/&/g,'and');
+    return '<button class="aria-chip" onclick="ariaSend(\'' + safe + '\')">' + c + '</button>';
+  }).join('');
+}
+
+// ── VOICE ─────────────────────────────────────────────────────────
+function ariaVoiceToggle() {
+  if (ARIA.isListening) { ariaVoiceStop(); return; }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { ariaAddMsg('aria', '⚠️ Voice input not supported in this browser. Please use Chrome or Edge.'); return; }
+  ARIA.recognition = new SR();
+  ARIA.recognition.lang = 'en-US';
+  ARIA.recognition.continuous = false;
+  ARIA.recognition.interimResults = true;
+  ARIA.recognition.onstart = function() {
+    ARIA.isListening = true;
+    AriaAudio.chime('start');
+    var mb = document.getElementById('aria-mic-btn'); if (mb) mb.classList.add('listening');
+    var av = document.getElementById('aria-avatar'); if (av) av.classList.add('listening');
+    var vc = document.getElementById('aria-voice-card'); if (vc) vc.style.display = 'block';
+    var lt = document.getElementById('aria-live-transcript'); if (lt) lt.textContent = 'Listening...';
+    var heq = document.getElementById('aria-header-eq'); if (heq) heq.classList.add('active');
+  };
+  ARIA.recognition.onresult = function(e) {
+    var t = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    var lt = document.getElementById('aria-live-transcript'); if (lt) lt.textContent = t;
+    var inp = document.getElementById('aria-text-input'); if (inp) inp.value = t;
+  };
+  ARIA.recognition.onend = function() {
+    var t = (document.getElementById('aria-text-input') || {}).value || '';
+    ariaVoiceStop();
+    if (t.trim()) ariaSend(t.trim());
+  };
+  ARIA.recognition.onerror = function(e) {
+    ariaVoiceStop();
+    if (e.error !== 'no-speech') ariaAddMsg('aria', '⚠️ Mic error: ' + e.error + '. Check microphone permissions.');
+  };
+  ARIA.recognition.start();
+}
+
+function ariaVoiceStop() {
+  ARIA.isListening = false;
+  if (ARIA.recognition) { try { ARIA.recognition.stop(); } catch(e) {} }
+  AriaAudio.chime('stop');
+  var mb = document.getElementById('aria-mic-btn'); if (mb) mb.classList.remove('listening');
+  var av = document.getElementById('aria-avatar'); if (av) { av.classList.remove('listening'); av.classList.remove('speaking'); }
+  var vc = document.getElementById('aria-voice-card'); if (vc) vc.style.display = 'none';
+  var heq = document.getElementById('aria-header-eq'); if (heq) heq.classList.remove('active');
+}
+
+function ariaSpeak(text) {
+  if (!ARIA.synth) return;
+  ARIA.synth.cancel();
+  var clean = text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/^[#]+/gm,'');
+  var utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = 'en-US'; utt.rate = 0.92; utt.pitch = 1.05;
+  var av = document.getElementById('aria-avatar');
+  var heq = document.getElementById('aria-header-eq');
+  utt.onstart = function(){
+    if (av) av.classList.add('speaking');
+    if (heq) heq.classList.add('active');
+  };
+  utt.onend = function(){
+    if (av) av.classList.remove('speaking');
+    if (heq) heq.classList.remove('active');
+  };
+  ARIA.synth.speak(utt);
+}
+
+// ── SPACEBAR PUSH-TO-TALK ─────────────────────────────────────────
+(function(){
+  var spaceHeld = false;
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && !spaceHeld) {
+      var act = document.activeElement;
+      var isInput = act && (act.tagName === 'INPUT' || act.tagName === 'TEXTAREA' || act.isContentEditable);
+      if (!isInput) {
+        e.preventDefault();
+        spaceHeld = true;
+        if (!ARIA.isOpen) ariaToggle();
+        if (!ARIA.isListening) ariaVoiceToggle();
+      }
+    }
+  });
+  document.addEventListener('keyup', function(e) {
+    if (e.code === 'Space' && spaceHeld) {
+      e.preventDefault();
+      spaceHeld = false;
+      if (ARIA.isListening) ariaVoiceStop();
+    }
+  });
+})();
+
+// ── MARKDOWN LITE ─────────────────────────────────────────────────
+function ariaMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#e8f4f0">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+}
+function ariaEsc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── HOOK switchTab FOR CHIP UPDATES ──────────────────────────────
+(function(){
+  var orig = window.switchTab;
+  if (typeof orig === 'function') {
+    window.switchTab = function(id) {
+      orig(id);
+      ARIA.currentTab = id;
+      ariaUpdateChips();
+    };
+  }
+})();
+
+// ── BOOT ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(ariaInit, 900); });
 </script>
 
 </body>
