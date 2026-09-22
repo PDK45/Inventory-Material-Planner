@@ -1902,7 +1902,55 @@
       .doc-paper-wrap { padding: 0 !important; background: #fff !important; }
       .official-paper { box-shadow: none !important; padding: 0 !important; max-width: 100% !important; }
     }
-  </style>
+  
+/* Enterprise Module CSS */
+.ent-dashboard { display: grid; grid-template-columns: 1fr 2.5fr; gap: 20px; margin-bottom: 25px; }
+.ent-kpi-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ent-kpi-val { font-size: 2.5rem; font-weight: 700; color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+.ent-kpi-lbl { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+.chart-container { position: relative; height: 350px; width: 100%; display: flex; align-items: center; justify-content: center; }
+.tier-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+.tier-strategic { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.tier-preferred { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.tier-tactical { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+.score-red { color: #f87171 !important; font-weight:bold; }
+.score-yellow { color: #fbbf24 !important; font-weight:bold; }
+.score-green { color: #34d399 !important; font-weight:bold; }
+.interactive-row { cursor: pointer; transition: background 0.2s; }
+.interactive-row:hover { background: rgba(255,255,255,0.05) !important; }
+.interactive-row.active { background: rgba(59, 130, 246, 0.1) !important; border-left: 3px solid var(--primary); }
+
+
+.risk-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+.risk-low { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+.risk-med { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+.risk-high { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+.comp-badge { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-right: 4px; }
+
+
+.prog-container { width: 100%; background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 4px; position:relative; }
+.prog-bar { height: 100%; border-radius: 4px; }
+.prog-po { background: var(--primary); width: 100%; opacity: 0.3; position:absolute; }
+.prog-gr { background: #34d399; position:absolute; z-index:2; }
+.prog-inv { background: #f87171; position:absolute; z-index:3; height: 4px; top: 2px; }
+.inv-action-btn { background: rgba(255,255,255,0.1); border:none; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem; margin-right:4px; }
+.inv-action-btn:hover { background: rgba(255,255,255,0.2); }
+.inv-force { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.4); }
+
+
+.trace-container { display: flex; flex-direction: column; gap: 20px; }
+.trace-search { padding: 15px; font-size: 1.1rem; width: 100%; max-width: 400px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white; border-radius: 8px; }
+.timeline-viz { display: flex; justify-content: space-between; align-items: flex-start; position: relative; margin-top: 30px; padding: 20px 0; }
+.timeline-viz::before { content: ''; position: absolute; top: 35px; left: 5%; right: 5%; height: 2px; background: rgba(255,255,255,0.1); z-index: 1; }
+.time-node { display: flex; flex-direction: column; align-items: center; z-index: 2; width: 120px; text-align: center; }
+.time-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--bg-card); border: 3px solid var(--primary); margin-bottom: 10px; }
+.time-dot.done { background: var(--primary); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+.time-label { font-size: 0.8rem; font-weight: bold; color: var(--text-light); }
+.time-date { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
+.ppv-item { cursor: pointer; transition: background 0.2s; }
+.ppv-item:hover { background: rgba(255,255,255,0.05); }
+
+</style>
 </head>
 <body>
 
@@ -2664,10 +2712,38 @@
 
       <!-- TAB 7: VENDOR SCORECARD -->
       <section id="tab-scorecard" class="content-body">
-        <div class="glass-card" style="margin-bottom: 25px;">
+        <div class="ent-dashboard">
+          <!-- Left: KPIs -->
+          <div style="display:flex; flex-direction:column; gap:15px;">
+            <div class="glass-card" style="flex:1;">
+              <h4 style="margin-top:0; color:var(--text-muted); font-size:0.85rem;"><i data-lucide="award"></i> Selected Vendor</h4>
+              <h2 id="sc-vendor-name" style="margin: 10px 0; color:var(--text-light);">Tata Steel Ltd.</h2>
+              <span id="sc-vendor-tier" class="tier-badge tier-strategic">Strategic Partner</span>
+            </div>
+            <div class="glass-card ent-kpi-card" style="flex:1;">
+              <div id="sc-overall-score" class="ent-kpi-val score-green">94.5</div>
+              <div class="ent-kpi-lbl">Overall Performance</div>
+            </div>
+            <button class="btn-primary" onclick="recalculateVendorScores()" style="padding:15px; font-size:1rem; width:100%; justify-content:center;">
+              <i data-lucide="refresh-cw"></i> Recalculate Live Data
+            </button>
+          </div>
+          
+          <!-- Right: Radar Chart -->
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="radar"></i> Performance Benchmark vs Industry</h3>
+              <span class="badge badge-info">Chart.js Analytics</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="vendorRadarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card">
           <div class="card-title-section">
-            <h3><i data-lucide="award"></i> Vendor Performance Scorecard Ledger</h3>
-            <button class="btn-primary" onclick="recalculateVendorScores()"><i data-lucide="refresh-cw"></i> Recalculate Ratings</button>
+            <h3><i data-lucide="list"></i> Vendor Scorecard Ledger</h3>
           </div>
           <div class="table-container">
             <table>
@@ -2675,16 +2751,16 @@
                 <tr>
                   <th>Vendor Code</th>
                   <th>Supplier Name</th>
-                  <th>Delivery (40%)</th>
+                  <th>Tier</th>
                   <th>Quality (40%)</th>
+                  <th>Delivery (40%)</th>
                   <th>Price (20%)</th>
-                  <th>Total Score</th>
-                  <th>Rating Grade</th>
+                  <th>Overall Score</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody id="scorecard-ledger-body">
-                <tr><td colspan="8" style="text-align:center;">Loading Scorecards...</td></tr>
+                <!-- Rendered via JS -->
               </tbody>
             </table>
           </div>
@@ -2693,29 +2769,57 @@
 
       <!-- TAB 8: APPROVED SUPPLIER LIST (ASL) -->
       <section id="tab-asl" class="content-body">
-        <div class="glass-card">
-          <div class="card-title-section">
-            <h3><i data-lucide="shield-check"></i> Approved Supplier List (ASL) Matrix</h3>
-            <span class="badge badge-info">Multi-Currency & Regional Sourcing</span>
+        <div class="row-2" style="margin-bottom: 25px; grid-template-columns: 3fr 1fr;">
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="shield-check"></i> Approved Supplier List (ASL) Matrix</h3>
+              <span class="badge badge-info">Multi-Currency & Regional Sourcing</span>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom: 15px;">
+              <select id="asl-filter-category" class="glass-input" style="max-width: 200px;" onchange="renderASLMatrix()">
+                <option value="ALL">All Categories</option>
+                <option value="STEEL">Steel & Metals</option>
+                <option value="COMPONENTS">Components</option>
+              </select>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Supplier Name</th>
+                    <th>Tier Rank</th>
+                    <th>Risk Profile</th>
+                    <th>Compliance / Certs</th>
+                    <th>Contract Price</th>
+                    <th>Avg Lead Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="asl-ledger-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Material SKU</th>
-                  <th>Supplier Code</th>
-                  <th>Supplier Name</th>
-                  <th>Pref Rank</th>
-                  <th>Status</th>
-                  <th>Contract Price</th>
-                  <th>Currency</th>
-                  <th>Review Date</th>
-                </tr>
-              </thead>
-              <tbody id="asl-ledger-body">
-                <tr><td colspan="8" style="text-align:center;">Loading ASL Matrix...</td></tr>
-              </tbody>
-            </table>
+          
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="alert-triangle"></i> Supply Chain Risk Heatmap</h3>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px;">
+              <div class="alert-item error">
+                <div class="alert-details"><h4>Geopolitical Risk: High</h4><p>Jindal Steel & Power</p></div>
+                <div class="alert-value"><i data-lucide="globe" style="width:20px;height:20px;"></i></div>
+              </div>
+              <div class="alert-item warning">
+                <div class="alert-details"><h4>Logistics Delay: Med</h4><p>Emirates Global Aluminium</p></div>
+                <div class="alert-value"><i data-lucide="truck" style="width:20px;height:20px;"></i></div>
+              </div>
+              <div class="alert-item info">
+                <div class="alert-details"><h4>Capacity Risk: Low</h4><p>Tata Steel Ltd.</p></div>
+                <div class="alert-value"><i data-lucide="box" style="width:20px;height:20px;"></i></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -2725,7 +2829,7 @@
         <div class="row-2" style="margin-bottom: 25px; grid-template-columns: 2fr 1fr;">
           <div class="glass-card">
             <div class="card-title-section">
-              <h3><i data-lucide="file-check-2"></i> 3-Way Invoice Matching Ledger (PO - GR - Invoice)</h3>
+              <h3><i data-lucide="file-check-2"></i> 3-Way Invoice Exception Center</h3>
               <span class="badge badge-warning">2% Price / 5% Qty Tolerance Engine</span>
             </div>
             <div class="table-container">
@@ -2734,15 +2838,14 @@
                   <tr>
                     <th>Invoice Num</th>
                     <th>Supplier</th>
-                    <th>Invoice Amt</th>
-                    <th>PO Amt</th>
-                    <th>Match Status</th>
-                    <th>Tolerance Alert</th>
+                    <th>Visual Match (PO vs GR vs Inv)</th>
+                    <th>Mismatch Amount</th>
+                    <th>Status</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="invoice-ledger-body">
-                  <tr><td colspan="7" style="text-align:center;">Loading Invoice Engine...</td></tr>
+                  <!-- Rendered via JS -->
                 </tbody>
               </table>
             </div>
@@ -2753,18 +2856,7 @@
               <h3><i data-lucide="pie-chart"></i> AP Ageing Breakdown</h3>
             </div>
             <div class="alert-list" id="ap-ageing-widget">
-              <div class="alert-item info">
-                <div class="alert-details"><h4>Current (0-30 Days)</h4><p>Active un-matched invoices</p></div>
-                <div class="alert-value"><span class="main-val">SAR 185,000</span></div>
-              </div>
-              <div class="alert-item warning">
-                <div class="alert-details"><h4>31-60 Days</h4><p>Pending receipt verification</p></div>
-                <div class="alert-value"><span class="main-val">SAR 42,500</span></div>
-              </div>
-              <div class="alert-item">
-                <div class="alert-details"><h4>61+ Days Overdue</h4><p>Hold release required</p></div>
-                <div class="alert-value"><span class="main-val">SAR 12,000</span></div>
-              </div>
+              <!-- Rendered via JS -->
             </div>
           </div>
         </div>
@@ -2772,30 +2864,38 @@
 
       <!-- TAB 10: QC INSPECTION -->
       <section id="tab-qc" class="content-body">
-        <div class="glass-card">
-          <div class="card-title-section">
-            <h3><i data-lucide="check-circle-2"></i> QC Quality Inspection Queue (IS 2062 / ASTM A36)</h3>
-            <span class="badge badge-success">Automated Quarantine & Stock Release</span>
+        <div class="row-2" style="margin-bottom: 25px; grid-template-columns: 1fr 2fr;">
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="activity"></i> Defect Pareto Analysis</h3>
+            </div>
+            <div class="chart-container" style="height: 250px;">
+              <canvas id="qcParetoChart"></canvas>
+            </div>
           </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Inspection ID</th>
-                  <th>Material Code</th>
-                  <th>Supplier</th>
-                  <th>Heat Number</th>
-                  <th>Mill Cert</th>
-                  <th>Rec Qty</th>
-                  <th>Sampled</th>
-                  <th>Status</th>
-                  <th>Result</th>
-                </tr>
-              </thead>
-              <tbody id="qc-ledger-body">
-                <tr><td colspan="9" style="text-align:center;">Loading Steel QC Queue...</td></tr>
-              </tbody>
-            </table>
+          
+          <div class="glass-card">
+            <div class="card-title-section">
+              <h3><i data-lucide="check-circle-2"></i> QC Inspection Queue (IS 2062)</h3>
+              <span class="badge badge-success">Automated Quarantine Release</span>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Insp ID</th>
+                    <th>Material</th>
+                    <th>Heat No.</th>
+                    <th>Rec Qty</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="qc-ledger-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -2805,41 +2905,36 @@
         <div class="row-2" style="margin-bottom: 25px;">
           <div class="glass-card">
             <div class="card-title-section">
+              <h3><i data-lucide="trending-down"></i> Purchase Price Variance (PPV) Analysis</h3>
+              <span class="badge badge-info">Chart.js Analytics</span>
+            </div>
+            <div class="chart-container" style="height: 250px;">
+              <canvas id="costingTrendChart"></canvas>
+            </div>
+            <div class="alert-list" id="ppv-log-widget" style="margin-top: 15px;">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          
+          <div class="glass-card">
+            <div class="card-title-section">
               <h3><i data-lucide="dollar-sign"></i> Inventory Standard Cost Valuation</h3>
-              <span class="badge badge-info">Multi-Currency (INR / SAR / USD)</span>
             </div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th>Material Code</th>
-                    <th>Material Name</th>
+                    <th>Material</th>
                     <th>Category</th>
                     <th>Stock Qty</th>
-                    <th>Standard Cost</th>
-                    <th>Stock Value (INR)</th>
+                    <th>Std Cost</th>
+                    <th>Stock Value</th>
                   </tr>
                 </thead>
                 <tbody id="costing-valuation-body">
-                  <tr><td colspan="6" style="text-align:center;">Loading Cost Valuation...</td></tr>
+                  <!-- Rendered via JS -->
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          <div class="glass-card">
-            <div class="card-title-section">
-              <h3><i data-lucide="trending-down"></i> Purchase Price Variance (PPV) Log</h3>
-            </div>
-            <div class="alert-list" id="ppv-log-widget">
-              <div class="alert-item warning">
-                <div class="alert-details"><h4>MAT-5001 Hot Rolled Sheet</h4><p>PO Price: SAR 88.50 vs Std: SAR 85.50</p></div>
-                <div class="alert-value"><span class="main-val" style="color:var(--danger);">+SAR 1,500 ADVERSE</span></div>
-              </div>
-              <div class="alert-item info">
-                <div class="alert-details"><h4>MAT-5003 Aluminium Ingot</h4><p>PO Price: SAR 218.00 vs Std: SAR 225.00</p></div>
-                <div class="alert-value"><span class="main-val" style="color:var(--success);">-SAR 3,500 FAVOURABLE</span></div>
-              </div>
             </div>
           </div>
         </div>
@@ -2849,28 +2944,25 @@
       <section id="tab-lot_serial" class="content-body">
         <div class="glass-card">
           <div class="card-title-section">
-            <h3><i data-lucide="barcode"></i> Steel Lot Register & Mill Certificate Traceability</h3>
-            <span class="badge badge-warning">Heat Traceability & FIFO Expiry Monitor</span>
+            <h3><i data-lucide="git-merge"></i> Bidirectional Genealogy & Traceability Center</h3>
+            <span class="badge badge-warning">Heat Traceability Simulator</span>
           </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Lot Number</th>
-                  <th>Material Code</th>
-                  <th>Supplier</th>
-                  <th>Heat Number</th>
-                  <th>Mill Cert #</th>
-                  <th>Qty Rec</th>
-                  <th>Available</th>
-                  <th>Status</th>
-                  <th>Expiry Date</th>
-                </tr>
-              </thead>
-              <tbody id="lot-ledger-body">
-                <tr><td colspan="9" style="text-align:center;">Loading Lot Register...</td></tr>
-              </tbody>
-            </table>
+          
+          <div class="trace-container">
+            <div style="display:flex; gap:15px; align-items:center;">
+              <input type="text" id="traceSearchInput" class="trace-search" placeholder="Enter Heat No. (e.g., HT-2026-9812A) or Material..." onkeyup="if(event.key === 'Enter') executeTraceSearch()">
+              <button class="btn-primary" onclick="executeTraceSearch()"><i data-lucide="search"></i> Trace</button>
+            </div>
+            
+            <div id="traceResultArea" style="display:none; margin-top:20px; padding:20px; background:rgba(0,0,0,0.2); border-radius:8px;">
+              <!-- Rendered via JS -->
+            </div>
+            
+            <div id="traceEmptyState" style="text-align:center; padding: 50px; color:var(--text-muted);">
+              <i data-lucide="barcode" style="width:48px; height:48px; opacity:0.5; margin-bottom:15px;"></i>
+              <p>Enter a Heat Number or Serial ID to begin traceability scan.</p>
+              <p style="font-size:0.8rem;">Try: <b>HT-2026-9812A</b> or <b>AL-9982-C</b></p>
+            </div>
           </div>
         </div>
       </section>
@@ -3106,6 +3198,57 @@
 </div>
 
 <script>
+
+// --- GLOBAL ENTERPRISE STATE ---
+const ENT_DATA = {
+  
+  // Extended ENT_DATA for Invoice, QC, Costing, Lot
+  invoices: [
+    { id: 'INV-9021', supplier: 'Tata Steel Ltd.', poAmt: 150000, grAmt: 150000, invAmt: 151500, status: 'Pending', age: 12 },
+    { id: 'INV-9022', supplier: 'Hindalco', poAmt: 45000, grAmt: 42000, invAmt: 45000, status: 'Tolerance Hold', age: 35 },
+    { id: 'INV-9025', supplier: 'SABIC', poAmt: 85000, grAmt: 85000, invAmt: 85000, status: 'Matched', age: 5 },
+    { id: 'INV-9028', supplier: 'Emirates Global', poAmt: 120000, grAmt: 110000, invAmt: 125000, status: 'Price Hold', age: 62 }
+  ],
+  qc: [
+    { id: 'QC-2026-01', mat: 'H-Beam 300mm', heat: 'HT-2026-9812A', qty: '500 MT', status: 'Quarantine', defects: 0 },
+    { id: 'QC-2026-02', mat: 'Aluminium Coil', heat: 'AL-9982-C', qty: '120 MT', status: 'Quarantine', defects: 0 },
+    { id: 'QC-2026-03', mat: 'Steel Plate 20mm', heat: 'SP-1044-X', qty: '350 MT', status: 'Rejected', defects: 3 }
+  ],
+  qcDefectStats: { dimensional: 45, surface: 30, metallurgical: 15, documentation: 10 },
+
+  // Extended ENT_DATA for Costing and Traceability
+  costing: [
+    { mat: 'MAT-5001', name: 'Hot Rolled Sheet', cat: 'Steel', qty: 250, std: 85.50, val: 21375, trend: [80, 81, 82, 85.5, 87, 88.5] },
+    { mat: 'MAT-5003', name: 'Aluminium Ingot', cat: 'Components', qty: 150, std: 225.00, val: 33750, trend: [240, 235, 230, 225, 220, 218] },
+    { mat: 'MAT-5005', name: 'High-Tensile Bolt', cat: 'Fasteners', qty: 15000, std: 1.25, val: 18750, trend: [1.10, 1.15, 1.20, 1.25, 1.25, 1.25] }
+  ],
+  traceability: [
+    { 
+      heat: 'HT-2026-9812A', mat: 'H-Beam 300mm', supplier: 'Tata Steel', 
+      timeline: [
+        { state: 'Received', date: 'Oct 12', desc: 'MIGO 101 Posted (500 MT)' },
+        { state: 'Inspected', date: 'Oct 13', desc: 'IS-2062 Passed' },
+        { state: 'Stored', date: 'Oct 14', desc: 'Bin: A1-RACK1' }
+      ]
+    },
+    { 
+      heat: 'AL-9982-C', mat: 'Aluminium Coil', supplier: 'Emirates Global', 
+      timeline: [
+        { state: 'Received', date: 'Oct 15', desc: 'MIGO 101 Posted (120 MT)' },
+        { state: 'Quarantined', date: 'Oct 15', desc: 'Awaiting QC' }
+      ]
+    }
+  ],
+vendors: [
+    { code: 'V-1001', name: 'Tata Steel Ltd.', tier: 'Strategic', quality: 96, delivery: 94, price: 88, compliance: 100, risk: 15 },
+    { code: 'V-1045', name: 'Hindalco Industries', tier: 'Preferred', quality: 88, delivery: 90, price: 92, compliance: 85, risk: 25 },
+    { code: 'V-2099', name: 'Saudi Basic Industries (SABIC)', tier: 'Strategic', quality: 99, delivery: 98, price: 85, compliance: 100, risk: 5 },
+    { code: 'V-3102', name: 'Jindal Steel & Power', tier: 'Tactical', quality: 78, delivery: 75, price: 95, compliance: 80, risk: 45 },
+    { code: 'V-4050', name: 'Emirates Global Aluminium', tier: 'Preferred', quality: 92, delivery: 85, price: 89, compliance: 90, risk: 20 }
+  ],
+  industryAvg: { quality: 85, delivery: 82, price: 80, compliance: 85, risk: 40 } // Risk is inverted in chart
+};
+
     // --- Mock Database / Demo Model State ---
     const mockData = {
       dashboard: {
@@ -6606,6 +6749,528 @@ function ariaSend(override) {
   ariaAddMsg('user', text);
   ariaShowTyping();
   setTimeout(function(){ ariaParseIntent(text.toLowerCase()); }, 650);
+}
+
+
+// --- ENTERPRISE MODULE LOGIC: VENDOR SCORECARD ---
+let vendorRadarChartInstance = null;
+let activeVendorCode = 'V-1001';
+
+function calcOverallScore(v) {
+  return ((v.quality * 0.4) + (v.delivery * 0.4) + (v.price * 0.2)).toFixed(1);
+}
+
+function getScoreColorClass(score) {
+  if (score >= 90) return 'score-green';
+  if (score >= 80) return 'score-yellow';
+  return 'score-red';
+}
+
+function renderVendorScorecard() {
+  const tbody = document.getElementById('scorecard-ledger-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  // Sort by score desc
+  ENT_DATA.vendors.sort((a,b) => calcOverallScore(b) - calcOverallScore(a));
+
+  ENT_DATA.vendors.forEach(v => {
+    const score = calcOverallScore(v);
+    const colorCls = getScoreColorClass(score);
+    const status = score >= 90 ? '✅ Excellent' : score >= 80 ? '⚠️ Monitor' : '❌ At Risk';
+    const activeCls = v.code === activeVendorCode ? 'active' : '';
+    
+    const tr = document.createElement('tr');
+    tr.className = `interactive-row ${activeCls}`;
+    tr.onclick = () => selectVendorScorecard(v.code);
+    tr.innerHTML = `
+      <td><strong>${v.code}</strong></td>
+      <td>${v.name}</td>
+      <td><span class="tier-badge tier-${v.tier.toLowerCase()}">${v.tier}</span></td>
+      <td class="${getScoreColorClass(v.quality)}">${v.quality}</td>
+      <td class="${getScoreColorClass(v.delivery)}">${v.delivery}</td>
+      <td class="${getScoreColorClass(v.price)}">${v.price}</td>
+      <td class="${colorCls}" style="font-size:1.1rem;">${score}</td>
+      <td>${status}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  selectVendorScorecard(activeVendorCode, true);
+}
+
+function selectVendorScorecard(code, force=false) {
+  if (!force && code === activeVendorCode) return;
+  activeVendorCode = code;
+  
+  const v = ENT_DATA.vendors.find(x => x.code === code);
+  if(!v) return;
+  
+  // Update DOM
+  document.getElementById('sc-vendor-name').textContent = v.name;
+  const tierBadge = document.getElementById('sc-vendor-tier');
+  tierBadge.className = `tier-badge tier-${v.tier.toLowerCase()}`;
+  tierBadge.textContent = v.tier + ' Partner';
+  
+  const overall = calcOverallScore(v);
+  const scoreEl = document.getElementById('sc-overall-score');
+  scoreEl.textContent = overall;
+  scoreEl.className = `ent-kpi-val ${getScoreColorClass(overall)}`;
+  
+  // Update active row highlighting
+  document.querySelectorAll('#scorecard-ledger-body tr').forEach(tr => {
+    tr.classList.remove('active');
+    if (tr.querySelector('td strong') && tr.querySelector('td strong').textContent === code) {
+      tr.classList.add('active');
+    }
+  });
+
+  // Update Chart
+  updateRadarChart(v);
+}
+
+function updateRadarChart(v) {
+  const ctx = document.getElementById('vendorRadarChart');
+  if(!ctx) return;
+  
+  // Risk is inverted for chart (lower risk = higher score on chart)
+  const vRiskScore = 100 - v.risk;
+  const iRiskScore = 100 - ENT_DATA.industryAvg.risk;
+  
+  const data = {
+    labels: ['Quality', 'Delivery', 'Cost/Price', 'Compliance', 'Risk Resilience'],
+    datasets: [{
+      label: v.name,
+      data: [v.quality, v.delivery, v.price, v.compliance, vRiskScore],
+      backgroundColor: 'rgba(59, 130, 246, 0.2)',
+      borderColor: 'rgba(59, 130, 246, 1)',
+      pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+      borderWidth: 2
+    }, {
+      label: 'Industry Average',
+      data: [ENT_DATA.industryAvg.quality, ENT_DATA.industryAvg.delivery, ENT_DATA.industryAvg.price, ENT_DATA.industryAvg.compliance, iRiskScore],
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      pointBackgroundColor: 'rgba(255, 255, 255, 0.5)',
+      borderWidth: 2,
+      borderDash: [5, 5]
+    }]
+  };
+  
+  const config = {
+    type: 'radar',
+    data: data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+          grid: { color: 'rgba(255, 255, 255, 0.1)' },
+          pointLabels: { color: 'rgba(255,255,255,0.7)', font: { size: 12, family: 'Inter' } },
+          ticks: { display: false, min: 40, max: 100 }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: 'rgba(255,255,255,0.8)' } }
+      }
+    }
+  };
+
+  if (vendorRadarChartInstance) {
+    vendorRadarChartInstance.data = data;
+    vendorRadarChartInstance.update();
+  } else {
+    // Check if Chart is loaded
+    if (typeof Chart !== 'undefined') {
+      Chart.defaults.color = 'rgba(255,255,255,0.7)';
+      vendorRadarChartInstance = new Chart(ctx, config);
+    }
+  }
+}
+
+function recalculateVendorScores() {
+  ariaAddMsg('system', 'Recalculating vendor performance models using simulated ERP data...');
+  // Add random variance (-5 to +5) to all metrics to simulate dynamic updates
+  ENT_DATA.vendors.forEach(v => {
+    v.quality = Math.min(100, Math.max(50, v.quality + Math.floor(Math.random() * 11) - 5));
+    v.delivery = Math.min(100, Math.max(50, v.delivery + Math.floor(Math.random() * 11) - 5));
+    v.price = Math.min(100, Math.max(50, v.price + Math.floor(Math.random() * 11) - 5));
+    
+    // Dynamically adjust tier based on new overall
+    const overall = parseFloat(calcOverallScore(v));
+    if (overall >= 90) v.tier = 'Strategic';
+    else if (overall >= 80) v.tier = 'Preferred';
+    else v.tier = 'Tactical';
+  });
+  
+  renderVendorScorecard();
+  showToast('Scorecard models updated successfully.', 'success');
+}
+
+
+// --- ENTERPRISE MODULE LOGIC: ASL ---
+function renderASLMatrix() {
+  const tbody = document.getElementById('asl-ledger-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  const filter = document.getElementById('asl-filter-category').value;
+  
+  // Sort by risk asc, then score desc
+  const sorted = [...ENT_DATA.vendors].sort((a,b) => a.risk - b.risk || calcOverallScore(b) - calcOverallScore(a));
+
+  sorted.forEach(v => {
+    // Mock category
+    const cat = v.name.includes('Aluminium') || v.name.includes('SABIC') ? 'COMPONENTS' : 'STEEL';
+    if (filter !== 'ALL' && cat !== filter) return;
+
+    const riskCls = v.risk <= 20 ? 'risk-low' : (v.risk <= 35 ? 'risk-med' : 'risk-high');
+    const riskTxt = v.risk <= 20 ? 'Low Risk' : (v.risk <= 35 ? 'Med Risk' : 'High Risk');
+    
+    const certs = v.compliance === 100 ? '<span class="comp-badge">ISO 9001</span><span class="comp-badge">ESG</span>' : 
+                  (v.compliance > 85 ? '<span class="comp-badge">ISO 9001</span>' : '<span class="comp-badge">Pending</span>');
+    
+    // Base price mock
+    const price = v.name.includes('SABIC') ? 'SAR 4,500/MT' : (v.name.includes('Emirates') ? 'USD 1,200/MT' : 'INR 85,000/MT');
+    const lead = Math.floor(v.risk / 2) + 14 + ' Days';
+    const status = v.risk >= 40 ? '⚠️ Restricted' : '✅ Approved';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${v.name}</strong><br><span style="font-size:0.7rem; color:var(--text-muted);">${v.code}</span></td>
+      <td><span class="tier-badge tier-${v.tier.toLowerCase()}">${v.tier}</span></td>
+      <td><span class="risk-badge ${riskCls}">${riskTxt} (${v.risk}%)</span></td>
+      <td>${certs}</td>
+      <td>${price}</td>
+      <td>${lead}</td>
+      <td>${status}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+
+// --- ENTERPRISE MODULE LOGIC: INVOICE ---
+function renderInvoiceLedger() {
+  const tbody = document.getElementById('invoice-ledger-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  let currentVal = 0, warnVal = 0, overVal = 0;
+
+  ENT_DATA.invoices.forEach(inv => {
+    // Ageing calc
+    if(inv.status !== 'Matched') {
+      if(inv.age <= 30) currentVal += inv.invAmt;
+      else if(inv.age <= 60) warnVal += inv.invAmt;
+      else overVal += inv.invAmt;
+    }
+
+    const maxAmt = Math.max(inv.poAmt, inv.grAmt, inv.invAmt);
+    const poPct = (inv.poAmt / maxAmt) * 100;
+    const grPct = (inv.grAmt / maxAmt) * 100;
+    const invPct = (inv.invAmt / maxAmt) * 100;
+
+    const diff = inv.invAmt - inv.grAmt;
+    const diffStr = diff === 0 ? '-' : (diff > 0 ? `<span style="color:#f87171">Overbill: ${formatMoney(diff)}</span>` : `<span style="color:#34d399">Underbill: ${formatMoney(Math.abs(diff))}</span>`);
+    
+    let statBadge = '';
+    if (inv.status === 'Matched') statBadge = '<span class="badge badge-success">Matched</span>';
+    else if (inv.status === 'Pending') statBadge = '<span class="badge badge-info">Pending</span>';
+    else statBadge = `<span class="badge badge-warning">${inv.status}</span>`;
+
+    const btnHtml = inv.status !== 'Matched' ? 
+      `<button class="inv-action-btn inv-force" onclick="forceMatchInvoice('${inv.id}')">Force Match</button>` : '—';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${inv.id}</strong><br><span style="font-size:0.7rem; color:var(--text-muted);">${inv.age} Days Old</span></td>
+      <td>${inv.supplier}</td>
+      <td style="min-width: 150px;">
+        <div style="font-size:0.65rem; display:flex; justify-content:space-between; color:var(--text-muted);">
+          <span>PO: ${formatShortNum(inv.poAmt)}</span><span>GR: ${formatShortNum(inv.grAmt)}</span><span>INV: ${formatShortNum(inv.invAmt)}</span>
+        </div>
+        <div class="prog-container" title="Grey=PO, Green=GR, Red=Invoice">
+          <div class="prog-bar prog-po" style="width: ${poPct}%"></div>
+          <div class="prog-bar prog-gr" style="width: ${grPct}%"></div>
+          <div class="prog-bar prog-inv" style="width: ${invPct}%"></div>
+        </div>
+      </td>
+      <td>${diffStr}</td>
+      <td>${statBadge}</td>
+      <td>${btnHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('ap-ageing-widget').innerHTML = `
+    <div class="alert-item info">
+      <div class="alert-details"><h4>Current (0-30 Days)</h4><p>Active un-matched invoices</p></div>
+      <div class="alert-value"><span class="main-val">${formatMoney(currentVal)}</span></div>
+    </div>
+    <div class="alert-item warning">
+      <div class="alert-details"><h4>31-60 Days</h4><p>Pending receipt verification</p></div>
+      <div class="alert-value"><span class="main-val">${formatMoney(warnVal)}</span></div>
+    </div>
+    <div class="alert-item error">
+      <div class="alert-details"><h4>61+ Days Overdue</h4><p>Hold release required</p></div>
+      <div class="alert-value"><span class="main-val">${formatMoney(overVal)}</span></div>
+    </div>
+  `;
+}
+
+function forceMatchInvoice(id) {
+  const inv = ENT_DATA.invoices.find(i => i.id === id);
+  if(inv) {
+    inv.status = 'Matched';
+    renderInvoiceLedger();
+    showToast(`Invoice ${id} force matched successfully.`, 'success');
+  }
+}
+
+function formatShortNum(num) {
+  return num > 1000 ? (num/1000).toFixed(1) + 'k' : num;
+}
+
+// --- ENTERPRISE MODULE LOGIC: QC ---
+let qcParetoChartInstance = null;
+
+function renderQCLedger() {
+  const tbody = document.getElementById('qc-ledger-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  ENT_DATA.qc.forEach(q => {
+    let statBadge = '';
+    if (q.status === 'Released') statBadge = '<span class="badge badge-success">Released</span>';
+    else if (q.status === 'Rejected') statBadge = '<span class="badge badge-error">Rejected</span>';
+    else statBadge = `<span class="badge badge-warning">Quarantine</span>`;
+
+    const btnHtml = q.status === 'Quarantine' ? 
+      `<button class="inv-action-btn inv-force" onclick="resolveQC('${q.id}', 'Released')">Pass</button>
+       <button class="inv-action-btn" style="background:rgba(248,113,113,0.2); color:#f87171;" onclick="resolveQC('${q.id}', 'Rejected')">Fail</button>` : '—';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${q.id}</strong></td>
+      <td>${q.mat}</td>
+      <td><span style="font-family: monospace;">${q.heat}</span></td>
+      <td>${q.qty}</td>
+      <td>${statBadge}</td>
+      <td>${btnHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  renderQCPareto();
+}
+
+function resolveQC(id, status) {
+  const q = ENT_DATA.qc.find(i => i.id === id);
+  if(q) {
+    q.status = status;
+    if(status === 'Rejected') {
+      // Simulate adding a random defect type to pareto stats
+      const types = ['dimensional', 'surface', 'metallurgical', 'documentation'];
+      const pick = types[Math.floor(Math.random() * types.length)];
+      ENT_DATA.qcDefectStats[pick] += 5;
+    }
+    renderQCLedger();
+    showToast(`QC Lot ${id} marked as ${status}.`, status === 'Released' ? 'success' : 'error');
+  }
+}
+
+function renderQCPareto() {
+  const ctx = document.getElementById('qcParetoChart');
+  if(!ctx) return;
+  
+  const stats = ENT_DATA.qcDefectStats;
+  const dataPairs = [
+    {label: 'Dimensional', val: stats.dimensional},
+    {label: 'Surface', val: stats.surface},
+    {label: 'Metallurgical', val: stats.metallurgical},
+    {label: 'Documentation', val: stats.documentation}
+  ].sort((a,b) => b.val - a.val);
+  
+  const data = {
+    labels: dataPairs.map(d => d.label),
+    datasets: [{
+      data: dataPairs.map(d => d.val),
+      backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981'],
+      borderWidth: 0,
+      cutout: '60%'
+    }]
+  };
+  
+  const config = {
+    type: 'doughnut',
+    data: data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { color: 'rgba(255,255,255,0.7)', font: {size: 11} } }
+      }
+    }
+  };
+
+  if (qcParetoChartInstance) {
+    qcParetoChartInstance.data = data;
+    qcParetoChartInstance.update();
+  } else {
+    if (typeof Chart !== 'undefined') {
+      qcParetoChartInstance = new Chart(ctx, config);
+    }
+  }
+}
+
+
+// --- ENTERPRISE MODULE LOGIC: COSTING ---
+let costingChartInstance = null;
+
+function renderCostingChart(matCode = 'MAT-5001') {
+  renderCostingLedger();
+  
+  const ctx = document.getElementById('costingTrendChart');
+  if(!ctx) return;
+  
+  const item = ENT_DATA.costing.find(c => c.mat === matCode);
+  if(!item) return;
+
+  const data = {
+    labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+    datasets: [{
+      label: 'Actual PO Price',
+      data: item.trend,
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      fill: true,
+      tension: 0.4
+    }, {
+      label: 'Standard Cost',
+      data: [item.std, item.std, item.std, item.std, item.std, item.std],
+      borderColor: '#34d399',
+      borderDash: [5, 5],
+      pointRadius: 0
+    }]
+  };
+  
+  const config = {
+    type: 'line',
+    data: data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: 'rgba(255,255,255,0.7)' } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
+        y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'rgba(255,255,255,0.5)' } }
+      }
+    }
+  };
+
+  if (costingChartInstance) {
+    costingChartInstance.data = data;
+    costingChartInstance.update();
+  } else {
+    if (typeof Chart !== 'undefined') {
+      costingChartInstance = new Chart(ctx, config);
+    }
+  }
+}
+
+function renderCostingLedger() {
+  const tbody = document.getElementById('costing-valuation-body');
+  if(tbody) {
+    tbody.innerHTML = '';
+    ENT_DATA.costing.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${c.mat}</strong><br><span style="font-size:0.7rem;">${c.name}</span></td>
+        <td>${c.cat}</td>
+        <td>${c.qty}</td>
+        <td>${c.std.toFixed(2)}</td>
+        <td>${c.val.toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  const ppv = document.getElementById('ppv-log-widget');
+  if(ppv) {
+    ppv.innerHTML = `
+      <div class="alert-item warning ppv-item" onclick="renderCostingChart('MAT-5001')">
+        <div class="alert-details"><h4>MAT-5001 Hot Rolled Sheet</h4><p>Click to view price trend</p></div>
+        <div class="alert-value"><span class="main-val" style="color:#f87171;">ADVERSE</span></div>
+      </div>
+      <div class="alert-item info ppv-item" onclick="renderCostingChart('MAT-5003')">
+        <div class="alert-details"><h4>MAT-5003 Aluminium Ingot</h4><p>Click to view price trend</p></div>
+        <div class="alert-value"><span class="main-val" style="color:#34d399;">FAVORABLE</span></div>
+      </div>
+    `;
+  }
+}
+
+// --- ENTERPRISE MODULE LOGIC: LOT TRACEABILITY ---
+function initLotTrace() {
+  // Just clear on entry
+  document.getElementById('traceSearchInput').value = '';
+  document.getElementById('traceResultArea').style.display = 'none';
+  document.getElementById('traceEmptyState').style.display = 'block';
+}
+
+function executeTraceSearch() {
+  const q = document.getElementById('traceSearchInput').value.trim().toUpperCase();
+  const res = document.getElementById('traceResultArea');
+  const empty = document.getElementById('traceEmptyState');
+  
+  if(!q) return;
+
+  const match = ENT_DATA.traceability.find(t => t.heat.toUpperCase().includes(q) || t.mat.toUpperCase().includes(q));
+  
+  empty.style.display = 'none';
+  res.style.display = 'block';
+  
+  if(match) {
+    let timelineHtml = '<div class="timeline-viz">';
+    match.timeline.forEach((step, idx) => {
+      timelineHtml += `
+        <div class="time-node">
+          <div class="time-dot done"></div>
+          <div class="time-label">${step.state}</div>
+          <div class="time-date">${step.date}</div>
+          <div style="font-size:0.65rem; color:var(--text-muted); margin-top:5px;">${step.desc}</div>
+        </div>
+      `;
+    });
+    // Add pending steps if needed
+    if(match.timeline.length < 4) {
+      timelineHtml += `
+        <div class="time-node">
+          <div class="time-dot"></div>
+          <div class="time-label" style="color:var(--text-muted)">Production</div>
+          <div class="time-date">Pending</div>
+        </div>
+      `;
+    }
+    timelineHtml += '</div>';
+
+    res.innerHTML = `
+      <h3 style="color:var(--primary); margin-top:0;">Heat Trace: ${match.heat}</h3>
+      <div style="display:flex; gap:30px; margin-bottom: 20px; font-size: 0.9rem;">
+        <div><span style="color:var(--text-muted);">Material:</span> <strong>${match.mat}</strong></div>
+        <div><span style="color:var(--text-muted);">Supplier Origin:</span> <strong>${match.supplier}</strong></div>
+      </div>
+      ${timelineHtml}
+    `;
+  } else {
+    res.innerHTML = `<h3 style="color:#f87171;">No Traceability Data Found</h3><p>Could not locate genealogy records for "${q}". Please verify the Heat Number or Mill Cert ID.</p>`;
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 // ── NLP INTENT PARSER (Fuzzy Scored Classifier + Free-Form Reasoner) ──────────
