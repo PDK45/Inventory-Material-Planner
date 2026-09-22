@@ -3042,6 +3042,15 @@
           </div>
         </div>
 
+        <div class="glass-card" style="margin-bottom:25px;">
+          <div class="card-title-section">
+            <h3><i data-lucide="bar-chart-2"></i> Monte Carlo Trial Distribution</h3>
+          </div>
+          <div style="height:250px;width:100%;">
+            <canvas id="dtBellCurveChart"></canvas>
+          </div>
+        </div>
+
         <!-- Material Risk Heatmap Table -->
         <div class="glass-card">
           <div class="card-title-section">
@@ -3136,6 +3145,15 @@
             <div class="kpi-icon" style="background:var(--warning-glow);"><i data-lucide="calendar" style="color:var(--warning);"></i></div>
             <div class="kpi-value" id="ss-delivery-date">—</div>
             <div class="kpi-label">Expected Delivery</div>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-bottom:25px;">
+          <div class="card-title-section">
+            <h3><i data-lucide="radar"></i> Vendor Optimization Comparison</h3>
+          </div>
+          <div style="height:250px;width:100%;">
+            <canvas id="ssComparisonChart"></canvas>
           </div>
         </div>
 
@@ -5914,21 +5932,102 @@ function runDigitalTwinSim() {
   }
 }
 
-function runDigitalTwinSimMock(delay, tariff, demand, btn, msg) {
-  // Derive mock risk from slider values (higher shocks = higher risk)
-  const shockLevel = (delay / 90 * 0.4) + (tariff / 100 * 0.35) + (demand / 100 * 0.25);
-  const stockoutRisk = Math.min(99, Math.round(shockLevel * 100 * (0.85 + Math.random() * 0.3)));
-  const p95Exposure  = Math.round(150000 + shockLevel * 800000 + Math.random() * 100000);
-  const bufferDays   = Math.max(0, Math.round(30 - delay * 0.7 - demand * 0.15));
+let dtChartInstance = null;
 
-  renderDigitalTwinKPIs({ riskPct: stockoutRisk, p95: p95Exposure, bufferDays, trials: 1000 });
+// Standard Normal variate using Box-Muller transform
+function boxMullerRandom() {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random(); 
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    return num / 10.0 + 0.5; // Translate to 0 -> 1
+}
+
+function runDigitalTwinSimMock(delay, tariff, demand, btn, msg) {
+  // TRUE MONTE CARLO ENGINE
+  const trials = 1000;
+  const baseLeadTime = 30; // 30 days base lead
+  const baseDemand = 100; // 100 units/day
+  const initialStock = 3500; // 3500 units on hand
+  
+  let stockouts = 0;
+  const stockoutDaysMap = {}; // To build histogram
+
+  for(let i=0; i<trials; i++) {
+    // Introduce Gaussian noise to lead time (std dev of 5 days) + user delay
+    const actualDelay = (boxMullerRandom() - 0.5) * 10;
+    const trialLeadTime = Math.max(1, Math.round(baseLeadTime + delay + actualDelay));
+    
+    // Introduce Gaussian noise to demand + user demand surge
+    const surgeMultiplier = 1 + (demand / 100);
+    let trialStockout = false;
+    let currentStock = initialStock;
+    
+    // Simulate day by day until shipment arrives
+    for(let day=1; day<=trialLeadTime; day++) {
+        const dailyDemand = Math.max(0, baseDemand * surgeMultiplier * (0.8 + (boxMullerRandom() * 0.4)));
+        currentStock -= dailyDemand;
+        if(currentStock <= 0) {
+            stockouts++;
+            stockoutDaysMap[day] = (stockoutDaysMap[day] || 0) + 1;
+            trialStockout = true;
+            break;
+        }
+    }
+  }
+
+  const stockoutRisk = Math.round((stockouts / trials) * 100);
+  const p95Exposure = Math.round(150000 + (stockoutRisk * 12000) * (1 + tariff/100));
+  const bufferDays = Math.max(0, Math.round(initialStock / (baseDemand * (1 + demand/100))) - (baseLeadTime + delay));
+
+  renderDigitalTwinKPIs({ riskPct: stockoutRisk, p95: p95Exposure, bufferDays, trials });
+
+  // Render Histogram
+  const labels = Object.keys(stockoutDaysMap).sort((a,b)=>parseInt(a)-parseInt(b));
+  const dataPoints = labels.map(l => stockoutDaysMap[l]);
+  
+  if (dtChartInstance) dtChartInstance.destroy();
+  const ctx = document.getElementById('dtBellCurveChart').getContext('2d');
+  dtChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: labels.map(l => 'Day ' + l),
+          datasets: [{
+              label: 'Stockouts per Day (Distribution)',
+              data: dataPoints,
+              backgroundColor: 'rgba(239,68,68,0.7)',
+              borderColor: 'rgba(239,68,68,1)',
+              borderWidth: 1,
+              borderRadius: 4
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true, labels: { color: 'rgba(255,255,255,0.7)' } } },
+          scales: {
+              y: { 
+                  beginAtZero: true, 
+                  grid: { color: 'rgba(255,255,255,0.05)' },
+                  ticks: { color: 'rgba(255,255,255,0.5)' },
+                  title: { display: true, text: 'Frequency (Trials)', color: 'rgba(255,255,255,0.7)' }
+              },
+              x: { 
+                  grid: { display: false },
+                  ticks: { color: 'rgba(255,255,255,0.5)' },
+                  title: { display: true, text: 'Stockout Occurred on Day X of Lead Time', color: 'rgba(255,255,255,0.7)' }
+              }
+          }
+      }
+  });
 
   // Adjust heatmap risks based on shock level
+  const shockLevel = (delay / 90 * 0.4) + (tariff / 100 * 0.35) + (demand / 100 * 0.25);
   const heatmap = (window.mockData.digitalTwin?.mockHeatmap || []).map(row => ({
     ...row,
-    riskPct:  Math.min(99, row.riskPct  + shockLevel * 30),
+    riskPct:  Math.min(99, row.riskPct  + (stockoutRisk * 0.6) + (shockLevel * 10)),
     exposure: Math.round(row.exposure * (1 + shockLevel * 0.5)),
-    risk: (row.riskPct + shockLevel * 30) > 60 ? 'RED' : (row.riskPct + shockLevel * 30) > 20 ? 'AMBER' : 'GREEN'
+    risk: (row.riskPct + stockoutRisk*0.6) > 60 ? 'RED' : (row.riskPct + stockoutRisk*0.6) > 20 ? 'AMBER' : 'GREEN'
   }));
   renderHeatmapTable(heatmap);
 
@@ -5937,7 +6036,7 @@ function runDigitalTwinSimMock(delay, tariff, demand, btn, msg) {
 
   btn.disabled = false;
   btn.innerHTML = '<i data-lucide="zap"></i> Run Monte Carlo Simulation';
-  msg.textContent = `✅ Simulation complete. ${stockoutRisk}% Stockout Risk detected.`;
+  msg.textContent = `✅ Simulation complete. ${stockoutRisk}% Stockout Risk computed.`;
   lucide.createIcons();
 }
 
@@ -6035,21 +6134,109 @@ function runSmartSourcing() {
   }
 }
 
-function runSmartSourcingMock(qty) {
-  const allocations = (window.mockData.smartSourcing?.[_currentStrategy] || []).map(v => ({
-    ...v,
-    allocQty: Math.round(qty * v.allocPct / 100)
-  }));
+let ssChartInstance = null;
 
+function runSmartSourcingMock(qty) {
+  // TRUE MULTI-CRITERIA OPTIMIZATION ENGINE
+  const vendors = JSON.parse(JSON.stringify(ENT_DATA.vendors)); // clone
+  
+  // Weights based on strategy
+  let wPrice = 0, wTime = 0, wRisk = 0;
+  if (_currentStrategy === 'LOWEST_COST') { wPrice = 0.8; wTime = 0.1; wRisk = 0.1; }
+  else if (_currentStrategy === 'FASTEST_DELIVERY') { wPrice = 0.1; wTime = 0.8; wRisk = 0.1; }
+  else { wPrice = 0.33; wTime = 0.33; wRisk = 0.34; } // BALANCED_RISK
+  
+  // Find min/max for normalization
+  const maxPrice = Math.max(...vendors.map(v => v.price));
+  const maxTime = Math.max(...vendors.map(v => v.avgLeadTime));
+  const maxRisk = 100;
+  
+  // Score vendors (0-100, higher is better)
+  vendors.forEach(v => {
+      // Lower price is better
+      const nPrice = 100 - ((v.price / maxPrice) * 100);
+      // Lower time is better
+      const nTime = 100 - ((v.avgLeadTime / maxTime) * 100);
+      // Higher score is better (v.score is 0-100)
+      const nRisk = v.score;
+      
+      v.compScore = Math.round((nPrice * wPrice) + (nTime * wTime) + (nRisk * wRisk));
+      // Give each vendor a mock capacity constraint (between 200 and 800)
+      v.capacity = Math.round(200 + (v.id.charCodeAt(v.id.length-1) * 30));
+  });
+  
+  // Sort descending by compScore
+  vendors.sort((a,b) => b.compScore - a.compScore);
+  
+  // Smart Allocation (Splitting)
+  let remainingQty = qty;
+  const allocations = [];
+  
+  for(let i=0; i<vendors.length; i++) {
+      if(remainingQty <= 0) break;
+      const v = vendors[i];
+      const allocQty = Math.min(v.capacity, remainingQty);
+      
+      allocations.push({
+          vendorId: v.id,
+          vendorName: v.name,
+          tier: v.tier,
+          price: v.price,
+          curr: v.currency,
+          leadDays: v.avgLeadTime,
+          compScore: v.compScore,
+          allocQty: allocQty,
+          allocPct: Math.round((allocQty / qty) * 100)
+      });
+      remainingQty -= allocQty;
+  }
+  
   // Compute summary KPIs from allocations
-  const totalInr     = allocations.reduce((s, v) => s + (v.allocQty * (v.curr === 'SAR' ? v.price * 22.15 : v.price)), 0);
-  const avgScore     = allocations.reduce((s, v) => s + v.compScore, 0) / (allocations.length || 1);
-  const maxLead      = Math.max(...allocations.map(v => v.leadDays));
-  const delivDate    = new Date(); delivDate.setDate(delivDate.getDate() + maxLead);
-  const delivStr     = delivDate.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const totalInr = allocations.reduce((s, v) => s + (v.allocQty * (v.curr === 'SAR' ? v.price * 22.15 : v.price)), 0);
+  const avgScore = allocations.reduce((s, v) => s + v.compScore, 0) / (allocations.length || 1);
+  const maxLead = Math.max(...allocations.map(v => v.leadDays));
+  const delivDate = new Date(); delivDate.setDate(delivDate.getDate() + maxLead);
+  const delivStr = delivDate.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
 
   renderSourcingKPIs(avgScore.toFixed(1), allocations.length, totalInr, delivStr);
   renderAllocationTable(allocations, true);
+  
+  // Render Comparison Chart
+  const top3 = vendors.slice(0, 3);
+  if (ssChartInstance) ssChartInstance.destroy();
+  const ctx = document.getElementById('ssComparisonChart').getContext('2d');
+  ssChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+          labels: top3.map(v => v.name),
+          datasets: [{
+              label: 'Composite Score (Weighted)',
+              data: top3.map(v => v.compScore),
+              backgroundColor: top3.map((v, i) => i === 0 ? 'rgba(56,189,248,0.7)' : 'rgba(255,255,255,0.1)'),
+              borderColor: top3.map((v, i) => i === 0 ? 'rgba(56,189,248,1)' : 'rgba(255,255,255,0.3)'),
+              borderWidth: 1,
+              borderRadius: 4
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y', // Horizontal bar chart
+          plugins: { legend: { display: false } },
+          scales: {
+              x: { 
+                  min: 0, max: 100,
+                  grid: { color: 'rgba(255,255,255,0.05)' },
+                  ticks: { color: 'rgba(255,255,255,0.5)' }
+              },
+              y: { 
+                  grid: { display: false },
+                  ticks: { color: 'rgba(255,255,255,0.8)' }
+              }
+          }
+      }
+  });
+
   document.getElementById('ss-accept-btn').style.display = '';
   lucide.createIcons();
 }
