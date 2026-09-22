@@ -467,49 +467,66 @@
       border-bottom: 1px solid rgba(0,212,138,0.1);
       backdrop-filter: blur(20px) saturate(140%);
       background: rgba(6, 10, 20, 0.9);
-      padding: 0 28px;
+      padding: 0 20px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 12px;
       position: sticky;
       top: 0;
       z-index: 100;
       flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .page-title-section {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .page-title-section h1 {
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 700;
       letter-spacing: -0.2px;
       color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .page-title-section p {
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       font-weight: 400;
       margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      flex-shrink: 0;
+      flex-wrap: nowrap;
     }
 
     /* Connection Status Indicator (sketch: top-right pill with dot) */
     .status-pill {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       background: rgba(0,0,0,0.3);
       border: 1px solid rgba(255,71,87,0.3);
       border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 0.72rem;
+      padding: 5px 10px;
+      font-size: 0.7rem;
       color: #ff4757;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.3s;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .status-pill.online {
       border-color: rgba(0,212,138,0.4);
@@ -541,7 +558,9 @@
       border: 1px solid rgba(255,255,255,0.07);
       padding: 7px 14px;
       border-radius: 16px;
-      width: 260px;
+      width: 220px;
+      flex-shrink: 1;
+      min-width: 120px;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -1485,6 +1504,25 @@
       transition: all 0.2s; flex-shrink: 0;
     }
     .aria-close-btn:hover { background: rgba(255,71,87,0.15); color: var(--danger); }
+    .aria-tts-btn {
+      width: 28px; height: 28px; border-radius: 8px; border: none;
+      background: rgba(255,255,255,0.04); color: var(--text-muted);
+      cursor: pointer; font-size: 0.85rem; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0; title: 'Toggle ARIA voice';
+    }
+    .aria-tts-btn:hover { background: rgba(0,212,138,0.12); color: var(--primary); }
+    .aria-tts-btn.muted { color: var(--text-muted); opacity: 0.5; }
+    /* Live transcript chip shown while voice is active */
+    #aria-transcript-chip {
+      display: none; align-items: center; gap: 6px;
+      background: rgba(0,200,212,0.08); border: 1px solid rgba(0,200,212,0.3);
+      border-radius: 20px; padding: 5px 12px;
+      font-size: 0.75rem; color: #00c8d4; font-style: italic;
+      margin: 0 14px 8px; flex-shrink: 0;
+      animation: ariaMsgIn 0.2s ease-out;
+    }
+    #aria-transcript-chip.visible { display: flex; }
     .aria-messages {
       flex: 1; overflow-y: auto; padding: 16px;
       display: flex; flex-direction: column; gap: 12px;
@@ -2022,10 +2060,10 @@
           </button>
 
           <!-- Status Pill (sketch: red dot + text top right) -->
-          <div class="status-pill" id="status-pill">
+          <div class="status-pill" id="status-pill" title="Database Connection: Offline (Simulating)">
             <div class="status-dot-small" id="status-dot-small"></div>
-            <i data-lucide="wifi-off" style="width:13px;height:13px;" id="status-icon"></i>
-            <span id="status-text">Database Connection: Offline (Simulating)</span>
+            <i data-lucide="wifi-off" style="width:11px;height:11px;flex-shrink:0;" id="status-icon"></i>
+            <span id="status-text">Demo Mode</span>
           </div>
         </div>
       </header>
@@ -5987,7 +6025,15 @@ function acceptSourcingSplit() {
       <div class="aria-subtitle">AI Procurement Assistant</div>
       <div class="aria-online-dot">online</div>
     </div>
+    <button class="aria-tts-btn" id="aria-tts-toggle" onclick="ariaToggleTTS()" title="Toggle ARIA voice responses">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" id="aria-tts-icon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    </button>
     <button class="aria-close-btn" onclick="ariaToggle()" title="Close">✕</button>
+  </div>
+  <!-- Live transcript chip shown while mic is active -->
+  <div id="aria-transcript-chip">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+    <span id="aria-transcript-text">Listening...</span>
   </div>
   <div class="aria-messages" id="aria-messages"></div>
   <div class="aria-chips-section">
@@ -6005,7 +6051,7 @@ function acceptSourcingSplit() {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
-    <div id="aria-ptt-hint">Tip: Hold <kbd>Space</kbd> anywhere to talk &bull; <kbd>Ctrl</kbd>+<kbd>/</kbd> to toggle</div>
+    <div id="aria-ptt-hint">🎙️ Click mic or hold <kbd>Space</kbd> to speak &bull; <kbd>Ctrl</kbd>+<kbd>/</kbd> to toggle</div>
   </div>
 </div>
 
@@ -6405,7 +6451,14 @@ const ARIA = {
   recognition: null, synth: window.speechSynthesis,
   history: [], pendingAction: null, currentTab: 'dashboard',
   initialized: false, userName: 'Dharani',
-  contextState: { entity: null }
+  ttsEnabled: true,
+  silenceTimer: null,
+  contextState: {
+    entity: null,        // last mentioned material / vendor name
+    last_intent: null,   // last fired intent key e.g. 'stock_check'
+    last_value: null,    // last returned value (qty, cost, etc.)
+    session_actions: []  // running log of actions this session
+  }
 };
 
 const ARIA_CHIPS = {
@@ -6555,73 +6608,212 @@ function ariaSend(override) {
   setTimeout(function(){ ariaParseIntent(text.toLowerCase()); }, 650);
 }
 
-// ── NLP INTENT PARSER ─────────────────────────────────────────────
+// ── NLP INTENT PARSER (Fuzzy Scored Classifier + Free-Form Reasoner) ──────────
 function ariaParseIntent(t) {
   ariaHideTyping();
-  
-  // ARIA Multi-Turn Memory: Pronoun Resolution
+
+  // Multi-Turn Memory: Pronoun Resolution
   if (ARIA.contextState && ARIA.contextState.entity) {
     if (/\b(it|this|that|its|these|them)\b/i.test(t)) {
-      var oldT = t;
       t = t.replace(/\b(it|this|that|its|these|them)\b/gi, ARIA.contextState.entity);
-      console.log('ARIA Memory: Resolved pronoun "' + oldT + '" -> "' + t + '"');
     }
   }
 
-  if (/^(help|what can you do|commands|show commands)/.test(t)) return ariaHandleHelp();
-  if (/^(hi|hello|hey|good morning|good afternoon|good evening)/.test(t))
-    return ariaAddMsg('aria', 'Hey! I\'m ARIA, your AI procurement assistant. I can check stock, approve PRs, run MRP, post MIGO receipts, simulate supply chain scenarios, switch currencies, and generate official Zamil documents. Just ask or tap a quick action below!');
-  
-  // Currency Switch Intent
-  if (/(currency|switch currency|change currency|show in|currency to) (sar|riyal|usd|dollar|eur|euro|inr|rupee)/.test(t)) {
-    var c = 'SAR';
-    if (/usd|dollar/.test(t)) c = 'USD';
-    else if (/eur|euro/.test(t)) c = 'EUR';
-    else if (/inr|rupee/.test(t)) c = 'INR';
-    else if (/sar|riyal/.test(t)) c = 'SAR';
-    setCurrency(c);
-    return;
-  }
-  
-  // Persona / Role Switch Intent
-  if (/(switch role|change role|persona|switch to) (vp|executive|procurement|manager|warehouse|dock)/.test(t)) {
-    var r = 'procurement';
-    if (/vp|executive/.test(t)) r = 'vp';
-    else if (/warehouse|dock/.test(t)) r = 'warehouse';
-    setUserRole(r);
-    return;
+  var tl = t.toLowerCase().trim();
+
+  // Direct greetings / help
+  if (/^(help|what can you do|commands|show commands|capabilities)/.test(tl)) return ariaHandleHelp();
+  if (/^(hi\b|hello\b|hey\b|good morning|good afternoon|good evening|howdy|yo\b)/.test(tl))
+    return ariaAddMsg('aria', 'Hey! I\'m ARIA — your AI procurement assistant. I understand natural language, so just ask me anything. Try *"How\'s our H-Beam stock?"* or *"Which vendor is most reliable?"* or say **"help"** to see everything I can do.');
+
+  // Scored Intent Map
+  var INTENTS = {
+    currency:    { handler: function(){ _ariaHandleCurrencyIntent(tl); }, score: 0,
+      kw: [['currency',3],['switch currency',4],['change currency',4],['show in',2],['convert',3],
+           ['sar',2],['riyal',2],['usd',2],['dollar',2],['eur',2],['euro',2],['inr',2],['rupee',2]] },
+    persona:     { handler: function(){ _ariaHandlePersonaIntent(tl); }, score: 0,
+      kw: [['switch role',4],['change role',4],['persona',3],['login as',3],
+           ['vp',2],['executive',2],['procurement lead',3],['warehouse lead',3]] },
+    print_po:    { handler: function(){ openDocHubModal('po'); ariaAddMsg('aria','\u{1F4C4} Generated official **Zamil Industrial Purchase Order** with 15% VAT and QR code.'); ariaSpeak('Official purchase order generated.'); }, score: 0,
+      kw: [['print',2],['generate',2],['official po',5],['print po',5],['purchase order',3]] },
+    print_migo:  { handler: function(){ openDocHubModal('migo'); ariaAddMsg('aria','\u{1F4E6} Generated **MIGO 101 Goods Slip** with bin and inspection stamp.'); ariaSpeak('MIGO slip generated.'); }, score: 0,
+      kw: [['migo',4],['goods receipt',4],['receipt slip',3],['print migo',5]] },
+    navigate:    { handler: function(){ ariaHandleNavigation(tl); }, score: 0,
+      kw: [['go to',4],['open',2],['navigate',4],['take me to',5],['show me the',3]] },
+    summary:     { handler: ariaHandleSummary, score: 0,
+      kw: [['summary',4],['briefing',4],['brief me',5],['status update',4],['how are we',4],
+           ['overview',3],['morning report',4],['update me',3],['situation',2],['whats going on',3]] },
+    shortages:   { handler: ariaHandleShortages, score: 0,
+      kw: [['shortage',4],['critical',3],['low stock',5],['below safety',5],['what is low',4],
+           ['out of stock',5],['running low',4],['deficit',3]] },
+    stock_check: { handler: function(){ ariaHandleStockCheck(tl); }, score: 0,
+      kw: [['how much',3],['how many',3],['stock of',4],['quantity of',4],['check stock',5],
+           ['inventory for',4],['do we have',4],['on hand',4],['in stock',3],['stock level',4]] },
+    pr_status:   { handler: ariaHandlePRStatus, score: 0,
+      kw: [['pending approval',5],['pending pr',5],['show pr',4],['list pr',4],
+           ['requisition',3],['awaiting approval',5],['approvals',3]] },
+    approve_pr:  { handler: function(){ ariaHandleApprovePR(tl); }, score: 0,
+      kw: [['approve',4],['sign off',4],['authorise',4],['authorize',4],['approve pr',6],['sign pr',5]] },
+    po_status:   { handler: ariaHandlePOStatus, score: 0,
+      kw: [['show po',4],['list po',4],['open po',3],['purchase orders',4],['order status',4],['po status',5]] },
+    raise_po:    { handler: ariaHandleRaisePO, score: 0,
+      kw: [['raise po',6],['create po',5],['generate po',5],['place order',4],['issue po',5]] },
+    migo:        { handler: function(){ ariaHandleMIGO(tl); }, score: 0,
+      kw: [['received',2],['goods receipt',4],['post goods',4],['post migo',5],['goods in',3]] },
+    run_mrp:     { handler: function(){ ariaHandleRunMRP(tl); }, score: 0,
+      kw: [['run mrp',6],['mrp calculation',5],['mrp explosion',5],['material requirements',5],['net requirement',4]] },
+    bom:         { handler: ariaHandleRunBOM, score: 0,
+      kw: [['bom',4],['bill of material',5],['explode',4],['components of',3],['parts list',4]] },
+    simulation:  { handler: function(){ ariaHandleSimulation(tl); }, score: 0,
+      kw: [['simulat',4],['digital twin',5],['monte carlo',5],['stress test',5],['what if',3],
+           ['shipping delay',4],['tariff shock',4],['demand surge',4],['scenario',3]] },
+    sourcing:    { handler: ariaHandleSourcing, score: 0,
+      kw: [['sourc',3],['vendor split',4],['best vendor',5],['which vendor',4],['best supplier',5],['optimize',3]] },
+    vendor:      { handler: ariaHandleVendorQuery, score: 0,
+      kw: [['vendor',3],['supplier',3],['scorecard',4],['tata',3],['hindalco',3],
+           ['vendor performance',5],['reliable',3],['on time delivery',4]] },
+    forecast:    { handler: ariaHandleForecast, score: 0,
+      kw: [['forecast',5],['demand for',4],['predict',4],['next quarter',3],['projection',4],['trend',2]] }
+  };
+
+  // Score each intent
+  var words = tl.split(/\s+/);
+  Object.keys(INTENTS).forEach(function(key) {
+    var intent = INTENTS[key];
+    intent.score = 0;
+    intent.kw.forEach(function(pair) {
+      var kw = pair[0], wt = pair[1];
+      if (tl.indexOf(kw) !== -1) intent.score += wt;
+      // Fuzzy partial match for typos
+      words.forEach(function(word) {
+        if (kw.length > 4 && word.length > 3 && kw.indexOf(word) !== -1 && intent.score === 0) {
+          intent.score += Math.floor(wt * 0.5);
+        }
+      });
+    });
+  });
+
+  // Pick winner
+  var best = null, bestScore = 0;
+  Object.keys(INTENTS).forEach(function(key) {
+    if (INTENTS[key].score > bestScore) { bestScore = INTENTS[key].score; best = key; }
+  });
+
+  if (best && bestScore >= 2) {
+    ARIA.contextState.last_intent = best;
+    ARIA.contextState.session_actions.push({ intent: best, time: Date.now() });
+    return INTENTS[best].handler();
   }
 
-  // Official Document Generation Intent
-  if (/(print|generate|show|view) (official )?(po|purchase order)/.test(t)) {
-    openDocHubModal('po');
-    ariaAddMsg('aria', '📄 Generated official **Zamil Industrial Purchase Order** with Saudi 15% VAT and verification QR code. Ready to print or export to PDF.');
-    ariaSpeak('Official purchase order generated. Ready to print.');
-    return;
-  }
-  if (/(print|generate|show|view) (migo|goods receipt|receipt slip|dock slip)/.test(t)) {
-    openDocHubModal('migo');
-    ariaAddMsg('aria', '📦 Generated official **MIGO 101 Goods Movement Slip** with warehouse bin location and inspection stamp. Ready to print.');
-    ariaSpeak('MIGO goods movement slip generated. Ready to print.');
-    return;
+  // Fallback: free-form data reasoner
+  return ariaFreeFormReason(tl);
+}
+
+function _ariaHandleCurrencyIntent(t) {
+  var c = 'SAR';
+  if (/usd|dollar/.test(t)) c = 'USD';
+  else if (/eur|euro/.test(t)) c = 'EUR';
+  else if (/inr|rupee/.test(t)) c = 'INR';
+  setCurrency(c);
+}
+
+function _ariaHandlePersonaIntent(t) {
+  var r = 'procurement';
+  if (/vp|executive/.test(t)) r = 'vp';
+  else if (/warehouse|dock/.test(t)) r = 'warehouse';
+  setUserRole(r);
+}
+
+// Free-Form Data Reasoner: scans mockData for materials, vendors, and KPIs
+function ariaFreeFormReason(t) {
+  var md = window.mockData || {};
+  var answered = false;
+
+  // 1. Vendor name match
+  var vendors = (md.vendors || []).concat([
+    {name:'Tata Steel', score:92, delivery_rate:94},
+    {name:'Hindalco', score:88, delivery_rate:90}
+  ]);
+  var matchedVendor = null;
+  vendors.forEach(function(v) {
+    if (v.name && t.indexOf(v.name.toLowerCase()) !== -1) matchedVendor = v;
+  });
+  if (matchedVendor) {
+    ARIA.contextState.entity = matchedVendor.name;
+    var score = matchedVendor.score || matchedVendor.rating || 'N/A';
+    var dr = matchedVendor.delivery_rate || matchedVendor.on_time || 'N/A';
+    ariaAddMsg('aria', '\u{1F3ED} **' + matchedVendor.name + '** Supplier Profile:\n' +
+      '- **Quality Score:** ' + score + '/100\n' +
+      '- **On-Time Delivery:** ' + dr + '%\n' +
+      '- **Status:** ' + (score >= 85 ? '\u2705 Approved & Reliable' : '\u26A0\uFE0F Monitor Closely') + '\n\n' +
+      'Ask me *"show their POs"* or *"check their contracts"* for more.');
+    ariaSpeak(matchedVendor.name + ' has a quality score of ' + score + ' out of 100.');
+    answered = true;
   }
 
-  if (/go to|open|navigate|take me to|show me the/.test(t)) return ariaHandleNavigation(t);
-  if (/summary|briefing|brief me|status update|how are we|overview/.test(t)) return ariaHandleSummary();
-  if (/shortage|critical|low stock|below safety|what.s low|out of stock/.test(t)) return ariaHandleShortages();
-  if (/how much|how many|stock of|quantity of|check stock|inventory for|available|do we have/.test(t)) return ariaHandleStockCheck(t);
-  if (/pending (approval|pr|requisition)|show (pr|requisition)|list pr|purchase req/.test(t)) return ariaHandlePRStatus();
-  if (/approve (pr|requisition)|sign off|authoris|authoriz/.test(t)) return ariaHandleApprovePR(t);
-  if (/(show|list|open|how many) (po|purchase order)|order status/.test(t)) return ariaHandlePOStatus();
-  if (/raise po|create (purchase order|po)|generate po/.test(t)) return ariaHandleRaisePO();
-  if (/received|receipt|goods receipt|migo|post stock|post receipt|post goods/.test(t)) return ariaHandleMIGO(t);
-  if (/run mrp|mrp (calculation|explosion|run|for)|material requirements|calculate (requirement|deficit)/.test(t)) return ariaHandleRunMRP(t);
-  if (/bom|bill of material|explode|breakdown (for|of)/.test(t)) return ariaHandleRunBOM();
-  if (/simulat|digital twin|monte carlo|stress test|shipping delay|tariff shock/.test(t)) return ariaHandleSimulation(t);
-  if (/sourc|vendor split|optimi|best vendor|allocation/.test(t)) return ariaHandleSourcing();
-  if (/vendor|supplier|scorecard|tata|hindalco|rating for|score for/.test(t)) return ariaHandleVendorQuery();
-  if (/forecast|demand for|predict|next quarter|projection|ai forecast/.test(t)) return ariaHandleForecast();
-  ariaAddMsg('aria', 'I didn\'t quite catch that. Try: *"check stock for H-Beams"*, *"switch currency to SAR"*, *"print official PO"*, *"run MRP for Q3"*, or say **"help"** to see all commands.');
+  // 2. Material balance match
+  if (!answered) {
+    var balances = md.balances || [];
+    var matchedMat = null;
+    balances.forEach(function(b) {
+      var mn = (b.material_name || b.material_code || '').toLowerCase();
+      if (mn && t.indexOf(mn.split(' ')[0]) !== -1) matchedMat = b;
+    });
+    if (!matchedMat && /beam|steel|bolt|pipe|plate|coil|rod|channel|angle/.test(t)) {
+      matchedMat = balances.find(function(b){ return /beam|steel|h-beam/i.test(b.material_name || ''); }) || balances[0];
+    }
+    if (matchedMat) {
+      ARIA.contextState.entity = matchedMat.material_name || matchedMat.material_code;
+      var qty = matchedMat.qty_on_hand || 0;
+      var safety = matchedMat.safety_stock || 500;
+      var status = matchedMat.stock_status || (qty < safety ? 'LOW' : 'OK');
+      ariaAddMsg('aria', '\u{1F4E6} **' + (matchedMat.material_name || matchedMat.material_code) + '**\n' +
+        '- **On Hand:** ' + qty.toLocaleString() + ' ' + (matchedMat.unit || 'KG') + '\n' +
+        '- **Safety Stock:** ' + safety.toLocaleString() + ' ' + (matchedMat.unit || 'KG') + '\n' +
+        '- **Status:** ' + (status === 'CRITICAL' ? '\u{1F534} Critical' : status === 'LOW' ? '\u{1F7E1} Low' : '\u{1F7E2} Healthy') + '\n\n' +
+        'Need me to *raise a PR*, *check vendors*, or *run MRP* for this?');
+      ariaSpeak('Stock for ' + (matchedMat.material_name || 'that material') + ' is ' + qty + ' on hand.');
+      answered = true;
+    }
+  }
+
+  // 3. KPI keywords
+  if (!answered) {
+    var d = md.dashboard || {};
+    if (/spend|budget|cost|expenditure|monthly/.test(t)) {
+      var sp = formatMoney(d.monthly_spend || 254000);
+      ariaAddMsg('aria', '\u{1F4B0} **Monthly Procurement Spend:** **' + sp + '**\n\nIncludes active POs, approved PRs in transit, and confirmed MIGO receipts.');
+      ariaSpeak('Monthly spend is ' + sp);
+      answered = true;
+    } else if (/how.*(doing|going|performing)|overall|health|all good/.test(t)) {
+      return ariaHandleSummary();
+    }
+  }
+
+  // 4. Smart fallback
+  if (!answered) {
+    var suggestions = [];
+    if (ARIA.contextState.entity) suggestions.push('*"Check stock for ' + ARIA.contextState.entity + '"*');
+    suggestions.push('*"Show shortages"*', '*"Brief me"*', '*"Run MRP"*');
+    ariaAddMsg('aria', 'Hmm, I couldn\'t find data matching *"' + t + '"* in our live system. \u{1F914}\n\nTry: ' + suggestions.slice(0, 3).join(' · ') + '\n\nOr say **"help"** to see all my capabilities.');
+  }
+}
+
+// TTS Mute Toggle
+function ariaToggleTTS() {
+  ARIA.ttsEnabled = !ARIA.ttsEnabled;
+  var btn = document.getElementById('aria-tts-toggle');
+  var icon = document.getElementById('aria-tts-icon');
+  var speakerOn  = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
+  var speakerOff = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>';
+  if (ARIA.ttsEnabled) {
+    if (btn) { btn.classList.remove('muted'); btn.title = 'Mute ARIA voice'; }
+    if (icon) icon.innerHTML = speakerOn;
+  } else {
+    if (btn) { btn.classList.add('muted'); btn.title = 'Unmute ARIA voice'; }
+    if (icon) icon.innerHTML = speakerOff;
+    if (ARIA.synth) ARIA.synth.cancel();
+  }
 }
 
 // ── INTENT HANDLERS ───────────────────────────────────────────────
@@ -6992,7 +7184,7 @@ function ariaVoiceToggle() {
   if (!SR) { ariaAddMsg('aria', '⚠️ Voice input not supported in this browser. Please use Chrome or Edge.'); return; }
   ARIA.recognition = new SR();
   ARIA.recognition.lang = 'en-US';
-  ARIA.recognition.continuous = false;
+  ARIA.recognition.continuous = true;
   ARIA.recognition.interimResults = true;
   ARIA.recognition.onstart = function() {
     ARIA.isListening = true;
@@ -7002,17 +7194,35 @@ function ariaVoiceToggle() {
     var vc = document.getElementById('aria-voice-card'); if (vc) vc.style.display = 'block';
     var lt = document.getElementById('aria-live-transcript'); if (lt) lt.textContent = 'Listening...';
     var heq = document.getElementById('aria-header-eq'); if (heq) heq.classList.add('active');
+    // Show inline transcript chip in drawer
+    var chip = document.getElementById('aria-transcript-chip');
+    var chipTxt = document.getElementById('aria-transcript-text');
+    if (chip) chip.classList.add('visible');
+    if (chipTxt) chipTxt.textContent = 'Listening...';
   };
   ARIA.recognition.onresult = function(e) {
     var t = '';
     for (var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
     var lt = document.getElementById('aria-live-transcript'); if (lt) lt.textContent = t;
     var inp = document.getElementById('aria-text-input'); if (inp) inp.value = t;
+    // Update inline transcript chip
+    var chipTxt = document.getElementById('aria-transcript-text');
+    if (chipTxt) chipTxt.textContent = t || 'Listening...';
+    // Silence detection: auto-submit after 1.8s of no new results
+    if (ARIA.silenceTimer) clearTimeout(ARIA.silenceTimer);
+    if (e.results[e.results.length - 1].isFinal) {
+      ARIA.silenceTimer = setTimeout(function() {
+        var finalText = (document.getElementById('aria-text-input') || {}).value || '';
+        if (finalText.trim()) { ariaVoiceStop(); ariaSend(finalText.trim()); }
+      }, 400);
+    }
   };
   ARIA.recognition.onend = function() {
-    var t = (document.getElementById('aria-text-input') || {}).value || '';
-    ariaVoiceStop();
-    if (t.trim()) ariaSend(t.trim());
+    if (ARIA.isListening) {
+      var t = (document.getElementById('aria-text-input') || {}).value || '';
+      ariaVoiceStop();
+      if (t.trim()) ariaSend(t.trim());
+    }
   };
   ARIA.recognition.onerror = function(e) {
     ariaVoiceStop();
@@ -7023,20 +7233,30 @@ function ariaVoiceToggle() {
 
 function ariaVoiceStop() {
   ARIA.isListening = false;
+  if (ARIA.silenceTimer) { clearTimeout(ARIA.silenceTimer); ARIA.silenceTimer = null; }
   if (ARIA.recognition) { try { ARIA.recognition.stop(); } catch(e) {} }
   AriaAudio.chime('stop');
   var mb = document.getElementById('aria-mic-btn'); if (mb) mb.classList.remove('listening');
   var av = document.getElementById('aria-avatar'); if (av) { av.classList.remove('listening'); av.classList.remove('speaking'); }
   var vc = document.getElementById('aria-voice-card'); if (vc) vc.style.display = 'none';
   var heq = document.getElementById('aria-header-eq'); if (heq) heq.classList.remove('active');
+  // Hide inline transcript chip
+  var chip = document.getElementById('aria-transcript-chip');
+  if (chip) chip.classList.remove('visible');
 }
 
 function ariaSpeak(text) {
+  if (!ARIA.ttsEnabled) return;  // Respect mute toggle
   if (!ARIA.synth) return;
   ARIA.synth.cancel();
-  var clean = text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/^[#]+/gm,'');
+  var clean = text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/^[#]+/gm,'').replace(/\n/g,' ');
   var utt = new SpeechSynthesisUtterance(clean);
   utt.lang = 'en-US'; utt.rate = 0.92; utt.pitch = 1.05;
+  // Pick best available female voice
+  var voices = ARIA.synth.getVoices();
+  var preferred = voices.find(function(v){ return /zira|google uk english female|microsoft|samantha/i.test(v.name) && /en[-_]/i.test(v.lang); });
+  if (!preferred) preferred = voices.find(function(v){ return /en[-_]/i.test(v.lang) && v.localService; });
+  if (preferred) utt.voice = preferred;
   var av = document.getElementById('aria-avatar');
   var heq = document.getElementById('aria-header-eq');
   utt.onstart = function(){
